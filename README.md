@@ -8,7 +8,7 @@
   <strong>
     <a href="https://momentum.natron.io/">Momentum</a>
     <br />
-		Propel your GitOps
+		Propel your GitOps workflow
   </strong>
 </p>
 
@@ -44,7 +44,7 @@ Momentum is a next-generation GitOps as a Service platform, designed to simplify
 
 - Kubernetes cluster (v1.23+)
 - Helm (v3.0+)
-- FluxCD (v1.24+)
+- FluxCD (v2.0.0)
 
 ## Installation
 
