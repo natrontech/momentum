@@ -1,0 +1,22 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: '{application}'
+spec:
+  valuesFrom:
+    - kind: ConfigMap
+      name: base-values
+    - kind: Secret
+      name: base-secrets
+    - kind: ConfigMap
+      name: '{stage}-values'
+    - kind: Secret
+      name: '{stage}-secrets'
+    - kind: ConfigMap
+      name: '{stage}-{stage}-values'
+    - kind: Secret
+      name: '{stage}-{stage}-secrets'
+    - kind: ConfigMap
+      name: deploy-values
+    - kind: Secret
+      name: deploy-secrets

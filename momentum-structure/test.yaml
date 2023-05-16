@@ -4,9 +4,9 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    gitops.natron.io/stage: '{stage}'
+    gitops.natron.io/stage: '{stage}-{stage}'
   name: base-values
-  namespace: '{deployment}-{stage}'
+  namespace: '{deployment}-{stage}-{stage}'
 ---
 apiVersion: v1
 data:
@@ -14,9 +14,9 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    gitops.natron.io/stage: '{stage}'
+    gitops.natron.io/stage: '{stage}-{stage}'
   name: deploy-values
-  namespace: '{deployment}-{stage}'
+  namespace: '{deployment}-{stage}-{stage}'
 ---
 apiVersion: v1
 data:
@@ -24,9 +24,19 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    gitops.natron.io/stage: '{stage}'
+    gitops.natron.io/stage: '{stage}-{stage}'
   name: '{stage}-values'
-  namespace: '{deployment}-{stage}'
+  namespace: '{deployment}-{stage}-{stage}'
+---
+apiVersion: v1
+data:
+  values.yaml: 'stage-base-key: stage-base-value'
+kind: ConfigMap
+metadata:
+  labels:
+    gitops.natron.io/stage: '{stage}-{stage}'
+  name: '{stage}-{stage}-values'
+  namespace: '{deployment}-{stage}-{stage}'
 ---
 apiVersion: v1
 data:
@@ -34,9 +44,9 @@ data:
 kind: Secret
 metadata:
   labels:
-    gitops.natron.io/stage: '{stage}'
+    gitops.natron.io/stage: '{stage}-{stage}'
   name: base-secrets
-  namespace: '{deployment}-{stage}'
+  namespace: '{deployment}-{stage}-{stage}'
 type: Opaque
 ---
 apiVersion: v1
@@ -45,9 +55,9 @@ data:
 kind: Secret
 metadata:
   labels:
-    gitops.natron.io/stage: '{stage}'
+    gitops.natron.io/stage: '{stage}-{stage}'
   name: deploy-secrets
-  namespace: '{deployment}-{stage}'
+  namespace: '{deployment}-{stage}-{stage}'
 type: Opaque
 ---
 apiVersion: v1
@@ -56,18 +66,29 @@ data:
 kind: Secret
 metadata:
   labels:
-    gitops.natron.io/stage: '{stage}'
+    gitops.natron.io/stage: '{stage}-{stage}'
   name: '{stage}-secrets'
-  namespace: '{deployment}-{stage}'
+  namespace: '{deployment}-{stage}-{stage}'
+type: Opaque
+---
+apiVersion: v1
+data:
+  secrets.yaml: c3RhZ2UtYmFzZS1zZWNyZXRrZXk6IHN0YWdlLWJhc2Utc2VjcmV0dmFsdWU=
+kind: Secret
+metadata:
+  labels:
+    gitops.natron.io/stage: '{stage}-{stage}'
+  name: '{stage}-{stage}-secrets'
+  namespace: '{deployment}-{stage}-{stage}'
 type: Opaque
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   labels:
-    gitops.natron.io/stage: '{stage}'
+    gitops.natron.io/stage: '{stage}-{stage}'
   name: '{application}'
-  namespace: '{deployment}-{stage}'
+  namespace: '{deployment}-{stage}-{stage}'
 spec:
   chart:
     spec:
@@ -92,6 +113,10 @@ spec:
     name: '{stage}-values'
   - kind: Secret
     name: '{stage}-secrets'
+  - kind: ConfigMap
+    name: '{stage}-{stage}-values'
+  - kind: Secret
+    name: '{stage}-{stage}-secrets'
   - kind: ConfigMap
     name: deploy-values
   - kind: Secret

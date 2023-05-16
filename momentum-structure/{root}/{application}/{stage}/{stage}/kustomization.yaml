@@ -4,4 +4,4 @@ resources:
   # @momentum: deployments
 - ./{deployment}.yaml
   # @momentum: stages
-- ./{stage}/
+  # - ./{stage}/
