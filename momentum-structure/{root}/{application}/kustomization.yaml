@@ -1,7 +1,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  # @momentum: config
+- ./ns.yaml
+- ./repository.yaml
   # @momentum: deployments
 - './{deployment}.yaml'
   # @momentum: stages
-# - ./{stage}/
+- ./{stage}/
