@@ -8,7 +8,7 @@ The structure is as follows (generated with `tree -a -I`):
 
 ```bash
 .
-└── momentum # The root folder
+└── {root} # The root folder
     ├── {application} # An application e.g. my-app
     │   ├── {deployment}.yaml # A deployment of the application
     │   ├── {stage} # A stage of the application e.g. dev, staging, prod
