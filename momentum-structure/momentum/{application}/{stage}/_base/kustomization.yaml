@@ -3,20 +3,29 @@ kind: Kustomization
 resources:
 - ns.yaml
 - release.yaml
-- repository.yaml
 configMapGenerator:
 - files:
-  - values.yaml
+  - ../../_base/values.yaml
   name: base-values
+  options:
+    disableNameSuffixHash: true
+- files:
+  - values.yaml
+  name: '{stage}-values'
   options:
     disableNameSuffixHash: true
 secretGenerator:
 - files:
-  - secrets.yaml
+  - ../../_base/secrets.yaml
   name: base-secrets
+  options:
+    disableNameSuffixHash: true
+- files:
+  - secrets.yaml
+  name: '{stage}-secrets'
   options:
     disableNameSuffixHash: true
 labels:
 - includeSelectors: true
   pairs:
-    gitops.natron.io/application: '[application]'
+    gitops.natron.io/application: '{application}'

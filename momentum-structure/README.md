@@ -9,17 +9,17 @@ The structure is as follows (generated with `tree -a -I`):
 ```bash
 .
 └── momentum # The root folder
-    ├── [application] # An application e.g. my-app
-    │   ├── [deployment].yaml # A deployment of the application
-    │   ├── [stage] # A stage of the application e.g. dev, staging, prod
-    │   │   ├── [deployment].yaml # A deployment of the application in a stage
+    ├── {application} # An application e.g. my-app
+    │   ├── {deployment}.yaml # A deployment of the application
+    │   ├── {stage} # A stage of the application e.g. dev, staging, prod
+    │   │   ├── {deployment}.yaml # A deployment of the application in a stage
     │   │   ├── _base
     │   │   │   ├── kustomization.yaml
     │   │   │   ├── release.yaml # The flux helmrelease
     │   │   │   ├── secrets.yaml # The helmrelease values for secrets, encrypted with SOPS
     │   │   │   └── values.yaml # The helmrelease values
     │   │   ├── _deploy
-    │   │   │   └── [deployment]
+    │   │   │   └── {deployment}
     │   │   │       ├── kustomization.yaml
     │   │   │       ├── release.yaml
     │   │   │       ├── secrets.yaml
@@ -36,7 +36,7 @@ The structure is as follows (generated with `tree -a -I`):
     │   │   ├── secrets.yaml
     │   │   └── values.yaml
     │   ├── _deploy
-    │   │   └── [deployment]
+    │   │   └── {deployment}
     │   │       ├── kustomization.yaml
     │   │       ├── release.yaml
     │   │       ├── secrets.yaml

@@ -1,16 +1,16 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: [application]
+  name: {application}
 spec:
   interval: 10m
   chart:
     spec:
-      chart: [application-chart]
+      chart: {application-chart}
       sourceRef:
         kind: HelmRepository
-        name: '[application]-charts'
-        namespace: [deployment]
+        name: '{application}-charts'
+        namespace: {deployment}
   install:
     remediation:
       remediateLastFailure: true
