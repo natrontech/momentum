@@ -47,3 +47,13 @@ The structure is as follows (generated with `tree -a -I`):
     │   └── kustomization.yaml
     └── kustomization.yaml
 ```
+
+## Kustomize
+
+The structure is based on [kustomize](https://kustomize.io/). The `kustomization.yaml` files are used to build the kubernetes manifests.
+
+Usage:
+
+```bash
+kustomize build --load_restrictor LoadRestrictionsNone momentum
+```
