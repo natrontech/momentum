@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://momentum.natron.io">
-        <img height="240px" src="assets/momentum_illu1.png" />
+        <img height="240px" src="assets/momentum_illu2.png" />
     </a>
 </p>
 
