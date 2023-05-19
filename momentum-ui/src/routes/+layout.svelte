@@ -33,7 +33,7 @@
 </script>
 
 <div class="h-full">
-	<div class="h-24 bg-secondary-500 absolute -z-10 w-full" />
+	<div class="h-24 bg-primary-500 absolute -z-10 w-full" />
 	<div class="bottom-0 top-24 bg-gray-100 absolute -z-10 w-full" />
 	<AppShell>
 		<svelte:fragment slot="sidebarLeft">
