@@ -13,6 +13,5 @@ export function load({ params }) {
         };
     }
 
-
     throw error(404, 'Not found');
 }

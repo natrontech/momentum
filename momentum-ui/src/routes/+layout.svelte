@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
 	import '../theme.postcss';
 	import '@skeletonlabs/skeleton/styles/all.css';
 	import '../app.postcss';
@@ -17,9 +17,14 @@
 	import HiSolidCollection from 'svelte-icons-pack/hi/HiSolidCollection';
 	import type { NavRoute } from '$lib/types';
 
-
 	let routes: NavRoute[] = [
-		{ id: '1',name: 'Dashboard', href: '/', icon: HiOutlineChartPie, currentIcon: HiSolidChartPie },
+		{
+			id: '1',
+			name: 'Dashboard',
+			href: '/',
+			icon: HiOutlineChartPie,
+			currentIcon: HiSolidChartPie
+		},
 		{
 			id: '2',
 			name: 'Deployments',
@@ -41,12 +46,28 @@
 			icon: HiOutlineTemplate,
 			currentIcon: HiSolidTemplate
 		},
-		{ id: '5', name: 'Repositories', href: '/repositories', icon: HiOutlineInbox, currentIcon: HiSolidInbox }
+		{
+			id: '5',
+			name: 'Repositories',
+			href: '/repositories',
+			icon: HiOutlineInbox,
+			currentIcon: HiSolidInbox
+		}
 	];
 </script>
 
 <div class="h-full">
-	<div class=" h-32 bg-primary-500 absolute -z-10 w-full" />
+	<div class=" h-32 bg-primary-500 absolute -z-10 w-full">
+		<div class="absolute pr-4 pt-4 pb-4 left-64 right-0 top-12">
+			{#each routes as route}
+				{#if $page.route.id && $page.route.id.split('/')[1]?.includes(route.name.toLowerCase()) || $page.route.id === '/' && route.name === 'Dashboard'}
+					<h1 class="h1 text-white font-bold mb-6">
+						{route.name}
+					</h1>
+				{/if}
+			{/each}
+		</div>
+	</div>
 	<div class="bottom-0 top-32 bg-gray-100 absolute -z-10 w-full" />
 	<AppShell>
 		<svelte:fragment slot="sidebarLeft">
@@ -56,13 +77,6 @@
 	<div
 		class="absolute pr-4 pt-4 pb-4 left-64 right-0 top-32 bottom-0 overflow-y-scroll hide-scrollbar"
 	>
-		{#each routes as route}
-			{#if $page.route.id === route.href}
-				<h1 class="h1 text-primary-500 font-bold mb-6">
-					{route.name}
-				</h1>
-			{/if}
-		{/each}
 		<slot />
 	</div>
 </div>
