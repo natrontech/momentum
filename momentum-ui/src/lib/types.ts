@@ -1,8 +1,3 @@
-// create new type Deployment with the following properties
-// name: string
-// status: string
-// namespace: string
-
 export enum DeploymentStatus {
     Running = 'Running',
     Pending = 'Pending',
@@ -10,9 +5,17 @@ export enum DeploymentStatus {
     Unknown = 'Unknown',
 }
 
-export type Deployment = {
+export interface Deployment {
     id: string;
     name: string;
     status: DeploymentStatus;
     namespace: string;
+}
+
+export interface NavRoute {
+    id: string;
+    name: string;
+    href: string;
+    icon: unknown;
+    currentIcon: unknown;
 }

@@ -1,6 +1,7 @@
 <script>
   /** @type {import('./$types').PageData} */
   export let data;
+	import BackButton from '$lib/components/base/BackButton.svelte';
   import { CodeBlock } from '@skeletonlabs/skeleton';
 
   let mockupYAML = `
@@ -22,6 +23,8 @@ ingress:
   `
 
 </script>
+
+<BackButton />
 
 <h2 class="h2 text-primary-500 font-bold mb-6">
   {data.props.deployment.name}
