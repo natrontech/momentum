@@ -54,9 +54,3 @@
 		</div>
 	</div>
 </div>
-
-<style>
-	.profile-icon {
-		color: #fff;
-	}
-</style>
