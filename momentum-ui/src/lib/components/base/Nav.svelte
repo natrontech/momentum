@@ -15,14 +15,14 @@
 </script>
 
 <div class="h-full p-4 bg-transparent">
-	<div class="bg-white h-full rounded-lg w-56 z-20">
+	<div class="bg-white shadow-md h-full rounded-lg w-56 z-20">
 		<div class="flex flex-shrink-0 items-center pt-4 px-8 ">
 			<img class="h-12 w-auto" src="./images/momentum-logo.png" alt="Momentum Logo" />
 			<span class="ml-2 text-xl font-semibold text-primary-500">Momentum</span>
 		</div>
 
 		<!-- Navigation -->
-		<nav class="mt-4 px-3 border-t-2 pt-6">
+		<nav class="mt-4 px-3 pt-6">
 			<div class="space-y-4">
 				{#each routes as route}
 					<a
