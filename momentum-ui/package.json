@@ -40,6 +40,7 @@
 	"dependencies": {
 		"@picocss/pico": "^1.5.10",
 		"@sveltejs/adapter-node": "^1.2.1",
+		"lucide-svelte": "^0.220.0",
 		"svelte-french-toast": "^1.0.4-beta.0",
 		"svelte-icons-pack": "^2.1.0",
 		"svelte-material-icons": "^3.0.4"

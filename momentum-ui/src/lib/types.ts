@@ -16,6 +16,5 @@ export interface NavRoute {
     id: string;
     name: string;
     href: string;
-    icon: unknown;
-    currentIcon: unknown;
+    icon: any;
 }

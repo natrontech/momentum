@@ -24,16 +24,17 @@
 						class="text-gray-500 unstyled border-2 rounded-md group flex items-center hover:text-gray-600 pl-9 py-2 text-sm font-medium
 						{$page.route.id.split('/')[1]?.includes(route.name.toLowerCase()) ||
 						($page.route.id === '/' && route.name === 'Dashboard')
-							? 'text-gray-600 border-gray-600'
+							? 'text-gray-700 border-gray-700'
 							: ''}
 "
 						aria-current="page"
 					>
 						{#if $page.route.id.split('/')[1]?.includes(route.name.toLowerCase()) || $page.route.id === '/' && route.name === 'Dashboard'}
-							<Icon className="w-5 h-5" src={route.currentIcon} />{@html '&nbsp;'}
+							<!-- <Icon className="w-5 h-5" src={route.currentIcon} />{@html '&nbsp;'} -->
+							<svelte:component this={route.icon} class="w-5 h-5" />{@html '&nbsp;'}
 							<div class="block">{route.name}</div>
 						{:else}
-							<Icon className="w-5 h-5" src={route.icon} />{@html '&nbsp;'}{route.name}
+							<svelte:component this={route.icon} class="w-5 h-5" />{@html '&nbsp;'}{route.name}
 						{/if}
 					</a>
 				{/each}

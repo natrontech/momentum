@@ -5,53 +5,44 @@
 	import { AppShell } from '@skeletonlabs/skeleton';
 	import Nav from '$lib/components/base/Nav.svelte';
 	import { page } from '$app/stores';
-	import HiOutlineChartPie from 'svelte-icons-pack/hi/HiOutlineChartPie';
-	import HiSolidChartPie from 'svelte-icons-pack/hi/HiSolidChartPie';
-	import HiOutlineInbox from 'svelte-icons-pack/hi/HiOutlineInbox';
-	import HiSolidInbox from 'svelte-icons-pack/hi/HiSolidInbox';
-	import HiOutlineTemplate from 'svelte-icons-pack/hi/HiOutlineTemplate';
-	import HiSolidTemplate from 'svelte-icons-pack/hi/HiSolidTemplate';
-	import HiOutlineCube from 'svelte-icons-pack/hi/HiOutlineCube';
-	import HiSolidCube from 'svelte-icons-pack/hi/HiSolidCube';
-	import HiOutlineCollection from 'svelte-icons-pack/hi/HiOutlineCollection';
-	import HiSolidCollection from 'svelte-icons-pack/hi/HiSolidCollection';
+	import { FolderGit2, LayoutDashboard, FileCode, Layers, Package } from 'lucide-svelte';
 	import type { NavRoute } from '$lib/types';
+	import { onMount } from 'svelte';
+	import { fly } from 'svelte/transition';
+
+	let ready = false;
+	onMount(() => (ready = true));
 
 	let routes: NavRoute[] = [
 		{
 			id: '1',
 			name: 'Dashboard',
 			href: '/',
-			icon: HiOutlineChartPie,
-			currentIcon: HiSolidChartPie
+			icon: LayoutDashboard
 		},
 		{
 			id: '2',
 			name: 'Deployments',
 			href: '/deployments',
-			icon: HiOutlineCube,
-			currentIcon: HiSolidCube
+			icon: Package
 		},
 		{
 			id: '3',
 			name: 'Stages',
 			href: '/stages',
-			icon: HiOutlineCollection,
-			currentIcon: HiSolidCollection
+			icon: Layers
 		},
 		{
 			id: '4',
 			name: 'Applications',
 			href: '/applications',
-			icon: HiOutlineTemplate,
-			currentIcon: HiSolidTemplate
+			icon: FileCode
 		},
 		{
 			id: '5',
 			name: 'Repositories',
 			href: '/repositories',
-			icon: HiOutlineInbox,
-			currentIcon: HiSolidInbox
+			icon: FolderGit2
 		}
 	];
 </script>
@@ -60,8 +51,11 @@
 	<div class=" h-32 bg-primary-500 absolute -z-10 w-full">
 		<div class="absolute pr-4 pt-4 pb-4 left-64 right-0 top-12">
 			{#each routes as route}
-				{#if $page.route.id && $page.route.id.split('/')[1]?.includes(route.name.toLowerCase()) || $page.route.id === '/' && route.name === 'Dashboard'}
+				{#if ($page.route.id && $page.route.id
+						.split('/')[1]
+						?.includes(route.name.toLowerCase())) || ($page.route.id === '/' && route.name === 'Dashboard')}
 					<h1 class="h1 text-white font-bold mb-6">
+						<svelte:component this={route.icon} class="w-14 h-14 inline -mt-2" />
 						{route.name}
 					</h1>
 				{/if}
@@ -77,6 +71,10 @@
 	<div
 		class="absolute pr-4 pt-4 pb-4 left-64 right-0 top-32 bottom-0 overflow-y-scroll hide-scrollbar"
 	>
-		<slot />
+		{#if ready}
+			<div transition:fly={{ y: 100, duration: 200 }}>
+				<slot />
+			</div>
+		{/if}
 	</div>
 </div>

@@ -10,9 +10,21 @@ export const mockDeployments: Deployment[] = [
 	{
 		id: '2',
 		name: 'nginx-deployment',
-		status: DeploymentStatus.Running,
+		status: DeploymentStatus.Failed,
 		namespace: 'kube-system'
-	}
+	},
+    {
+        id: '3',
+        name: 'nginx-deployment',
+        status: DeploymentStatus.Pending,
+        namespace: 'kube-system'
+    },
+    {
+        id: '4',
+        name: 'nginx-deployment',
+        status: DeploymentStatus.Unknown,
+        namespace: 'kube-system'
+    },
 ];
 
 export const mockDeploymentData = {
