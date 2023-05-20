@@ -1,13 +1,13 @@
 <script lang="ts">
 	import Icon from "svelte-icons-pack";
-	import HiOutlineArrowSmLeft from "svelte-icons-pack/hi/HiOutlineArrowSmLeft";
+	import { ArrowBigLeft } from 'lucide-svelte';
 
 	function onClick() {
 		window.history.back();
 	}
 </script>
 
-<button on:click={onClick}>
-	<Icon className="inline w-5 h-5" src={HiOutlineArrowSmLeft} />
+<button on:click={onClick} class="hover:text-gray-700 hover:bg-gray-300 text-gray-500 bg-gray-200 p-2">
+	<ArrowBigLeft class="inline" />
 	Back
 </button>

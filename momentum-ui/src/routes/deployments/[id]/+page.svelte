@@ -14,16 +14,16 @@
 		});
 	}
 
-  let tableArr: any[] = [];
-  let totalWeight: number = 0;
-
+	let tableArr: any[] = [];
+	let totalWeight: number = 0;
 </script>
 
-<BackButton />
-
-<h2 class="h2 text-primary-500 font-bold mb-6">
-	{data.props.deployment.name}
-</h2>
+<div class="">
+	<BackButton />
+	<h2 class="h2 text-primary-500 font-bold mb-6">
+		{data.props.deployment.name}
+	</h2>
+</div>
 
 <div class="my-6">
 	<InputChip
