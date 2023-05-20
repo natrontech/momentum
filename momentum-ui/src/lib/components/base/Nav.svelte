@@ -6,13 +6,6 @@
 	import type { NavRoute } from '$lib/types';
 
 	export let routes: NavRoute[] = [];
-
-	// split the current route by /
-	// and get the first part of the route
-	// to determine the current page
-	// e.g. /deployments/1234 -> deployments
-
-	$: console.log($page.route.id?.split('/')[1]);
 </script>
 
 <div class="h-full p-4 bg-transparent">

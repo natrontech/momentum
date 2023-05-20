@@ -3,7 +3,6 @@
 	import { mockDeployments } from '$lib/mock-data';
 	import { toggleTableView } from '$lib/store';
 	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
-	import { getContext } from 'svelte';
 	import Icon from 'svelte-icons-pack';
 
 	import HiOutlineTable from 'svelte-icons-pack/hi/HiOutlineTable';
