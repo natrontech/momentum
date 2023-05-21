@@ -1,38 +1,42 @@
-# create-svelte
+# Momentum UI
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
-
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
+## Setup
 
 ```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
+npm install # install dependencies
+npm run build # compile frontend
 ```
 
-## Developing
+The above produces `build` output directory which is then used by PocketBase to serve the frontend of your app.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Live Development
 
 ```bash
+# start the backend, if not already running ...
+npm run dev:backend
+# and then start the frontend ...
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
+
+Now visit http://localhost:5173 (ui) or http://localhost:8090 (pb)
+
+## Generated Types
+
+The file `generated-types.ts` contains TypeScript definitions of `Record` types mirroring the fields in your database collections. But it needs to be regenerated every time you modify the schema. This can be done by simply running the `typegen` script in the frontend's `package.json`. So remember to run `npm run typegen` after every schema change.
 
 ## Building
 
-To create a production version of your app:
+To create a production version of your app (static HTML/JS app):
+
+_NOTE_: The build below will fail unless the backend has at least 1
+post created. So please create a "posts" record using the app UI or
+the admin UI before running build below.
 
 ```bash
+# compile frontend
 npm run build
+# and then serve it with pocketbase
+npm run backend
 ```
 
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+The above generates output in the `build` folder. Now you can serve production compiled version of the frontend using the backend (with `--publicDir ../frontend/build`), any static file web server, or `npm preview`.

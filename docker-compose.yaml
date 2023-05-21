@@ -1,0 +1,27 @@
+version: '3.5'
+
+services:
+  momentum-backend:
+    image: golang:1.20-alpine
+    entrypoint: /app/momentum-backend/entrypoint.sh
+    command: "/app/momentum-backend/pocketbase serve --http 0.0.0.0:8090 --publicDir ../momentum-ui/build"
+    user: ${UID}:${GID}
+    expose:
+      - 8090
+    working_dir: /app/momentum-backend
+    environment:
+      - HOME=/app/momentum-backend
+    volumes:
+      - ${PWD}/momentum-backend:/app/momentum-backend
+      - ${PWD}/momentum-ui:/app/momentum-ui
+      - ${HOME}/go/pkg:/go/pkg
+  momentum-ui:
+    image: node:alpine
+    user: ${UID}:${GID}
+    # sveltekit build
+    command: sh -c "npm run build"
+    volumes:
+      - ${PWD}/momentum-ui:/app/momentum-ui
+    environment:
+      - HOME=/app/momentum-ui
+    working_dir: /app/momentum-ui

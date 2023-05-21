@@ -2,9 +2,7 @@
 	export let data: any;
 
 	console.log(data);
-
 </script>
-
 
 <section class="card w-full">
 	<div class="p-4 space-y-4">

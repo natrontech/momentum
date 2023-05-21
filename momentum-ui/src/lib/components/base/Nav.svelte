@@ -29,7 +29,9 @@
 "
 						aria-current="page"
 					>
-						{#if $page.route.id.split('/')[1]?.includes(route.name.toLowerCase()) || $page.route.id === '/' && route.name === 'Dashboard'}
+						{#if $page.route.id
+							.split('/')[1]
+							?.includes(route.name.toLowerCase()) || ($page.route.id === '/' && route.name === 'Dashboard')}
 							<!-- <Icon className="w-5 h-5" src={route.currentIcon} />{@html '&nbsp;'} -->
 							<svelte:component this={route.icon} class="w-5 h-5" />{@html '&nbsp;'}
 							<div class="block">{route.name}</div>

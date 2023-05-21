@@ -4,7 +4,11 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
+		"dev:backend": "cd ../momentum-backend && modd",
+		"backend": "cd ../momentum-backend && ./pocketbase serve --publicDir=../momentum-ui/build",
 		"build": "vite build",
+		"build:backend": "cd ../momentum-backend && go build",
+		"typegen": "pocketbase-typegen --db ../momentum-backend/pb_data/data.db --out ./src/lib/pocketbase/generated-types.ts",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
@@ -40,6 +44,7 @@
 	"dependencies": {
 		"@picocss/pico": "^1.5.10",
 		"@sveltejs/adapter-node": "^1.2.1",
+		"@sveltejs/adapter-static": "^2.0.2",
 		"lucide-svelte": "^0.220.0",
 		"svelte-french-toast": "^1.0.4-beta.0",
 		"svelte-icons-pack": "^2.1.0",

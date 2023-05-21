@@ -1,4 +1,5 @@
-import adapter from '@sveltejs/adapter-node';
+// import adapter from '@sveltejs/adapter-node';
+import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/kit/vite';
 import preprocess from 'svelte-preprocess';
 
@@ -12,15 +13,18 @@ const config = {
 			postcss: true
 		})
 	],
-	server: {
-		port: 8080
-	},
 	envPrefix: 'MOMENTUM_',
 	kit: {
+		// adapter: adapter({
+		// 	out: 'build',
+		// 	envPrefix: 'MOMENTUM_',
+		// 	polyfill: false
+		// }),
+		// Prerendering turned off. Turn it on if you know what you're doing.
 		adapter: adapter({
-			out: 'build',
-			envPrefix: 'MOMENTUM_',
-			polyfill: false
+			// Prerendering turned off. Turn it on if you know what you're doing.
+			prerender: { entries: [] },
+			fallback: 'index.html' // enable SPA mode
 		}),
 		csrf: {
 			checkOrigin: false
