@@ -12,6 +12,21 @@
   </strong>
 </p>
 
+<p align="center">
+  <a href="https://github.com/natrontech/momentum/issues"><img
+    src="https://img.shields.io/github/issues/natrontech/momentum"
+    alt="Build"
+  /></a>
+  <a href="https://github.com/natrontech/momentum"><img
+    src="https://img.shields.io/github/license/natrontech/momentum"
+    alt="License"
+  /></a>
+	<img alt="GitHub go.mod Go version" src="https://img.shields.io/github/go-mod/go-version/natrontech/momentum/main/momentum-backend?label=Go%20Version" />
+	<img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/natrontech/momentum/ci.yml?label=CI" />
+	<img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/natrontech/momentum/codeql.yml?label=CodeQL" />
+	<img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/natrontech/momentum/docker-release.yml?label=Docker%20Release" />
+</p>
+
 <h2></h2>
 
 Momentum is a next-generation GitOps as a Service platform, designed to simplify, accelerate, and automate your software delivery process. By embracing the power of GitOps, Momentum provides transparent, auditable, and easy-to-manage continuous deployment solutions.
