@@ -86,6 +86,8 @@ See `example-hook-script.sh` for a demonstration.
 
 Possible use cases:
 
+- Clone git repo when a record is inserted to "repositories" table
+- Execute a terraform script when a new cluster is inserted to "clusters" table
 - Send an acknowledgement email when a "contact" form table is inserted to.
 - Charge a credit card when payment_token table is inserted to and then
   send email upon success/failure
