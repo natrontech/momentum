@@ -39,7 +39,7 @@ jobs:
 
     - name: Build
       run: |
-        go build -v ./cmd/natrium
+        go build -v ./...
 
   ui-build:
     name: Frontend Build
@@ -52,3 +52,5 @@ jobs:
       - uses: actions/setup-node@v3
       - name: Install dependencies
         run: npm ci
+      - name: Build
+        run: npm run build
