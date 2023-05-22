@@ -4,7 +4,7 @@
   export let deployment: Deployment;
 </script>
 
-<a class="card rounded-md" href={"deployments/" + deployment.id}>
+<a class="card rounded-md" href={"/deployments/" + deployment.id}>
   <div class="px-4 py-5 sm:px-6 relative">
     <h3 class="text-lg leading-6 font-medium text-gray-900 text-center mt-6">
       {deployment.name}
