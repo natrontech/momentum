@@ -48,6 +48,29 @@ Momentum is a next-generation GitOps as a Service platform, designed to simplify
 
 ## Installation
 
+### Docker Compose
+
+```bash
+# clone the repo
+git clone git@github.com:natrontech/momentum.git
+cd momentum
+
+# copy the example env file
+cp .env.example .env
+
+# edit the .env file to match your environment
+
+# build the images
+docker compose build
+
+# in the docker-compose.yaml is a volume mounted for the backend pb_data
+# this is where the database is stored, so you might want to create a directory for it or change the path
+mkdir -p ./momentum-backend/pb_data
+
+# start the containers
+docker compose up -d
+```
+
 ## Documentation
 
 ## Developing
