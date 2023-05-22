@@ -12,6 +12,21 @@
   </strong>
 </p>
 
+<p align="center">
+  <a href="https://github.com/natrontech/momentum/issues"><img
+    src="https://img.shields.io/github/issues/natrontech/momentum"
+    alt="Build"
+  /></a>
+  <a href="https://github.com/natrontech/momentum"><img
+    src="https://img.shields.io/github/license/natrontech/momentum"
+    alt="License"
+  /></a>
+	<img alt="GitHub go.mod Go version" src="https://img.shields.io/github/go-mod/go-version/natrontech/momentum/main/momentum-backend?label=Go%20Version" />
+	<img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/natrontech/momentum/ci.yml?label=CI" />
+	<img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/natrontech/momentum/codeql.yml?label=CodeQL" />
+	<img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/natrontech/momentum/docker-release.yml?label=Docker%20Release" />
+</p>
+
 <h2></h2>
 
 Momentum is a next-generation GitOps as a Service platform, designed to simplify, accelerate, and automate your software delivery process. By embracing the power of GitOps, Momentum provides transparent, auditable, and easy-to-manage continuous deployment solutions.
@@ -22,21 +37,14 @@ Momentum is a next-generation GitOps as a Service platform, designed to simplify
 
 ## Key Features
 
-- **Multi-Stage Deployments**: Seamlessly manage deployments across multiple stages within your pipeline.
-
-- **Customizable Stage Structure**: Define your own stage structure to best fit your development and deployment processes.
-
-- **App Catalogue Management**: Define and manage your application catalogue with ease.
-
-- **Bring Your Own Helm Chart**: Flexibility to bring your own Helm chart for personalized configuration.
-
-- **Observability**: Built-in logging, monitoring, and alerting tools for better insights into your deployments.
-
-- **Bring Your Own GitOps Repository**: We provide the flexibility to integrate your existing GitOps repositories for a seamless transition.
-
-- **Seamless Rollout with FluxCD**: Leverage FluxCD for efficient and reliable application rollouts.
-
-- **Multi-Cloud Support**: Deploy your applications across multiple cloud providers or on-premise.
+- **Flexible Deployments**: Manage deployments effortlessly across various stages in your pipeline.
+- **Custom Stage Design**: Tailor your stage structure to align with your unique development and deployment procedures.
+- **Application Catalogue Control**: Easily manage your application catalogue.
+- **Personalized Helm Chart Integration**: Benefit from the flexibility to use your own Helm chart for tailored configurations.
+- **Enhanced Observability**: Enhance your deployment oversight with comprehensive stage value tracking. Clearly visualize where deployment values originate from within various stages, promoting improved understanding and control.
+- **GitOps Repository Integration**: Seamlessly integrate with your existing GitOps repositories for a smooth transition.
+- **Efficient Rollouts with FluxCD**: Utilize FluxCD to enable efficient and reliable application rollouts.
+- **Multi Cloud Compatibility**: Deploy applications across a variety of cloud providers or on-premise environments.
 
 ## Getting Started
 
@@ -47,6 +55,10 @@ Momentum is a next-generation GitOps as a Service platform, designed to simplify
 - FluxCD (v2.0.0)
 
 ## Installation
+
+### Helm
+
+*tbd*
 
 ### Docker Compose
 
@@ -67,6 +79,8 @@ docker compose up -d
 ```
 
 ## Documentation
+
+*tbd*
 
 ## Developing
 
@@ -112,3 +126,7 @@ It is a very easy and powerful way to extend your application with minimal
 configuration and perhaps no code.
 
 ## Contributing
+
+> **Note:** We currently have no contribution guidelines. This will be added in the future.
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
