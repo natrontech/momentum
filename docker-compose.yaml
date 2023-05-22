@@ -3,6 +3,7 @@ version: '3.5'
 services:
   momentum:
     build: .
+    # image: ghcr.io/natrontech/momentum:latest
     ports:
       - "8090:8090"
     volumes:
