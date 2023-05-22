@@ -55,11 +55,6 @@ Momentum is a next-generation GitOps as a Service platform, designed to simplify
 git clone git@github.com:natrontech/momentum.git
 cd momentum
 
-# copy the example env file
-cp .env.example .env
-
-# edit the .env file to match your environment
-
 # build the images
 docker compose build
 
