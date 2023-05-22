@@ -25,3 +25,11 @@ tmp/
 
 dist/
 .builds/
+
+.cache
+.local
+.npm
+.env
+.ash_history
+/docker-compose.override.yml
+_temp/
