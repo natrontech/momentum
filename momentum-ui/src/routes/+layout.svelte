@@ -5,9 +5,9 @@
   import { AppShell } from "@skeletonlabs/skeleton";
   import Nav from "$lib/components/base/Nav.svelte";
   import { page } from "$app/stores";
-  import { FolderGit2, LayoutDashboard, FileCode, Layers, Package, Loader2 } from "lucide-svelte";
+  import { FolderGit2, LayoutDashboard, FileCode, Layers, Package } from "lucide-svelte";
   import type { NavRoute } from "$lib/types";
-  import { metadata } from "$lib/app/store";
+  import { metadata } from "$lib/stores/metadata";
   import { site } from "$lib/config";
   import { beforeNavigate } from "$app/navigation";
   import { fly } from "svelte/transition";

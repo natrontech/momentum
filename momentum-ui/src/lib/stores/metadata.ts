@@ -6,7 +6,3 @@ export interface Metadata {
 }
 
 export const metadata = writable<Metadata>({});
-
-export const toggleTableView = writable(false);
-
-export const loading = writable(false);

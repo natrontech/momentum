@@ -1,19 +1,23 @@
 <script lang="ts">
-  import { metadata } from "$lib/app/store";
-  import type { RepositoriesRecord } from "$lib/pocketbase/generated-types";
+  import { metadata } from "$lib/stores/metadata";
+  import type { RepositoriesResponse } from "$lib/pocketbase/generated-types";
   import type { PageData } from "./$types";
+  import RepositoryCard from "$lib/components/repositories/RepositoryCard.svelte";
+  import tableView from "$lib/stores/tableView";
+  import TableViewSelector from "$lib/components/base/TableViewSelector.svelte";
 
   $metadata.title = "Repositories";
 
   export let data: PageData;
 
   // parse data to RepositoriesRecord[]
-  $: repositories = data.records as RepositoriesRecord[];
-
+  $: repositories = data.records as RepositoriesResponse[];
 </script>
 
-{#each repositories as repository}
-  <div>
-    <h1>{repository.name}</h1>
-  </div>
-{/each}
+<TableViewSelector />
+
+<div class="grid gap-6 {$tableView ? 'grid-cols-2' : ''}">
+  {#each repositories as repository}
+    <RepositoryCard {repository} />
+  {/each}
+</div>
