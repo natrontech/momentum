@@ -61,7 +61,7 @@
 </svelte:head>
 
 <div class="h-full">
-  <div class=" h-32 bg-primary-500 absolute -z-10 w-full">
+  <div class="h-32 bg-primary-500 absolute -z-10 w-full">
     <div class="absolute pr-4 pt-4 pb-4 left-64 right-0 top-12">
       {#each routes as route}
         {#if ($page.route.id && $page.route.id
