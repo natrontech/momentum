@@ -1,0 +1,17 @@
+key: value # .key
+
+keyArray:
+  - value1 # .keyArray[0]
+  - value2 # .keyArray[1]
+  - value3 # .keyArray[2]
+
+keyMap:
+  key1: value1 # .keyMap.key1
+  key2: value2 # .keyMap.key2
+  key3: value3 # .keyMap.key3
+
+keyArrayMap:
+  - key1: value1 # .keyArrayMap[0].key1
+    key2: value2 # .keyArrayMap[0].key2
+  - key1: value3 # .keyArrayMap[1].key1
+    key2: value4 # .keyArrayMap[1].key2
