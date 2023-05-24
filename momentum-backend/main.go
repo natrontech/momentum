@@ -2,14 +2,12 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 
 	hooks "pocketbase/hooks"
 
-	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
@@ -58,18 +56,6 @@ func main() {
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		// serves static files from the provided public dir (if exists)
 		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS(publicDirFlag), true))
-
-		e.Router.AddRoute(echo.Route{
-			Method: http.MethodGet,
-			Path:   "/api/hello",
-			Handler: func(c echo.Context) error {
-				obj := map[string]interface{}{"message": "Hello world!"}
-				return c.JSON(http.StatusOK, obj)
-			},
-			// Middlewares: []echo.MiddlewareFunc{
-			// 	apis.RequireAdminOrUserAuth(),
-			// },
-		})
 
 		return nil
 	})

@@ -6,7 +6,11 @@ module.exports = {
     require("path").join(require.resolve("@skeletonlabs/skeleton"), "../**/*.{html,js,svelte,ts}")
   ],
   theme: {
-    extend: {}
+    extend: {
+      screens: {
+        'hover-hover': {'raw': '(hover: hover)'},
+      }
+    }
   },
   plugins: [
     require("@tailwindcss/forms"),

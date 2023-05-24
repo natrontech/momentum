@@ -11,22 +11,22 @@
     </h3>
     <div class="absolute left-0 right-0 w-full top-0">
       {#if deployment.status === DeploymentStatus.Running}
-        <span class="badge variant-filled bg-green-500 w-full rounded-t-md">
+        <span class="badge variant-filled bg-green-400 w-full rounded-t-md">
           <HeartPulse />{@html "&nbsp;"}
           {deployment.status}
         </span>
       {:else if deployment.status === DeploymentStatus.Failed}
-        <span class="badge variant-filled bg-red-500 w-full rounded-t-md">
+        <span class="badge variant-filled bg-red-400 w-full rounded-t-md">
           <HeartCrack />{@html "&nbsp;"}
           {deployment.status}
         </span>
       {:else if deployment.status === DeploymentStatus.Pending}
-        <span class="badge variant-filled bg-yellow-500 w-full rounded-t-md">
+        <span class="badge variant-filled bg-yellow-400 w-full rounded-t-md">
           <Loader2 class="animate-spin" />{@html "&nbsp;"}
           {deployment.status}
         </span>
       {:else if deployment.status === DeploymentStatus.Unknown}
-        <span class="badge variant-filled bg-gray-500 w-full rounded-t-md">
+        <span class="badge variant-filled bg-gray-400 w-full rounded-t-md">
           <CloudOff />{@html "&nbsp;"}
           {deployment.status}
         </span>

@@ -22,7 +22,6 @@ const config = {
         alias: {
             $lib: "src/lib"
         },
-        // Prerendering turned off. Turn it on if you know what you're doing.
         adapter: adapter({
             // Prerendering turned off. Turn it on if you know what you're doing.
             prerender: { entries: [] },

@@ -43,6 +43,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@floating-ui/dom": "^1.2.8",
     "@picocss/pico": "^1.5.10",
     "@sveltejs/adapter-node": "^1.2.1",
     "@sveltejs/adapter-static": "^2.0.2",
