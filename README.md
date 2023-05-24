@@ -46,6 +46,12 @@ Momentum is a next-generation GitOps as a Service platform, designed to simplify
 - **Efficient Rollouts with FluxCD**: Utilize FluxCD to enable efficient and reliable application rollouts.
 - **Multi Cloud Compatibility**: Deploy applications across a variety of cloud providers or on-premise environments.
 
+## Architecture Overview
+
+<p align="center">
+	<img alt="Architecture Overview" src="assets/momentum-architecture.png" />
+</p>
+
 ## Getting Started
 
 ### Prerequisites
