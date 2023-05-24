@@ -60,10 +60,10 @@ export enum RepositoriesStatusOptions {
 	"ERROR" = "ERROR",
 }
 export type RepositoriesRecord = {
-	name?: string
-	url?: string
+	name: string
+	url: string
+	status: RepositoriesStatusOptions
 	repositoryCredentials?: RecordIdString
-	status?: RepositoriesStatusOptions
 }
 
 export type RepositoryCredentialsRecord = {

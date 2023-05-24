@@ -8,6 +8,7 @@
   $: repository = data.record as RepositoriesResponse;
 
   $metadata.title = data.record.name;
+
 </script>
 
 <div class="">

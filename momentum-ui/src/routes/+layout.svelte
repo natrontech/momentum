@@ -2,6 +2,7 @@
   import "../theme.postcss";
   import "@skeletonlabs/skeleton/styles/all.css";
   import "../app.postcss";
+  import "../app.css";
   import { AppShell } from "@skeletonlabs/skeleton";
   import Nav from "$lib/components/base/Nav.svelte";
   import { page } from "$app/stores";
