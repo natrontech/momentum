@@ -67,7 +67,7 @@ func TestBuildPath(t *testing.T) {
 }
 
 func TestFileEmpty(t *testing.T) {
-	testFile := "/home/joel/projects/natrium-cli/natrium-demo/natrium/mywebserver/_templates/release.yaml"
+	testFile := "./testdata/emptyfile.yaml"
 
 	if utils.FileExists(testFile) {
 
