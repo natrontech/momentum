@@ -27,6 +27,22 @@ func defaultPublicDir() string {
 func main() {
 	app := pocketbase.New()
 
+	// momentum core features must run before executing DB statements.
+	// like this we prevent invalid/inconsistent state.
+	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+
+		dispatcher := new(MomentumDispatcher)
+
+		dispatcher.createRules = setupCreateRules()
+		dispatcher.updateRules = setupUpdateRules()
+		dispatcher.deleteRules = setupDeleteRules()
+
+		app.OnModelBeforeCreate().Add(dispatcher.DispatchCreate)
+		app.OnModelBeforeUpdate().Add(dispatcher.DispatchUpdate)
+		app.OnModelBeforeDelete().Add(dispatcher.DispatchDelete)
+		return nil
+	})
+
 	var publicDirFlag string
 
 	// add "--publicDir" option flag
