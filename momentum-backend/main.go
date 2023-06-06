@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	hooks "pocketbase/hooks"
+	hooks "momentum/hooks"
 
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"

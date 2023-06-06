@@ -1,0 +1,7 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # @natrium: deployments
+  - ./deployment2.yaml
+  # @natrium: stages
+  # - gold/
