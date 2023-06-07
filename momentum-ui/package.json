@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite dev",
     "dev:backend": "cd ../momentum-backend && modd",
-    "backend": "cd ../momentum-backend && ./pocketbase serve --publicDir=../momentum-ui/build",
+    "backend": "cd ../momentum-backend && ./momentum serve --publicDir=../momentum-ui/build",
     "build": "vite build",
     "build:backend": "cd ../momentum-backend && go build",
     "typegen": "pocketbase-typegen --db ../momentum-backend/pb_data/data.db --out ./src/lib/pocketbase/generated-types.ts",
