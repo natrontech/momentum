@@ -57,11 +57,15 @@ func writeFile(n *Node) (string, error) {
 		return "", errors.New("kind file expected")
 	}
 
+	if n.yamlNode == nil {
+		return "", errors.New("file has no yaml node. cannot write file")
+	}
+
 	if strings.HasSuffix(n.Path, ".yml") || strings.HasSuffix(n.Path, ".yaml") {
 		fmt.Println("Writing FILE", n.FullPath())
 		// yaml.EncodeToFile(n.yamlNode, n.FullPath())
 	} else {
-		return "", errors.New("only files which end with .yml or .yaml can be parsed")
+		return "", errors.New("only files which end with .yml or .yaml can be written")
 	}
 
 	return n.Path, nil

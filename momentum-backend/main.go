@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	hooks "momentum/hooks"
+	momentumcore "momentum/momentum-core"
+	config "momentum/momentum-core/momentum-config"
 
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
@@ -25,28 +27,29 @@ func defaultPublicDir() string {
 }
 
 func main() {
-	app := pocketbase.New()
+
+	momentumConfig, configErr := config.InitializeMomentumCore()
+	if configErr != nil {
+		panic("failed initializing momentum. problem: " + configErr.Error())
+	}
+
+	dispatcher := momentumcore.NewDispatcher(momentumConfig, pocketbase.New())
 
 	// momentum core features must run before executing DB statements.
-	// like this we prevent invalid/inconsistent state.
-	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+	// like this invalid/inconsistent state is prevented.
+	dispatcher.App.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 
-		dispatcher := new(MomentumDispatcher)
+		dispatcher.App.OnRecordBeforeCreateRequest().Add(dispatcher.DispatchCreate)
+		dispatcher.App.OnRecordBeforeUpdateRequest().Add(dispatcher.DispatchUpdate)
+		dispatcher.App.OnRecordBeforeDeleteRequest().Add(dispatcher.DispatchDelete)
 
-		dispatcher.createRules = setupCreateRules()
-		dispatcher.updateRules = setupUpdateRules()
-		dispatcher.deleteRules = setupDeleteRules()
-
-		app.OnModelBeforeCreate().Add(dispatcher.DispatchCreate)
-		app.OnModelBeforeUpdate().Add(dispatcher.DispatchUpdate)
-		app.OnModelBeforeDelete().Add(dispatcher.DispatchDelete)
 		return nil
 	})
 
 	var publicDirFlag string
 
 	// add "--publicDir" option flag
-	app.RootCmd.PersistentFlags().StringVar(
+	dispatcher.App.RootCmd.PersistentFlags().StringVar(
 		&publicDirFlag,
 		"publicDir",
 		defaultPublicDir(),
@@ -55,28 +58,28 @@ func main() {
 	migrationsDir := "" // default to "pb_migrations" (for js) and "migrations" (for go)
 
 	// load js files to allow loading external JavaScript migrations
-	jsvm.MustRegisterMigrations(app, &jsvm.MigrationsOptions{
+	jsvm.MustRegisterMigrations(dispatcher.App, &jsvm.MigrationsOptions{
 		Dir: migrationsDir,
 	})
 
 	// register the `migrate` command
-	migratecmd.MustRegister(app, app.RootCmd, &migratecmd.Options{
+	migratecmd.MustRegister(dispatcher.App, dispatcher.App.RootCmd, &migratecmd.Options{
 		TemplateLang: migratecmd.TemplateLangJS, // or migratecmd.TemplateLangGo (default)
 		Dir:          migrationsDir,
 		Automigrate:  true,
 	})
 
 	// call this only if you want to use the configurable "hooks" functionality
-	hooks.PocketBaseInit(app)
+	hooks.PocketBaseInit(dispatcher.App)
 
-	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+	dispatcher.App.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		// serves static files from the provided public dir (if exists)
 		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS(publicDirFlag), true))
 
 		return nil
 	})
 
-	if err := app.Start(); err != nil {
+	if err := dispatcher.App.Start(); err != nil {
 		log.Fatal(err)
 	}
 }
