@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	gitclient "momentum/git-client"
-	momentumconfig "momentum/momentum-core/momentum-config"
-	momentumservices "momentum/momentum-core/momentum-services"
+	config "momentum/momentum-core/momentum-config"
+	services "momentum/momentum-core/momentum-services"
 	tree "momentum/momentum-core/momentum-tree"
 	utils "momentum/momentum-core/momentum-utils"
 
@@ -14,22 +14,32 @@ import (
 	"github.com/pocketbase/pocketbase/models"
 )
 
-type RepositoryController struct {
-	applicationService *momentumservices.ApplicationService
+type RepositoryAddedEvent struct {
+	RepositoryName string
+	Deployments    []*models.Record
 }
 
-func NewRepositoryController(appService *momentumservices.ApplicationService) *RepositoryController {
+type RepositoryController struct {
+	repositoryService           *services.RepositoryService
+	deploymentService           *services.DeploymentService
+	repositoryAddedEventChannel chan *RepositoryAddedEvent
+}
+
+func NewRepositoryController(repoService *services.RepositoryService, deploymentService *services.DeploymentService, repositoryAddedEventChannel chan *RepositoryAddedEvent) *RepositoryController {
 
 	repoController := new(RepositoryController)
-	repoController.applicationService = appService
+
+	repoController.repositoryService = repoService
+	repoController.deploymentService = deploymentService
+	repoController.repositoryAddedEventChannel = repositoryAddedEventChannel
 
 	return repoController
 }
 
-func (rc *RepositoryController) AddRepository(record *models.Record, conf *momentumconfig.MomentumConfig) error {
+func (rc *RepositoryController) AddRepository(record *models.Record, conf *config.MomentumConfig) error {
 
-	repoName := record.GetString(momentumconfig.TABLE_REPOSITORIES_FIELD_NAME)
-	repoUrl := record.GetString(momentumconfig.TABLE_REPOSITORIES_FIELD_URL)
+	repoName := record.GetString(config.TABLE_REPOSITORIES_FIELD_NAME)
+	repoUrl := record.GetString(config.TABLE_REPOSITORIES_FIELD_URL)
 	path := utils.BuildPath(conf.DataDir(), strings.ReplaceAll(repoName, " ", ""))
 
 	fmt.Println("adding repo", repoName, ", located at", repoUrl, "and to be written to", path)
@@ -50,22 +60,28 @@ func (rc *RepositoryController) AddRepository(record *models.Record, conf *momen
 		return err
 	}
 
-	tree.Print(repo)
-
-	err = rc.applicationService.AddApplications(repo, record)
+	_, deployments, err := rc.repositoryService.SyncRepositoryFromDisk(repo, record)
 	if err != nil {
-		return apis.NewApiError(500, err.Error(), nil)
+		fmt.Println("ERROR:", err.Error())
+		utils.DirDelete(path)
+		return err
 	}
 
+	repoAddedEvent := new(RepositoryAddedEvent)
+	repoAddedEvent.RepositoryName = repoName
+	repoAddedEvent.Deployments = deployments
+
+	rc.repositoryAddedEventChannel <- repoAddedEvent
+
 	return nil
 }
 
-func (rc *RepositoryController) UpdateRepository(record *models.Record, conf *momentumconfig.MomentumConfig) error {
+func (rc *RepositoryController) UpdateRepository(record *models.Record, conf *config.MomentumConfig) error {
 
 	return nil
 }
 
-func (rc *RepositoryController) DeleteRepository(record *models.Record, conf *momentumconfig.MomentumConfig) error {
+func (rc *RepositoryController) DeleteRepository(record *models.Record, conf *config.MomentumConfig) error {
 
 	return nil
 }

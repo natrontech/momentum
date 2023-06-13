@@ -1,35 +1,47 @@
 package momentumcontrollers
 
 import (
-	momentumconfig "momentum/momentum-core/momentum-config"
-	momentumservices "momentum/momentum-core/momentum-services"
+	config "momentum/momentum-core/momentum-config"
+	services "momentum/momentum-core/momentum-services"
 
 	"github.com/pocketbase/pocketbase/models"
 )
 
 type DeploymentController struct {
-	deploymentService *momentumservices.DeplyomentService
+	deploymentService *services.DeploymentService
+	repositoryService *services.RepositoryService
 }
 
-func NewDeploymentController(deploymentService *momentumservices.DeplyomentService) *DeploymentController {
+func NewDeploymentController(deploymentService *services.DeploymentService, repositoryService *services.RepositoryService) *DeploymentController {
 
 	deploymentController := new(DeploymentController)
 	deploymentController.deploymentService = deploymentService
+	deploymentController.repositoryService = repositoryService
 
 	return deploymentController
 }
 
-func (dc *DeploymentController) AddDeplyoment(record *models.Record, conf *momentumconfig.MomentumConfig) error {
+func (dc *DeploymentController) AddDeployment(record *models.Record, conf *config.MomentumConfig) error {
 
 	return nil
 }
 
-func (dc *DeploymentController) UpdateDeplyoment(record *models.Record, conf *momentumconfig.MomentumConfig) error {
+func (dc *DeploymentController) UpdateDeployment(record *models.Record, conf *config.MomentumConfig) error {
 
 	return nil
 }
 
-func (dc *DeploymentController) DeleteDeplyoment(record *models.Record, conf *momentumconfig.MomentumConfig) error {
+func (dc *DeploymentController) DeleteDeployment(record *models.Record, conf *config.MomentumConfig) error {
 
 	return nil
+}
+
+func (dc *DeploymentController) AddRepositoryToDeployments(repositoryAddedEvent *RepositoryAddedEvent) error {
+
+	repositoryRecord, err := dc.repositoryService.FindForName(repositoryAddedEvent.RepositoryName)
+	if err != nil {
+		return err
+	}
+
+	return dc.deploymentService.AddRepository(repositoryRecord, repositoryAddedEvent.Deployments)
 }

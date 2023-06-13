@@ -68,6 +68,11 @@ func DirCreate(path string) error {
 	return os.Mkdir(path, DIR_ALLOW_CREATION_FOR_GROUP)
 }
 
+func DirDelete(path string) error {
+
+	return os.RemoveAll(path)
+}
+
 func dirCopyRecursive(rootFrom string, rootTo string, relativeToParent string) error {
 
 	errs := make([]error, 0)

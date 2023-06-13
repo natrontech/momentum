@@ -33,23 +33,12 @@ func main() {
 		panic("failed initializing momentum. problem: " + configErr.Error())
 	}
 
-	dispatcher := momentumcore.NewDispatcher(momentumConfig, pocketbase.New())
-
-	// momentum core features must run before executing DB statements.
-	// like this invalid/inconsistent state is prevented.
-	dispatcher.App.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-
-		dispatcher.App.OnRecordBeforeCreateRequest().Add(dispatcher.DispatchCreate)
-		dispatcher.App.OnRecordBeforeUpdateRequest().Add(dispatcher.DispatchUpdate)
-		dispatcher.App.OnRecordBeforeDeleteRequest().Add(dispatcher.DispatchDelete)
-
-		return nil
-	})
+	app := pocketbase.New()
 
 	var publicDirFlag string
 
 	// add "--publicDir" option flag
-	dispatcher.App.RootCmd.PersistentFlags().StringVar(
+	app.RootCmd.PersistentFlags().StringVar(
 		&publicDirFlag,
 		"publicDir",
 		defaultPublicDir(),
@@ -58,28 +47,40 @@ func main() {
 	migrationsDir := "" // default to "pb_migrations" (for js) and "migrations" (for go)
 
 	// load js files to allow loading external JavaScript migrations
-	jsvm.MustRegisterMigrations(dispatcher.App, &jsvm.MigrationsOptions{
+	jsvm.MustRegisterMigrations(app, &jsvm.MigrationsOptions{
 		Dir: migrationsDir,
 	})
 
 	// register the `migrate` command
-	migratecmd.MustRegister(dispatcher.App, dispatcher.App.RootCmd, &migratecmd.Options{
+	migratecmd.MustRegister(app, app.RootCmd, &migratecmd.Options{
 		TemplateLang: migratecmd.TemplateLangJS, // or migratecmd.TemplateLangGo (default)
 		Dir:          migrationsDir,
 		Automigrate:  true,
 	})
 
 	// call this only if you want to use the configurable "hooks" functionality
-	hooks.PocketBaseInit(dispatcher.App)
+	hooks.PocketBaseInit(app)
 
-	dispatcher.App.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		// serves static files from the provided public dir (if exists)
 		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS(publicDirFlag), true))
 
 		return nil
 	})
 
-	if err := dispatcher.App.Start(); err != nil {
+	app.OnAfterBootstrap().Add(func(e *core.BootstrapEvent) error {
+		dispatcher := momentumcore.NewDispatcher(momentumConfig, app)
+
+		// momentum core features must run before executing DB statements.
+		// like this invalid/inconsistent state is prevented.
+		dispatcher.Pocketbase.OnRecordBeforeCreateRequest().Add(dispatcher.DispatchCreate)
+		dispatcher.Pocketbase.OnRecordBeforeUpdateRequest().Add(dispatcher.DispatchUpdate)
+		dispatcher.Pocketbase.OnRecordBeforeDeleteRequest().Add(dispatcher.DispatchDelete)
+
+		return nil
+	})
+
+	if err := app.Start(); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -1,17 +1,17 @@
 package momentumcontrollers
 
 import (
-	momentumconfig "momentum/momentum-core/momentum-config"
-	momentumservices "momentum/momentum-core/momentum-services"
+	config "momentum/momentum-core/momentum-config"
+	services "momentum/momentum-core/momentum-services"
 
 	"github.com/pocketbase/pocketbase/models"
 )
 
 type StageController struct {
-	stageService *momentumservices.StageService
+	stageService *services.StageService
 }
 
-func NewStageController(stageService *momentumservices.StageService) *StageController {
+func NewStageController(stageService *services.StageService) *StageController {
 
 	stageController := new(StageController)
 	stageController.stageService = stageService
@@ -19,17 +19,17 @@ func NewStageController(stageService *momentumservices.StageService) *StageContr
 	return stageController
 }
 
-func (sc *StageController) AddStage(record *models.Record, conf *momentumconfig.MomentumConfig) error {
+func (sc *StageController) AddStage(record *models.Record, conf *config.MomentumConfig) error {
 
 	return nil
 }
 
-func (sc *StageController) UpdateStage(record *models.Record, conf *momentumconfig.MomentumConfig) error {
+func (sc *StageController) UpdateStage(record *models.Record, conf *config.MomentumConfig) error {
 
 	return nil
 }
 
-func (sc *StageController) DeleteStage(record *models.Record, conf *momentumconfig.MomentumConfig) error {
+func (sc *StageController) DeleteStage(record *models.Record, conf *config.MomentumConfig) error {
 
 	return nil
 }

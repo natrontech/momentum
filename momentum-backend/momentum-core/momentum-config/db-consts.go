@@ -1,16 +1,30 @@
 package momentumconfig
 
 const TABLE_REPOSITORIES_NAME = "repositories"
+const TABLE_REPOSITORIES_FIELD_ID = "id"
 const TABLE_REPOSITORIES_FIELD_NAME = "name"
 const TABLE_REPOSITORIES_FIELD_URL = "url"
 
 const TABLE_APPLICATIONS_NAME = "applications"
+const TABLE_APPLICATIONS_FIELD_ID = "id"
+const TABLE_APPLICATIONS_FIELD_NAME = "name"
+const TABLE_APPLICATIONS_FIELD_STAGES = "stages"
+const TABLE_APPLICATIONS_FIELD_HELMREPO = "helmRepository"
 
 const TABLE_DEPLOYMENTS_NAME = "deployments"
+const TABLE_DEPLOYMENTS_FIELD_ID = "id"
+const TABLE_DEPLOYMENTS_FIELD_NAME = "name"
+const TABLE_DEPLOYMENTS_FIELD_DESCRIPTION = "description"
+const TABLE_DEPLOYMENTS_FIELD_REPOSITORIES = "repositories"
 
 const TABLE_STAGES_NAME = "stages"
+const TABLE_STAGES_FIELD_ID = "id"
+const TABLE_STAGES_FIELD_NAME = "name"
+const TABLE_STAGES_FIELD_DEPLOYMENTS = "deployments"
 
 const TABLE_TEMPLATES_NAME = "templates"
+const TABLE_TEMPLATES_FIELD_ID = "id"
+const TABLE_TEMPLATES_FIELD_NAME = "name"
 
 const TABLE_REPOSITORYCREDENTIALS_NAME = "repositoryCredentials"
 
