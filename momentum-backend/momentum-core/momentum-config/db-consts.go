@@ -1,5 +1,7 @@
 package momentumconfig
 
+const GENERIC_FIELD_KEYVALUES = "keyValues"
+
 const TABLE_REPOSITORIES_NAME = "repositories"
 const TABLE_REPOSITORIES_FIELD_ID = "id"
 const TABLE_REPOSITORIES_FIELD_NAME = "name"
@@ -34,6 +36,9 @@ const TABLE_HELMREPOSITORYCREDENTIALS_NAME = "helmRepositoryCredentials"
 
 const TABLE_HOOKS_NAME = "hooks"
 
-const TABLE_KEYVALUE_NAME = "keyValue"
+const TABLE_KEYVALUE_NAME = "keyValues"
+const TABLE_KEYVALUE_FIELD_ID = "id"
+const TABLE_KEYVALUE_FIELD_KEY = "key"
+const TABLE_KEYVALUE_FIELD_VALUE = "value"
 
 const TABLE_SECRETKEYVALUE_NAME = "secretKeyValues"

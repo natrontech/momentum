@@ -39,8 +39,9 @@ func NewDispatcher(config *conf.MomentumConfig, pb *pocketbase.PocketBase) *Mome
 	dispatcher := new(MomentumDispatcher)
 	dispatcher.Config = config
 
-	deploymentService := services.NewDeploymentService(pb.Dao())
-	stageService := services.NewStageService(pb.Dao(), deploymentService)
+	keyValueService := services.NewKeyValueService(pb.Dao())
+	deploymentService := services.NewDeploymentService(pb.Dao(), keyValueService)
+	stageService := services.NewStageService(pb.Dao(), deploymentService, keyValueService)
 	appService := services.NewApplicationService(pb.Dao(), stageService)
 	repoService := services.NewRepositoryService(pb.Dao(), appService)
 

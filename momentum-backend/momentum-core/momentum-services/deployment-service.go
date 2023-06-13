@@ -11,10 +11,11 @@ import (
 )
 
 type DeploymentService struct {
-	dao *daos.Dao
+	dao             *daos.Dao
+	keyValueService *KeyValueService
 }
 
-func NewDeploymentService(dao *daos.Dao) *DeploymentService {
+func NewDeploymentService(dao *daos.Dao, keyValueService *KeyValueService) *DeploymentService {
 
 	if dao == nil {
 		panic("cannot initialize service with nil dao")
@@ -23,6 +24,7 @@ func NewDeploymentService(dao *daos.Dao) *DeploymentService {
 	deplyomentService := new(DeploymentService)
 
 	deplyomentService.dao = dao
+	deplyomentService.keyValueService = keyValueService
 
 	return deplyomentService
 }
@@ -34,9 +36,16 @@ func (ds *DeploymentService) SyncDeploymentsFromDisk(n *tree.Node) ([]string, er
 	deploymentIds := make([]string, 0)
 	for _, deployment := range deployments {
 
-		deploymentId, err := ds.createWithoutEvent(deployment.Path)
+		deploymentId, deploymentRecord, err := ds.createWithoutEvent(deployment.NormalizedPath())
 		if err != nil {
 			return nil, err
+		}
+
+		if deployment.Kind == tree.File {
+			err = ds.keyValueService.SyncFile(deployment, deploymentRecord)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		deploymentIds = append(deploymentIds, deploymentId)
@@ -75,11 +84,11 @@ func (ds *DeploymentService) GetDeploymentsCollection() (*models.Collection, err
 	return coll, nil
 }
 
-func (ds *DeploymentService) createWithoutEvent(name string) (string, error) {
+func (ds *DeploymentService) createWithoutEvent(name string) (string, *models.Record, error) {
 
 	deploymentCollection, err := ds.GetDeploymentsCollection()
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	deploymentRecord := models.NewRecord(deploymentCollection)
@@ -87,5 +96,5 @@ func (ds *DeploymentService) createWithoutEvent(name string) (string, error) {
 
 	err = ds.dao.Clone().SaveRecord(deploymentRecord)
 
-	return deploymentRecord.Id, nil
+	return deploymentRecord.Id, deploymentRecord, nil
 }

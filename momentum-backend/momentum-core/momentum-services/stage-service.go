@@ -11,9 +11,10 @@ import (
 type StageService struct {
 	dao               *daos.Dao
 	deploymentService *DeploymentService
+	keyValueService   *KeyValueService
 }
 
-func NewStageService(dao *daos.Dao, deploymentService *DeploymentService) *StageService {
+func NewStageService(dao *daos.Dao, deploymentService *DeploymentService, keyValueService *KeyValueService) *StageService {
 
 	if dao == nil {
 		panic("cannot initialize service with nil dao")
@@ -22,6 +23,7 @@ func NewStageService(dao *daos.Dao, deploymentService *DeploymentService) *Stage
 	stageService := new(StageService)
 	stageService.deploymentService = deploymentService
 	stageService.dao = dao
+	stageService.keyValueService = keyValueService
 
 	return stageService
 }
@@ -37,9 +39,19 @@ func (ss *StageService) SyncStagesFromDisk(n *tree.Node) ([]string, error) {
 			return nil, err
 		}
 
-		stageId, err := ss.createWithoutEvent(stage.Path, deploymentIds)
+		stageId, stageRecord, err := ss.createWithoutEvent(stage.NormalizedPath(), deploymentIds)
 		if err != nil {
 			return nil, err
+		}
+
+		if stage.Kind == tree.Directory {
+			stageFiles := stage.Files()
+			for _, f := range stageFiles {
+				err = ss.keyValueService.SyncFile(f, stageRecord)
+				if err != nil {
+					return nil, err
+				}
+			}
 		}
 
 		stageIds = append(stageIds, stageId)
@@ -53,11 +65,11 @@ func (ss *StageService) GetStagesCollection() (*models.Collection, error) {
 	return ss.dao.FindCollectionByNameOrId(consts.TABLE_STAGES_NAME)
 }
 
-func (ss *StageService) createWithoutEvent(name string, deploymentIds []string) (string, error) {
+func (ss *StageService) createWithoutEvent(name string, deploymentIds []string) (string, *models.Record, error) {
 
 	stageCollection, err := ss.GetStagesCollection()
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	stageRecord := models.NewRecord(stageCollection)
@@ -66,5 +78,5 @@ func (ss *StageService) createWithoutEvent(name string, deploymentIds []string) 
 
 	err = ss.dao.Clone().SaveRecord(stageRecord)
 
-	return stageRecord.Id, err
+	return stageRecord.Id, stageRecord, err
 }
