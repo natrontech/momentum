@@ -37,7 +37,7 @@ func (as *ApplicationService) SyncApplicationsFromDisk(n *tree.Node, record *mod
 			return nil, err
 		}
 
-		rec, err := as.createWithoutEvent(app.Path, stages)
+		rec, err := as.createWithoutEvent(app.NormalizedPath(), stages)
 		if err != nil {
 			return nil, err
 		}
