@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestTreeCreation(test *testing.T) {
+func FILESYSTEMTEST_TestTreeCreation(test *testing.T) {
 
 	tDir := tree.NewNode(tree.Directory, "/testpath", "", nil, nil, nil)
 	tFile := tree.NewNode(tree.File, "testfile.yaml", "", tDir, nil, nil)

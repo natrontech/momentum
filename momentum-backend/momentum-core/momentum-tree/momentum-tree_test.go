@@ -8,7 +8,7 @@ import (
 
 const basePath = "testdata"
 
-func TestAllApps(t *testing.T) {
+func FILESYSTEMTEST_TestAllApps(t *testing.T) {
 
 	n, err := tree.Parse(basePath, []string{".git"})
 	if err != nil {
@@ -28,7 +28,7 @@ func TestAllApps(t *testing.T) {
 	}
 }
 
-func TestAllStages(t *testing.T) {
+func FILESYSTEMTEST_TestAllStages(t *testing.T) {
 
 	n, err := tree.Parse(basePath, []string{".git"})
 	if err != nil {
@@ -47,7 +47,7 @@ func TestAllStages(t *testing.T) {
 	expectOneToBe(stages, "gold", t)
 }
 
-func TestAllDeployments(t *testing.T) {
+func FILESYSTEMTEST_TestAllDeployments(t *testing.T) {
 
 	n, err := tree.Parse(basePath, []string{".git"})
 	if err != nil {
