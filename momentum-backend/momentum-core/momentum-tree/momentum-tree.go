@@ -1,7 +1,6 @@
 package tree
 
 import (
-	"errors"
 	"strings"
 )
 
@@ -29,99 +28,15 @@ func (n *Node) AllStages() []*Node {
 
 func (n *Node) AllDeployments() []*Node {
 
-	stgs := n.AllStages()
+	stgsAndApps := n.AllStages()
+	stgsAndApps = append(stgsAndApps, n.Apps()...)
 	depls := make([]*Node, 0)
 
-	for _, stage := range stgs {
+	for _, stage := range stgsAndApps {
 		depls = append(depls, deployments(stage)...)
 	}
 
 	return depls
-}
-
-// selects stages relative to this node
-func (n *Node) Stages() ([]*Node, error) {
-
-	if n.Kind != Directory || strings.HasPrefix(n.Path, META_PREFIX) {
-
-		return nil, errors.New("cannot read stages of given node")
-	}
-
-	if n.Parent == nil {
-		return n.AllStages(), nil
-	}
-
-	stgs := make([]*Node, 0)
-	for _, stg := range n.Children {
-		stgs = append(stgs, stages(stg.Children, stgs)...)
-	}
-	return stgs, nil
-}
-
-// selects deployments relative to the current stage
-func (n *Node) Deployments() ([]*Node, error) {
-
-	if n.Kind != Directory || n.Parent == nil {
-		return nil, errors.New("cannot read deployments relative to stage if node is not stage")
-	}
-
-	return deployments(n), nil
-}
-
-func (n *Node) AppExists(app string) (bool, *Node) {
-
-	for _, a := range n.Apps() {
-
-		if strings.EqualFold(a.Path, app) {
-			return true, a
-		}
-	}
-	return false, nil
-}
-
-func (n *Node) StageExists(app string, stage string) (bool, *Node) {
-
-	appExists, appNode := n.AppExists(app)
-	if !appExists {
-		return false, nil
-	}
-
-	stages, err := appNode.Stages()
-	if err != nil {
-		return false, nil
-	}
-
-	for _, stg := range stages {
-
-		if stg.Path == stage {
-
-			return true, stg
-		}
-	}
-
-	return false, nil
-}
-
-func (n *Node) DeploymentExists(app string, stage string, deployment string) (bool, *Node) {
-
-	stageExists, stageNode := n.StageExists(app, stage)
-	if !stageExists {
-		return false, nil
-	}
-
-	depls, err := stageNode.Deployments()
-	if err != nil {
-		return false, nil
-	}
-
-	for _, dep := range depls {
-
-		if dep.Path == deployment {
-			return true, dep
-		}
-	}
-
-	return false, nil
 }
 
 func stages(parents []*Node, stgs []*Node) []*Node {
@@ -155,13 +70,13 @@ func deployments(stage *Node) []*Node {
 	for _, f := range files {
 
 		fileIsDeployment := true
-		if !strings.HasSuffix(f.Path, ".yml") && !strings.HasSuffix(f.Path, ".yaml") {
+		if !strings.HasSuffix(f.NormalizedPath(), ".yml") && !strings.HasSuffix(f.NormalizedPath(), ".yaml") {
 			continue
 		}
 
 		for _, excl := range exclusions {
 
-			if strings.EqualFold(f.Path, excl) {
+			if strings.EqualFold(f.NormalizedPath(), excl) {
 
 				fileIsDeployment = false
 			}
@@ -169,10 +84,9 @@ func deployments(stage *Node) []*Node {
 
 		if fileIsDeployment {
 
-			fileNameWithoutEnding := strings.Split(f.Path, ".")[0]
 			for _, dir := range deployFolders {
 
-				if strings.EqualFold(dir.Path, fileNameWithoutEnding) {
+				if strings.EqualFold(dir.Path, f.PathWithoutEnding()) {
 					depls = append(depls, f)
 				}
 			}

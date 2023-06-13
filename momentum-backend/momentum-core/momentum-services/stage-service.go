@@ -1,47 +1,70 @@
 package momentumservices
 
 import (
-	"fmt"
+	consts "momentum/momentum-core/momentum-config"
 	tree "momentum/momentum-core/momentum-tree"
 
 	"github.com/pocketbase/pocketbase/daos"
+	"github.com/pocketbase/pocketbase/models"
 )
 
 type StageService struct {
 	dao               *daos.Dao
-	deplyomentService *DeplyomentService
+	deploymentService *DeploymentService
 }
 
-func NewStageService(dao *daos.Dao, deploymentService *DeplyomentService) *StageService {
+func NewStageService(dao *daos.Dao, deploymentService *DeploymentService) *StageService {
+
+	if dao == nil {
+		panic("cannot initialize service with nil dao")
+	}
 
 	stageService := new(StageService)
-	stageService.deplyomentService = deploymentService
+	stageService.deploymentService = deploymentService
 	stageService.dao = dao
 
 	return stageService
 }
 
-func (ss *StageService) AddStages(n *tree.Node) error {
+func (ss *StageService) SyncStagesFromDisk(n *tree.Node) ([]string, error) {
 
-	stages, err := n.Stages()
-	if err != nil {
-		return err
-	}
-
+	stages := n.AllStages()
+	stageIds := make([]string, 0)
 	for _, stage := range stages {
 
-		fmt.Println(stage.Path)
-
-		err = ss.AddStages(stage) // Stages are multilevel
+		deploymentIds, err := ss.deploymentService.SyncDeploymentsFromDisk(n)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
-		err = ss.deplyomentService.AddDeployments(n)
+		stageId, err := ss.createWithoutEvent(stage.Path, deploymentIds)
 		if err != nil {
-			return err
+			return nil, err
 		}
+
+		stageIds = append(stageIds, stageId)
 	}
 
-	return nil
+	return stageIds, nil
+}
+
+func (ss *StageService) GetStagesCollection() (*models.Collection, error) {
+
+	return ss.dao.FindCollectionByNameOrId(consts.TABLE_STAGES_NAME)
+}
+
+func (ss *StageService) createWithoutEvent(name string, deploymentIds []string) (string, error) {
+
+	stageCollection, err := ss.GetStagesCollection()
+	if err != nil {
+		return "", err
+	}
+
+	stageRecord := models.NewRecord(stageCollection)
+	stageRecord.Set(consts.TABLE_STAGES_FIELD_NAME, name)
+	stageRecord.Set(consts.TABLE_STAGES_FIELD_DEPLOYMENTS, deploymentIds)
+
+	err = ss.dao.Clone().SaveRecord(stageRecord)
+
+	return stageRecord.Id, err
 }

@@ -98,6 +98,9 @@ func (n *Node) SetValue(v string) {
 	}
 }
 
+/*
+* Returns full path from root to this node.
+ */
 func (n *Node) FullPath() string {
 	path := ""
 	current := n
@@ -110,6 +113,20 @@ func (n *Node) FullPath() string {
 	}
 	path = utils.BuildPath(current.Path, path)
 	return strings.ReplaceAll(path, FILE_ENDING_SEPARATOR_REPLACEMENT, ".")
+}
+
+/*
+* Returns path for use in filesystem interactions.
+ */
+func (n *Node) NormalizedPath() string {
+	return strings.ReplaceAll(n.Path, FILE_ENDING_SEPARATOR_REPLACEMENT, ".")
+}
+
+/*
+* If path has special ending '::[anything]' its cut otherwise just n.Path
+ */
+func (n *Node) PathWithoutEnding() string {
+	return strings.Split(n.Path, FILE_ENDING_SEPARATOR_REPLACEMENT)[0]
 }
 
 func (n *Node) Write() error {

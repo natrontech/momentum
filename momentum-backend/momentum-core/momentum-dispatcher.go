@@ -3,61 +3,59 @@ package momentumcore
 import (
 	"fmt"
 
-	momentumconfig "momentum/momentum-core/momentum-config"
-	momentumcontrollers "momentum/momentum-core/momentum-controllers"
-	momentumservices "momentum/momentum-core/momentum-services"
+	conf "momentum/momentum-core/momentum-config"
+	controllers "momentum/momentum-core/momentum-controllers"
+	services "momentum/momentum-core/momentum-services"
 
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/models"
 )
 
-type MomentumDispatcherRuleType int
-
-const (
-	CREATE MomentumDispatcherRuleType = 1 << iota
-	UPDATE
-	DELETE
-)
+var REPOSITORY_ADDED_EVENT_CHANNEL = make(chan *controllers.RepositoryAddedEvent, 1)
 
 type MomentumDispatcherRule struct {
 	tableName string
-	action    func(*models.Record, *momentumconfig.MomentumConfig) error
+	action    func(*models.Record, *conf.MomentumConfig) error
 }
 
 type MomentumDispatcher struct {
-	App    *pocketbase.PocketBase
-	Config *momentumconfig.MomentumConfig
+	Pocketbase *pocketbase.PocketBase
+	Config     *conf.MomentumConfig
 
 	CreateRules []*MomentumDispatcherRule
 	UpdateRules []*MomentumDispatcherRule
 	DeleteRules []*MomentumDispatcherRule
 
-	RepositoryController   *momentumcontrollers.RepositoryController
-	ApplicationsController *momentumcontrollers.ApplicationController
-	StagesController       *momentumcontrollers.StageController
-	DeploymentController   *momentumcontrollers.DeploymentController
+	RepositoryController   *controllers.RepositoryController
+	ApplicationsController *controllers.ApplicationController
+	StagesController       *controllers.StageController
+	DeploymentController   *controllers.DeploymentController
 }
 
-func NewDispatcher(config *momentumconfig.MomentumConfig, app *pocketbase.PocketBase) *MomentumDispatcher {
+func NewDispatcher(config *conf.MomentumConfig, pb *pocketbase.PocketBase) *MomentumDispatcher {
 
+	// the order of statements is relevant
 	dispatcher := new(MomentumDispatcher)
 	dispatcher.Config = config
 
-	deploymentService := momentumservices.NewDeploymentService(app.Dao())
-	stageService := momentumservices.NewStageService(app.Dao(), deploymentService)
-	appService := momentumservices.NewApplicationService(app.Dao(), stageService)
+	deploymentService := services.NewDeploymentService(pb.Dao())
+	stageService := services.NewStageService(pb.Dao(), deploymentService)
+	appService := services.NewApplicationService(pb.Dao(), stageService)
+	repoService := services.NewRepositoryService(pb.Dao(), appService)
 
-	dispatcher.RepositoryController = momentumcontrollers.NewRepositoryController(appService)
-	dispatcher.ApplicationsController = momentumcontrollers.NewApplicationController(appService)
-	dispatcher.StagesController = momentumcontrollers.NewStageController(stageService)
-	dispatcher.DeploymentController = momentumcontrollers.NewDeploymentController(deploymentService)
+	dispatcher.RepositoryController = controllers.NewRepositoryController(repoService, deploymentService, REPOSITORY_ADDED_EVENT_CHANNEL)
+	dispatcher.ApplicationsController = controllers.NewApplicationController(appService)
+	dispatcher.StagesController = controllers.NewStageController(stageService)
+	dispatcher.DeploymentController = controllers.NewDeploymentController(deploymentService, repoService)
 
 	dispatcher.CreateRules = dispatcher.setupCreateRules()
 	dispatcher.UpdateRules = dispatcher.setupUpdateRules()
 	dispatcher.DeleteRules = dispatcher.setupDeleteRules()
 
-	dispatcher.App = app
+	dispatcher.Pocketbase = pb
+
+	dispatcher.setupRepositoryAddedEventChannelObserver()
 
 	return dispatcher
 }
@@ -67,7 +65,10 @@ func (d *MomentumDispatcher) DispatchCreate(recordEvent *core.RecordCreateEvent)
 	for _, rule := range d.CreateRules {
 		fmt.Println("Rule:", rule.tableName)
 		if rule.tableName == recordEvent.Record.TableName() {
-			rule.action(recordEvent.Record, d.Config)
+			err := rule.action(recordEvent.Record, d.Config)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -77,7 +78,10 @@ func (d *MomentumDispatcher) DispatchUpdate(recordEvent *core.RecordUpdateEvent)
 
 	for _, rule := range d.UpdateRules {
 		if rule.tableName == recordEvent.Record.TableName() {
-			rule.action(recordEvent.Record, d.Config)
+			err := rule.action(recordEvent.Record, d.Config)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -87,7 +91,10 @@ func (d *MomentumDispatcher) DispatchDelete(recordEvent *core.RecordDeleteEvent)
 
 	for _, rule := range d.DeleteRules {
 		if rule.tableName == recordEvent.Record.TableName() {
-			rule.action(recordEvent.Record, d.Config)
+			err := rule.action(recordEvent.Record, d.Config)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -95,27 +102,43 @@ func (d *MomentumDispatcher) DispatchDelete(recordEvent *core.RecordDeleteEvent)
 
 func (d *MomentumDispatcher) setupCreateRules() []*MomentumDispatcherRule {
 	return []*MomentumDispatcherRule{
-		{momentumconfig.TABLE_REPOSITORIES_NAME, d.RepositoryController.AddRepository},
-		{momentumconfig.TABLE_APPLICATIONS_NAME, d.ApplicationsController.AddApplication},
-		{momentumconfig.TABLE_STAGES_NAME, d.StagesController.AddStage},
-		{momentumconfig.TABLE_DEPLOYMENTS_NAME, d.DeploymentController.AddDeplyoment},
+		{conf.TABLE_REPOSITORIES_NAME, d.RepositoryController.AddRepository},
+		{conf.TABLE_APPLICATIONS_NAME, d.ApplicationsController.AddApplication},
+		{conf.TABLE_STAGES_NAME, d.StagesController.AddStage},
+		{conf.TABLE_DEPLOYMENTS_NAME, d.DeploymentController.AddDeployment},
 	}
 }
 
 func (d *MomentumDispatcher) setupUpdateRules() []*MomentumDispatcherRule {
 	return []*MomentumDispatcherRule{
-		{momentumconfig.TABLE_REPOSITORIES_NAME, d.RepositoryController.UpdateRepository},
-		{momentumconfig.TABLE_APPLICATIONS_NAME, d.ApplicationsController.UpdateApplication},
-		{momentumconfig.TABLE_STAGES_NAME, d.StagesController.UpdateStage},
-		{momentumconfig.TABLE_DEPLOYMENTS_NAME, d.DeploymentController.UpdateDeplyoment},
+		{conf.TABLE_REPOSITORIES_NAME, d.RepositoryController.UpdateRepository},
+		{conf.TABLE_APPLICATIONS_NAME, d.ApplicationsController.UpdateApplication},
+		{conf.TABLE_STAGES_NAME, d.StagesController.UpdateStage},
+		{conf.TABLE_DEPLOYMENTS_NAME, d.DeploymentController.UpdateDeployment},
 	}
 }
 
 func (d *MomentumDispatcher) setupDeleteRules() []*MomentumDispatcherRule {
 	return []*MomentumDispatcherRule{
-		{momentumconfig.TABLE_REPOSITORIES_NAME, d.RepositoryController.DeleteRepository},
-		{momentumconfig.TABLE_APPLICATIONS_NAME, d.ApplicationsController.DeleteApplication},
-		{momentumconfig.TABLE_STAGES_NAME, d.StagesController.DeleteStage},
-		{momentumconfig.TABLE_DEPLOYMENTS_NAME, d.DeploymentController.DeleteDeplyoment},
+		{conf.TABLE_REPOSITORIES_NAME, d.RepositoryController.DeleteRepository},
+		{conf.TABLE_APPLICATIONS_NAME, d.ApplicationsController.DeleteApplication},
+		{conf.TABLE_STAGES_NAME, d.StagesController.DeleteStage},
+		{conf.TABLE_DEPLOYMENTS_NAME, d.DeploymentController.DeleteDeployment},
 	}
+}
+
+func (d *MomentumDispatcher) setupRepositoryAddedEventChannelObserver() {
+
+	d.Pocketbase.OnRecordAfterCreateRequest(conf.TABLE_REPOSITORIES_NAME).Add(func(e *core.RecordCreateEvent) error {
+
+		event := <-REPOSITORY_ADDED_EVENT_CHANNEL
+
+		err := d.DeploymentController.AddRepositoryToDeployments(event)
+		if err != nil {
+			fmt.Println("failed adding relationship to deployments for repository after reciving RepositoryAddedEvent:", event, err, err.Error())
+			return err
+		}
+
+		return nil
+	})
 }

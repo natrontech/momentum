@@ -72,7 +72,6 @@ func parseDir(path string, excludes []string) (*Node, error) {
 	for _, entry := range entries {
 
 		if contains(excludes, entry.Name()) {
-			fmt.Println("EXCLUDE", entry.Name())
 			continue
 		}
 
