@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-const basePath = "./testdata"
+const basePath = "testdata"
 
 func TestAllApps(t *testing.T) {
 
