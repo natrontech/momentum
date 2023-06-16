@@ -2,7 +2,6 @@ package momentumservices
 
 import (
 	"errors"
-	"fmt"
 	consts "momentum/momentum-core/momentum-config"
 	tree "momentum/momentum-core/momentum-tree"
 
@@ -29,29 +28,47 @@ func NewDeploymentService(dao *daos.Dao, keyValueService *KeyValueService) *Depl
 	return deplyomentService
 }
 
-func (ds *DeploymentService) SyncDeploymentsFromDisk(n *tree.Node) ([]string, error) {
+func (ds *DeploymentService) SyncDeploymentsFromDisk(n *tree.Node) ([]*models.Record, error) {
 
 	deployments := n.AllDeployments()
 
-	deploymentIds := make([]string, 0)
+	deploymentIds := make([]*models.Record, 0)
 	for _, deployment := range deployments {
 
-		deploymentId, deploymentRecord, err := ds.createWithoutEvent(deployment.NormalizedPath())
+		deploymentRecord, err := ds.createWithoutEvent(deployment.NormalizedPath())
 		if err != nil {
 			return nil, err
 		}
 
 		if deployment.Kind == tree.File {
-			err = ds.keyValueService.SyncFile(deployment, deploymentRecord)
+
+			err := ds.keyValueService.SyncFile(deployment, deploymentRecord)
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		deploymentIds = append(deploymentIds, deploymentId)
+		deploymentIds = append(deploymentIds, deploymentRecord)
 	}
 
 	return deploymentIds, nil
+}
+
+func (ds *DeploymentService) AddParentStage(stage *models.Record, deployments []*models.Record) error {
+
+	if stage.Collection().Name != consts.TABLE_STAGES_NAME {
+		return errors.New("stage is not record of stages collection")
+	}
+
+	for _, deployment := range deployments {
+		deployment.Set(consts.TABLE_DEPLOYMENTS_FIELD_PARENTSTAGE, stage.Id)
+		err := ds.saveWithoutEvent(deployment)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (ds *DeploymentService) AddRepository(repositoryRecord *models.Record, deployments []*models.Record) error {
@@ -60,12 +77,10 @@ func (ds *DeploymentService) AddRepository(repositoryRecord *models.Record, depl
 		return errors.New("repositoryRecord is not record of repositories collection")
 	}
 
-	fmt.Println("adding repository", repositoryRecord.Id, "to deplyoments", deployments)
-
 	for _, depl := range deployments {
 
 		depl.Set(consts.TABLE_DEPLOYMENTS_FIELD_REPOSITORIES, append(depl.Get(consts.TABLE_DEPLOYMENTS_FIELD_REPOSITORIES).([]string), repositoryRecord.Id))
-		err := ds.dao.SaveRecord(depl)
+		err := ds.saveWithoutEvent(depl)
 		if err != nil {
 			return err
 		}
@@ -84,17 +99,22 @@ func (ds *DeploymentService) GetDeploymentsCollection() (*models.Collection, err
 	return coll, nil
 }
 
-func (ds *DeploymentService) createWithoutEvent(name string) (string, *models.Record, error) {
+func (ds *DeploymentService) createWithoutEvent(name string) (*models.Record, error) {
 
 	deploymentCollection, err := ds.GetDeploymentsCollection()
 	if err != nil {
-		return "", nil, err
+		return nil, err
 	}
 
 	deploymentRecord := models.NewRecord(deploymentCollection)
 	deploymentRecord.Set(consts.TABLE_DEPLOYMENTS_FIELD_NAME, name)
 
-	err = ds.dao.Clone().SaveRecord(deploymentRecord)
+	err = ds.saveWithoutEvent(deploymentRecord)
 
-	return deploymentRecord.Id, deploymentRecord, nil
+	return deploymentRecord, nil
+}
+
+func (ds *DeploymentService) saveWithoutEvent(record *models.Record) error {
+
+	return ds.dao.Clone().SaveRecord(record)
 }

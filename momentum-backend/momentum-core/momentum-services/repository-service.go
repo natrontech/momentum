@@ -31,22 +31,28 @@ func NewRepositoryService(dao *daos.Dao, appService *ApplicationService) *Reposi
 	return repositoryService
 }
 
-func (rs *RepositoryService) SyncRepositoryFromDisk(n *tree.Node, record *models.Record) (*models.Record, []*models.Record, error) {
+func (rs *RepositoryService) SyncRepositoryFromDisk(n *tree.Node, record *models.Record) (*models.Record, []*models.Record, []*models.Record, error) {
 
-	appRecordIds, err := rs.applicationService.SyncApplicationsFromDisk(n, record)
+	appRecords, err := rs.applicationService.SyncApplicationsFromDisk(n, record)
 	if err != nil {
-		return nil, nil, apis.NewApiError(500, err.Error(), nil)
+		return nil, nil, nil, apis.NewApiError(500, err.Error(), nil)
 	}
+
+	appRecIds := make([]string, 0)
+	for _, appRec := range appRecords {
+		appRecIds = append(appRecIds, appRec.Id)
+	}
+	record.Set(consts.TABLE_REPOSITORIES_FIELD_APPLICATIONS, appRecIds)
 
 	// this complex loop is necessary because we need to know which deployments must add the repository
 	// which is currently created, when the creation of the repository is finished.
 	// TODO for a future refactoring: extract logic to specific services.
 	deployments := make([]*models.Record, 0)
-	for _, applicationRecordId := range appRecordIds {
+	for _, applicationRecord := range appRecords {
 
-		appRecord, err := rs.dao.FindRecordById(consts.TABLE_APPLICATIONS_NAME, applicationRecordId)
+		appRecord, err := rs.dao.FindRecordById(consts.TABLE_APPLICATIONS_NAME, applicationRecord.Id)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, err
 		}
 
 		stagesIds := appRecord.Get(consts.TABLE_APPLICATIONS_FIELD_STAGES).([]string)
@@ -54,7 +60,7 @@ func (rs *RepositoryService) SyncRepositoryFromDisk(n *tree.Node, record *models
 
 			stageRec, err := rs.dao.FindRecordById(consts.TABLE_STAGES_NAME, stageId)
 			if err != nil {
-				return nil, nil, err
+				return nil, nil, nil, err
 			}
 
 			deploymentIds := stageRec.Get(consts.TABLE_STAGES_FIELD_DEPLOYMENTS).([]string)
@@ -62,7 +68,7 @@ func (rs *RepositoryService) SyncRepositoryFromDisk(n *tree.Node, record *models
 
 				deploymentRec, err := rs.dao.FindRecordById(consts.TABLE_DEPLOYMENTS_NAME, deploymentId)
 				if err != nil {
-					return nil, nil, err
+					return nil, nil, nil, err
 				}
 
 				deployments = append(deployments, deploymentRec)
@@ -70,7 +76,7 @@ func (rs *RepositoryService) SyncRepositoryFromDisk(n *tree.Node, record *models
 		}
 	}
 
-	return record, deployments, nil
+	return record, appRecords, deployments, nil
 }
 
 func (rs *RepositoryService) FindForName(name string) (*models.Record, error) {

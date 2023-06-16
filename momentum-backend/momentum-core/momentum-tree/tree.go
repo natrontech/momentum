@@ -139,14 +139,14 @@ func (n *Node) Write() error {
 }
 
 func (n *Node) IsRoot() bool {
-	return n.Parent == nil
+	return n.Parent == nil || n == n.Parent // if nodes parent is reference to itself its the parent.
 }
 
 func (n *Node) Root() *Node {
 
 	current := n
 	for !current.IsRoot() {
-		current = n.Parent
+		current = current.Parent
 	}
 	return current
 }

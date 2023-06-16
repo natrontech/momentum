@@ -34,9 +34,7 @@ func (kvs *KeyValueService) SyncFile(n *tree.Node, parentArtifact *models.Record
 		return errors.New("can only sync nodes of type file")
 	}
 
-	kvs.syncChildren(n.Children, parentArtifact, n.NormalizedPath())
-
-	return nil
+	return kvs.syncChildren(n.Children, parentArtifact, n.NormalizedPath())
 }
 
 func (kvs *KeyValueService) GetKeyValueCollection() (*models.Collection, error) {
@@ -76,7 +74,12 @@ func (kvs *KeyValueService) syncChildren(children []*tree.Node, parentArtifact *
 			childRecord.Set(consts.TABLE_KEYVALUE_FIELD_KEY, propertyPath)
 			childRecord.Set(consts.TABLE_KEYVALUE_FIELD_VALUE, child.Value)
 
-			err = kvs.dao.Clone().SaveRecord(childRecord)
+			err = kvs.saveWithoutEvent(childRecord)
+			if err != nil {
+				break
+			}
+
+			err = kvs.addParentArtifact(parentArtifact, childRecord)
 			if err != nil {
 				break
 			}
@@ -87,7 +90,7 @@ func (kvs *KeyValueService) syncChildren(children []*tree.Node, parentArtifact *
 			} else {
 				parentArtifact.Set(consts.GENERIC_FIELD_KEYVALUES, childRecord.Id)
 			}
-			err = kvs.dao.Clone().SaveRecord(parentArtifact)
+			err = kvs.saveWithoutEvent(parentArtifact)
 			if err != nil {
 				break
 			}
@@ -95,4 +98,64 @@ func (kvs *KeyValueService) syncChildren(children []*tree.Node, parentArtifact *
 	}
 
 	return err
+}
+
+func (kvs *KeyValueService) addParentArtifact(parentArtifact *models.Record, keyValues *models.Record) error {
+
+	switch parentArtifact.Collection().Name {
+	case consts.TABLE_STAGES_NAME:
+		return kvs.addParentStage(parentArtifact, []*models.Record{keyValues})
+	case consts.TABLE_DEPLOYMENTS_NAME:
+		return kvs.addParentDeployment(parentArtifact, []*models.Record{keyValues})
+	default:
+		return errors.New("invalid parent record type")
+	}
+}
+
+func (kvs *KeyValueService) addParentStage(stage *models.Record, keyValues []*models.Record) error {
+
+	if stage.Collection().Name != consts.TABLE_STAGES_NAME {
+		return errors.New("parent stage must be record of collection stages")
+	}
+
+	for _, kv := range keyValues {
+
+		if kv.Collection().Name != consts.TABLE_KEYVALUE_NAME {
+			return errors.New("expected keyvalues record type to add parent stage")
+		}
+
+		kv.Set(consts.TABLE_KEYVALUE_FIELD_PARENTSTAGE, stage.Id)
+		err := kvs.saveWithoutEvent(kv)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (kvs *KeyValueService) addParentDeployment(deployment *models.Record, keyValues []*models.Record) error {
+
+	if deployment.Collection().Name != consts.TABLE_DEPLOYMENTS_NAME {
+		return errors.New("parent deployment must be record of collection deploments")
+	}
+
+	for _, kv := range keyValues {
+
+		if kv.Collection().Name != consts.TABLE_KEYVALUE_NAME {
+			return errors.New("expected keyvalues record type to add parent deployment")
+		}
+
+		kv.Set(consts.TABLE_KEYVALUE_FIELD_PARENTDEPLOYMENT, deployment.Id)
+		err := kvs.saveWithoutEvent(kv)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (kvs *KeyValueService) saveWithoutEvent(record *models.Record) error {
+	return kvs.dao.Clone().SaveRecord(record)
 }
