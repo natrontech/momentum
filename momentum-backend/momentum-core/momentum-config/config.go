@@ -6,11 +6,16 @@ import (
 )
 
 type MomentumConfig struct {
-	dataDir string
+	dataDir          string
+	validationTmpDir string
 }
 
 func (m *MomentumConfig) DataDir() string {
 	return m.dataDir
+}
+
+func (m *MomentumConfig) ValidationTmpDir() string {
+	return m.validationTmpDir
 }
 
 func InitializeMomentumCore() (*MomentumConfig, error) {
@@ -22,16 +27,24 @@ func InitializeMomentumCore() (*MomentumConfig, error) {
 
 	momentumDir := utils.BuildPath(usrHome, ".momentum")
 	dataDir := utils.BuildPath(momentumDir, "data")
+	validationTmpDir := utils.BuildPath(momentumDir, "validation")
 
-	if !utils.FileExists(dataDir) {
-		if !utils.FileExists(momentumDir) {
-			utils.DirCreate(momentumDir)
-		}
-		utils.DirCreate(dataDir)
-	}
+	createPathIfNotPresent(dataDir, momentumDir)
+	createPathIfNotPresent(validationTmpDir, momentumDir)
 
 	config := new(MomentumConfig)
 	config.dataDir = dataDir
+	config.validationTmpDir = validationTmpDir
 
 	return config, err
+}
+
+func createPathIfNotPresent(path string, momentumDir string) {
+
+	if !utils.FileExists(path) {
+		if !utils.FileExists(momentumDir) {
+			utils.DirCreate(momentumDir)
+		}
+		utils.DirCreate(path)
+	}
 }
