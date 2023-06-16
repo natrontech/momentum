@@ -41,7 +41,10 @@ func (as *ApplicationService) SyncApplicationsFromDisk(n *tree.Node, record *mod
 		if err != nil {
 			return nil, err
 		}
-		recs = append(recs, rec)
+
+		err = as.stageService.AddParentApplication(stages, rec)
+
+		recs = append(recs, rec.Id)
 	}
 	return recs, nil
 }
@@ -51,11 +54,11 @@ func (as *ApplicationService) GetApplicationCollection() (*models.Collection, er
 	return as.dao.FindCollectionByNameOrId(consts.TABLE_APPLICATIONS_NAME)
 }
 
-func (as *ApplicationService) createWithoutEvent(name string, stageIds []string) (string, error) {
+func (as *ApplicationService) createWithoutEvent(name string, stageIds []string) (*models.Record, error) {
 
 	appCollection, err := as.GetApplicationCollection()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	appRecord := models.NewRecord(appCollection)
@@ -64,5 +67,5 @@ func (as *ApplicationService) createWithoutEvent(name string, stageIds []string)
 
 	err = as.dao.Clone().SaveRecord(appRecord)
 
-	return appRecord.Id, err
+	return appRecord, err
 }

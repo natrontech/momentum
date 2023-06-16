@@ -26,6 +26,28 @@ func (n *Node) AllStages() []*Node {
 	return stgs
 }
 
+func (n *Node) IsStage() bool {
+
+	stages := n.AllStages()
+	for _, stage := range stages {
+		if n.FullPath() == stage.FullPath() {
+			return true
+		}
+	}
+	return false
+}
+
+func (n *Node) FindStage(path string) (bool, *Node) {
+
+	stages := n.AllStages()
+	for _, stage := range stages {
+		if stage.FullPath() == path {
+			return true, stage
+		}
+	}
+	return false, nil
+}
+
 func (n *Node) AllDeployments() []*Node {
 
 	stgsAndApps := n.AllStages()

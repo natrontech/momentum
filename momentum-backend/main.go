@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -13,6 +14,7 @@ import (
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/plugins/jsvm"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 )
@@ -69,6 +71,9 @@ func main() {
 	})
 
 	app.OnAfterBootstrap().Add(func(e *core.BootstrapEvent) error {
+
+		testCleanUp(app.Dao().Clone())
+
 		dispatcher := momentumcore.NewDispatcher(momentumConfig, app)
 
 		// momentum core features must run before executing DB statements.
@@ -82,5 +87,34 @@ func main() {
 
 	if err := app.Start(); err != nil {
 		log.Fatal(err)
+	}
+}
+
+func testCleanUp(dao *daos.Dao) {
+
+	keyvalues, err := dao.FindRecordsByExpr("keyValues")
+	depls, err := dao.FindRecordsByExpr("deployments")
+	stages, err := dao.FindRecordsByExpr("stages")
+	apps, err := dao.FindRecordsByExpr("applications")
+	reps, err := dao.FindRecordsByExpr("repositories")
+
+	if err != nil {
+		fmt.Println("TEST CLEAN FAILED:", err.Error())
+	}
+
+	for _, e := range keyvalues {
+		dao.DeleteRecord(e)
+	}
+	for _, e := range depls {
+		dao.DeleteRecord(e)
+	}
+	for _, e := range stages {
+		dao.DeleteRecord(e)
+	}
+	for _, e := range apps {
+		dao.DeleteRecord(e)
+	}
+	for _, e := range reps {
+		dao.DeleteRecord(e)
 	}
 }
