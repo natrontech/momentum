@@ -16,6 +16,7 @@ import (
 
 type RepositoryAddedEvent struct {
 	RepositoryName string
+	Applications   []*models.Record
 	Deployments    []*models.Record
 }
 
@@ -60,7 +61,7 @@ func (rc *RepositoryController) AddRepository(record *models.Record, conf *confi
 		return err
 	}
 
-	_, deployments, err := rc.repositoryService.SyncRepositoryFromDisk(repo, record)
+	_, apps, deployments, err := rc.repositoryService.SyncRepositoryFromDisk(repo, record)
 	if err != nil {
 		fmt.Println("ERROR:", err.Error())
 		utils.DirDelete(path)
@@ -69,6 +70,7 @@ func (rc *RepositoryController) AddRepository(record *models.Record, conf *confi
 
 	repoAddedEvent := new(RepositoryAddedEvent)
 	repoAddedEvent.RepositoryName = repoName
+	repoAddedEvent.Applications = apps
 	repoAddedEvent.Deployments = deployments
 
 	rc.repositoryAddedEventChannel <- repoAddedEvent

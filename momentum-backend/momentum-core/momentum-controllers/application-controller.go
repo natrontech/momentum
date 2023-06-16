@@ -8,15 +8,27 @@ import (
 )
 
 type ApplicationController struct {
-	appService *services.ApplicationService
+	appService        *services.ApplicationService
+	repositoryService *services.RepositoryService
 }
 
-func NewApplicationController(appService *services.ApplicationService) *ApplicationController {
+func NewApplicationController(appService *services.ApplicationService, repoService *services.RepositoryService) *ApplicationController {
 
 	appController := new(ApplicationController)
 	appController.appService = appService
+	appController.repositoryService = repoService
 
 	return appController
+}
+
+func (ac *ApplicationController) AddRepositoryToApplications(repoAddedEvent *RepositoryAddedEvent) error {
+
+	repositoryRecord, err := ac.repositoryService.FindForName(repoAddedEvent.RepositoryName)
+	if err != nil {
+		return err
+	}
+
+	return ac.appService.AddRepository(repositoryRecord, repoAddedEvent.Applications)
 }
 
 func (ac *ApplicationController) AddApplication(record *models.Record, conf *config.MomentumConfig) error {

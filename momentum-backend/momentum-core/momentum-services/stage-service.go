@@ -29,10 +29,10 @@ func NewStageService(dao *daos.Dao, deploymentService *DeploymentService, keyVal
 	return stageService
 }
 
-func (ss *StageService) SyncStagesFromDisk(n *tree.Node) ([]string, error) {
+func (ss *StageService) SyncStagesFromDisk(n *tree.Node) ([]*models.Record, error) {
 
 	stages := n.AllStages()
-	stageIds := make([]string, 0)
+	stageRecords := make([]*models.Record, 0)
 	var lastStageNode *tree.Node = nil
 	var lastStage *models.Record = nil
 	for _, stage := range stages {
@@ -70,12 +70,12 @@ func (ss *StageService) SyncStagesFromDisk(n *tree.Node) ([]string, error) {
 			}
 		}
 
-		stageIds = append(stageIds, stageRecord.Id)
+		stageRecords = append(stageRecords, stageRecord)
 		lastStage = stageRecord
 		lastStageNode = stage
 	}
 
-	return stageIds, nil
+	return stageRecords, nil
 }
 
 func (ss *StageService) AddParentApplication(stageIds []string, app *models.Record) error {
@@ -86,7 +86,7 @@ func (ss *StageService) AddParentApplication(stageIds []string, app *models.Reco
 
 	for _, stageId := range stageIds {
 
-		stage, err := ss.dao.FindRecordById(consts.TABLE_APPLICATIONS_NAME, stageId)
+		stage, err := ss.dao.FindRecordById(consts.TABLE_STAGES_NAME, stageId)
 		if err != nil {
 			return err
 		}

@@ -46,7 +46,7 @@ func NewDispatcher(config *conf.MomentumConfig, pb *pocketbase.PocketBase) *Mome
 	repoService := services.NewRepositoryService(pb.Dao(), appService)
 
 	dispatcher.RepositoryController = controllers.NewRepositoryController(repoService, deploymentService, REPOSITORY_ADDED_EVENT_CHANNEL)
-	dispatcher.ApplicationsController = controllers.NewApplicationController(appService)
+	dispatcher.ApplicationsController = controllers.NewApplicationController(appService, repoService)
 	dispatcher.StagesController = controllers.NewStageController(stageService)
 	dispatcher.DeploymentController = controllers.NewDeploymentController(deploymentService, repoService)
 
@@ -136,7 +136,13 @@ func (d *MomentumDispatcher) setupRepositoryAddedEventChannelObserver() {
 
 		err := d.DeploymentController.AddRepositoryToDeployments(event)
 		if err != nil {
-			fmt.Println("failed adding relationship to deployments for repository after reciving RepositoryAddedEvent:", event, err, err.Error())
+			fmt.Println("failed adding relationship to deployments for repository after receiving RepositoryAddedEvent:", event, err, err.Error())
+			return err
+		}
+
+		err = d.ApplicationsController.AddRepositoryToApplications(event)
+		if err != nil {
+			fmt.Println("failed adding relationship to applications for repository after receiving RepositoryAddedEvent:", event, err, err.Error())
 			return err
 		}
 

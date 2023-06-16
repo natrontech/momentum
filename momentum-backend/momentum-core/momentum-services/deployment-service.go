@@ -80,7 +80,7 @@ func (ds *DeploymentService) AddRepository(repositoryRecord *models.Record, depl
 	for _, depl := range deployments {
 
 		depl.Set(consts.TABLE_DEPLOYMENTS_FIELD_REPOSITORIES, append(depl.Get(consts.TABLE_DEPLOYMENTS_FIELD_REPOSITORIES).([]string), repositoryRecord.Id))
-		err := ds.dao.SaveRecord(depl)
+		err := ds.saveWithoutEvent(depl)
 		if err != nil {
 			return err
 		}
