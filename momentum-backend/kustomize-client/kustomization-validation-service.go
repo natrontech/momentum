@@ -1,56 +1,65 @@
 package kustomizeclient
 
 import (
-	"errors"
 	"fmt"
 	config "momentum/momentum-core/momentum-config"
 	services "momentum/momentum-core/momentum-services"
+	tree "momentum/momentum-core/momentum-tree"
 	utils "momentum/momentum-core/momentum-utils"
 
-	"github.com/pocketbase/pocketbase/models"
-	"github.com/spf13/cobra"
-	kustomize "sigs.k8s.io/kustomize/kustomize/v5/commands"
+	"sigs.k8s.io/kustomize/api/krusty"
+	"sigs.k8s.io/kustomize/kyaml/filesys"
 )
-
-const KUSTOMIZE_BUILD_COMMAND_NAME = "build"
 
 type KustomizationValidationService struct {
 	config            *config.MomentumConfig
 	repositoryService *services.RepositoryService
 }
 
-func (kustomizationService *KustomizationValidationService) Validate(repo *models.Record) bool {
+func NewKustomizationValidationService(config *config.MomentumConfig, repositoryService *services.RepositoryService) *KustomizationValidationService {
 
-	if repo.Collection().Name != config.TABLE_REPOSITORIES_NAME {
-		fmt.Println("cannot validate non repositories collection record")
-		return false
-	}
+	validator := new(KustomizationValidationService)
 
-	repoName := repo.GetString(config.TABLE_REPOSITORIES_FIELD_NAME)
+	validator.config = config
+	validator.repositoryService = repositoryService
+
+	return validator
+}
+
+func (kustomizationService *KustomizationValidationService) Validate(repoName string) (bool, error) {
+
 	path := utils.BuildPath(kustomizationService.config.ValidationTmpDir(), repoName)
 	src := utils.BuildPath(kustomizationService.config.DataDir(), repoName)
 
 	err := kustomizationService.prepareValidation(path, src)
 	if err != nil {
-		fmt.Println("error while validating kustomize structure:", err.Error())
+		fmt.Println("error while validating kustomize structure (prepare):", err.Error())
 		kustomizationService.validationCleanup(path)
-		return false
-	}
-	err = kustomizationService.check(path)
-	if err != nil {
-		fmt.Println("error while validating kustomize structure:", err.Error())
-		kustomizationService.validationCleanup(path)
-		return false
+		return false, err
 	}
 
-	success := kustomizationService.checkSuccessful(path)
+	repoTree, err := tree.Parse(path, []string{".git"})
+	if err != nil {
+		fmt.Println("failed parsing validation directory")
+		return false, err
+	}
+
+	for _, app := range repoTree.Apps() {
+		err = kustomizationService.check(app.FullPath())
+		if err != nil {
+			fmt.Println("error while validating kustomize structure (check):", err.Error())
+			kustomizationService.validationCleanup(path)
+			return false, err
+		}
+	}
 
 	err = kustomizationService.validationCleanup(path)
 	if err != nil {
-		fmt.Println("error while validating kustomize structure:", err.Error())
+		fmt.Println("error while validating kustomize structure (cleanup):", err.Error())
+		return false, err
 	}
 
-	return success
+	return true, nil
 }
 
 func (kustomizationService *KustomizationValidationService) prepareValidation(path string, src string) error {
@@ -61,29 +70,15 @@ func (kustomizationService *KustomizationValidationService) prepareValidation(pa
 
 func (kustomizationService *KustomizationValidationService) check(path string) error {
 
-	var buildCmd *cobra.Command = nil
-	for _, cmd := range kustomize.NewDefaultCommand().Commands() {
-		if cmd.Name() == KUSTOMIZE_BUILD_COMMAND_NAME {
-			buildCmd = cmd
-			break
-		}
+	fs := filesys.MakeFsOnDisk()
+
+	kustomizer := krusty.MakeKustomizer(krusty.MakeDefaultOptions())
+
+	_, err := kustomizer.Run(fs, path)
+	if err != nil {
+		return err
 	}
-
-	if buildCmd == nil {
-		return errors.New("build command was not found")
-	}
-
-	// TODO: FIND OUT HOW TO SET PATH HERE???
-	buildCmd.Args = kustomizationService.kustomizeBuildArgs
-
-	err := buildCmd.Execute()
-
-	return err
-}
-
-func (kustomizationService *KustomizationValidationService) checkSuccessful(path string) bool {
-
-	return true
+	return nil
 }
 
 func (kustomizationService *KustomizationValidationService) validationCleanup(path string) error {
@@ -92,10 +87,5 @@ func (kustomizationService *KustomizationValidationService) validationCleanup(pa
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-func (kustomizationService *KustomizationValidationService) kustomizeBuildArgs(cmd *cobra.Command, args []string) error {
-
 	return nil
 }

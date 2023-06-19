@@ -52,12 +52,7 @@ func FileCopy(from string, to string) bool {
 func DirCopy(from string, to string) (string, error) {
 
 	if !IsDirectory(from) || FileExists(to) {
-		return to, errors.New("From-Path must be directory and To-Path must be non existent.")
-	}
-
-	err := DirCreate(to)
-	if err != nil {
-		return to, err
+		return to, errors.New("from path must be directory and to path must be non existent")
 	}
 
 	return to, dirCopyRecursive(from, to, "")
