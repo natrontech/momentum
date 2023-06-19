@@ -1,8 +1,10 @@
 package momentumcore
 
 import (
+	"errors"
 	"fmt"
 
+	kustomizeclient "momentum/kustomize-client"
 	conf "momentum/momentum-core/momentum-config"
 	controllers "momentum/momentum-core/momentum-controllers"
 	services "momentum/momentum-core/momentum-services"
@@ -31,6 +33,8 @@ type MomentumDispatcher struct {
 	ApplicationsController *controllers.ApplicationController
 	StagesController       *controllers.StageController
 	DeploymentController   *controllers.DeploymentController
+
+	kustomizeValidator *kustomizeclient.KustomizationValidationService
 }
 
 func NewDispatcher(config *conf.MomentumConfig, pb *pocketbase.PocketBase) *MomentumDispatcher {
@@ -45,7 +49,9 @@ func NewDispatcher(config *conf.MomentumConfig, pb *pocketbase.PocketBase) *Mome
 	appService := services.NewApplicationService(pb.Dao(), stageService)
 	repoService := services.NewRepositoryService(pb.Dao(), appService)
 
-	dispatcher.RepositoryController = controllers.NewRepositoryController(repoService, deploymentService, REPOSITORY_ADDED_EVENT_CHANNEL)
+	dispatcher.kustomizeValidator = kustomizeclient.NewKustomizationValidationService(dispatcher.Config, repoService)
+
+	dispatcher.RepositoryController = controllers.NewRepositoryController(repoService, deploymentService, REPOSITORY_ADDED_EVENT_CHANNEL, dispatcher.kustomizeValidator)
 	dispatcher.ApplicationsController = controllers.NewApplicationController(appService, repoService)
 	dispatcher.StagesController = controllers.NewStageController(stageService)
 	dispatcher.DeploymentController = controllers.NewDeploymentController(deploymentService, repoService)
@@ -144,6 +150,14 @@ func (d *MomentumDispatcher) setupRepositoryAddedEventChannelObserver() {
 		if err != nil {
 			fmt.Println("failed adding relationship to applications for repository after receiving RepositoryAddedEvent:", event, err, err.Error())
 			return err
+		}
+
+		validationSuccessful, err := d.kustomizeValidator.Validate(event.RepositoryName)
+		if !validationSuccessful {
+			if err != nil {
+				return nil
+			}
+			return errors.New("validation failed for repository on repository added event")
 		}
 
 		return nil

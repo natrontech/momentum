@@ -1,10 +1,12 @@
 package momentumcontrollers
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
 	gitclient "momentum/git-client"
+	kustomizeclient "momentum/kustomize-client"
 	config "momentum/momentum-core/momentum-config"
 	services "momentum/momentum-core/momentum-services"
 	tree "momentum/momentum-core/momentum-tree"
@@ -24,15 +26,21 @@ type RepositoryController struct {
 	repositoryService           *services.RepositoryService
 	deploymentService           *services.DeploymentService
 	repositoryAddedEventChannel chan *RepositoryAddedEvent
+	kustomizeValidation         *kustomizeclient.KustomizationValidationService
 }
 
-func NewRepositoryController(repoService *services.RepositoryService, deploymentService *services.DeploymentService, repositoryAddedEventChannel chan *RepositoryAddedEvent) *RepositoryController {
+func NewRepositoryController(
+	repoService *services.RepositoryService,
+	deploymentService *services.DeploymentService,
+	repositoryAddedEventChannel chan *RepositoryAddedEvent,
+	kustomizeValidator *kustomizeclient.KustomizationValidationService) *RepositoryController {
 
 	repoController := new(RepositoryController)
 
 	repoController.repositoryService = repoService
 	repoController.deploymentService = deploymentService
 	repoController.repositoryAddedEventChannel = repositoryAddedEventChannel
+	repoController.kustomizeValidation = kustomizeValidator
 
 	return repoController
 }
@@ -54,6 +62,14 @@ func (rc *RepositoryController) AddRepository(record *models.Record, conf *confi
 	err := gitclient.PullRepoTo(repoUrl, "", "", path)
 	if err != nil {
 		return err
+	}
+
+	validationSuccessful, err := rc.kustomizeValidation.Validate(repoName)
+	if !validationSuccessful {
+		if err != nil {
+			return err
+		}
+		return errors.New("the repository could not be validated with kustomize")
 	}
 
 	repo, err := tree.Parse(path, []string{".git"})
