@@ -61,6 +61,10 @@ func (n *Node) AllDeployments() []*Node {
 	return depls
 }
 
+func (n *Node) Deployments() []*Node {
+	return deployments(n)
+}
+
 func stages(parents []*Node, stgs []*Node) []*Node {
 
 	if len(parents) == 0 {

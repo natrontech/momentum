@@ -6,8 +6,10 @@ import (
 )
 
 type MomentumConfig struct {
-	dataDir          string
-	validationTmpDir string
+	dataDir                string
+	validationTmpDir       string
+	templatesDir           string
+	deploymentTemplatePath string
 }
 
 func (m *MomentumConfig) DataDir() string {
@@ -16,6 +18,14 @@ func (m *MomentumConfig) DataDir() string {
 
 func (m *MomentumConfig) ValidationTmpDir() string {
 	return m.validationTmpDir
+}
+
+func (m *MomentumConfig) TemplateDir() string {
+	return m.templatesDir
+}
+
+func (m *MomentumConfig) DeploymentTemplateDir() string {
+	return m.deploymentTemplatePath
 }
 
 func InitializeMomentumCore() (*MomentumConfig, error) {
@@ -28,6 +38,7 @@ func InitializeMomentumCore() (*MomentumConfig, error) {
 	momentumDir := utils.BuildPath(usrHome, ".momentum")
 	dataDir := utils.BuildPath(momentumDir, "data")
 	validationTmpDir := utils.BuildPath(momentumDir, "validation")
+	templatesDir := "./templates"
 
 	createPathIfNotPresent(dataDir, momentumDir)
 	createPathIfNotPresent(validationTmpDir, momentumDir)
@@ -35,15 +46,17 @@ func InitializeMomentumCore() (*MomentumConfig, error) {
 	config := new(MomentumConfig)
 	config.dataDir = dataDir
 	config.validationTmpDir = validationTmpDir
+	config.templatesDir = templatesDir
+	config.deploymentTemplatePath = utils.BuildPath(templatesDir, "deployments")
 
 	return config, err
 }
 
-func createPathIfNotPresent(path string, momentumDir string) {
+func createPathIfNotPresent(path string, parentDir string) {
 
 	if !utils.FileExists(path) {
-		if !utils.FileExists(momentumDir) {
-			utils.DirCreate(momentumDir)
+		if !utils.FileExists(parentDir) {
+			utils.DirCreate(parentDir)
 		}
 		utils.DirCreate(path)
 	}

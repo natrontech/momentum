@@ -22,11 +22,42 @@ func NewStageService(dao *daos.Dao, deploymentService *DeploymentService, keyVal
 	}
 
 	stageService := new(StageService)
-	stageService.deploymentService = deploymentService
 	stageService.dao = dao
+	stageService.deploymentService = deploymentService
 	stageService.keyValueService = keyValueService
 
 	return stageService
+}
+
+func (ss *StageService) GetById(stageId string) (*models.Record, error) {
+
+	return ss.dao.FindRecordById(consts.TABLE_STAGES_NAME, stageId)
+}
+
+func (ss *StageService) GetStagesSortedById(stageId string) ([]*models.Record, bool, error) {
+
+	isStagelessDeployment := false
+	parentStageRecordId := stageId
+	if parentStageRecordId == "" {
+		isStagelessDeployment = true
+	}
+
+	stageRecord, err := ss.GetById(parentStageRecordId)
+	if err != nil {
+		return nil, false, err
+	}
+	stagesSorted := make([]*models.Record, 0)
+	parentStageRecordId = stageRecord.GetString(consts.TABLE_STAGES_FIELD_PARENTSTAGE)
+	for parentStageRecordId != "" {
+		stageRecord, err = ss.GetById(parentStageRecordId)
+		if err != nil {
+			return nil, false, err
+		}
+		stagesSorted = append([]*models.Record{stageRecord}, stagesSorted...)
+		parentStageRecordId = stageRecord.GetString(consts.TABLE_STAGES_FIELD_PARENTSTAGE)
+	}
+
+	return stagesSorted, isStagelessDeployment, nil
 }
 
 func (ss *StageService) SyncStagesFromDisk(n *tree.Node) ([]*models.Record, error) {

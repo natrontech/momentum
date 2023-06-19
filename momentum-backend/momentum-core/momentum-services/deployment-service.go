@@ -2,19 +2,28 @@ package momentumservices
 
 import (
 	"errors"
+	"fmt"
 	consts "momentum/momentum-core/momentum-config"
 	tree "momentum/momentum-core/momentum-tree"
+	utils "momentum/momentum-core/momentum-utils"
 
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
 )
 
 type DeploymentService struct {
-	dao             *daos.Dao
-	keyValueService *KeyValueService
+	dao                *daos.Dao
+	config             *consts.MomentumConfig
+	repositoryService  *RepositoryService
+	applicationService *ApplicationService
+	stageService       *StageService
+	keyValueService    *KeyValueService
 }
 
-func NewDeploymentService(dao *daos.Dao, keyValueService *KeyValueService) *DeploymentService {
+func NewDeploymentService(
+	dao *daos.Dao,
+	config *consts.MomentumConfig,
+	keyValueService *KeyValueService) *DeploymentService {
 
 	if dao == nil {
 		panic("cannot initialize service with nil dao")
@@ -23,9 +32,15 @@ func NewDeploymentService(dao *daos.Dao, keyValueService *KeyValueService) *Depl
 	deplyomentService := new(DeploymentService)
 
 	deplyomentService.dao = dao
+	deplyomentService.config = config
 	deplyomentService.keyValueService = keyValueService
 
 	return deplyomentService
+}
+
+func (ds *DeploymentService) GetById(deploymentId string) (*models.Record, error) {
+
+	return ds.dao.FindRecordById(consts.TABLE_REPOSITORIES_NAME, deploymentId)
 }
 
 func (ds *DeploymentService) SyncDeploymentsFromDisk(n *tree.Node) ([]*models.Record, error) {
@@ -85,6 +100,53 @@ func (ds *DeploymentService) AddRepository(repositoryRecord *models.Record, depl
 			return err
 		}
 	}
+
+	return nil
+}
+
+func (ds *DeploymentService) CreateDeployment(
+	deploymentRecord *models.Record,
+	stageNamesSorted []string,
+	appName string,
+	repositoryName string,
+	isStagelessDeployment bool) error {
+
+	name := deploymentRecord.GetString(consts.TABLE_DEPLOYMENTS_FIELD_NAME)
+
+	repoPath := utils.BuildPath(ds.config.DataDir(), repositoryName)
+	deploymentStagePath := utils.BuildPath(repoPath, appName)
+	for _, s := range stageNamesSorted {
+		deploymentStagePath = utils.BuildPath(deploymentStagePath, s)
+	}
+	fmt.Println("adding deployment for stage:", deploymentStagePath)
+
+	repoTree, err := tree.Parse(repoPath, []string{".git"})
+	if err != nil {
+		return err
+	}
+
+	stageFound, stageNode := repoTree.FindStage(deploymentStagePath)
+	if !stageFound {
+		return errors.New("unable to find stage in tree structure")
+	}
+
+	existingDeployments := stageNode.Deployments()
+	for _, deployment := range existingDeployments {
+		if deployment.Path == name {
+			return errors.New("unable to create deployment because name already in use")
+		}
+	}
+
+	// 	1. copy template to destination (with deploymentName)
+	deploymentStagePath, err = utils.DirCopy(ds.config.DeploymentTemplateDir(), utils.BuildPath(deploymentStagePath))
+	if err != nil {
+		return err
+	}
+
+	// 	2. replace deploymentName in files
+	// 	3. replace applicationName in release yaml
+	// 	4. replace repositoryName in kustomization yaml
+	// 	5. add deployment yaml to kustomization.yaml of parent stage OR application (see isStagelessDeployment toggle)
 
 	return nil
 }

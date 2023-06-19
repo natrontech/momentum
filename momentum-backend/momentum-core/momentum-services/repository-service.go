@@ -5,7 +5,6 @@ import (
 	consts "momentum/momentum-core/momentum-config"
 	tree "momentum/momentum-core/momentum-tree"
 
-	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
@@ -29,6 +28,11 @@ func NewRepositoryService(dao *daos.Dao, appService *ApplicationService) *Reposi
 	repositoryService.applicationService = appService
 
 	return repositoryService
+}
+
+func (rs *RepositoryService) GetById(repositoryId string) (*models.Record, error) {
+
+	return rs.dao.FindRecordById(consts.TABLE_REPOSITORIES_NAME, repositoryId)
 }
 
 func (rs *RepositoryService) SyncRepositoryFromDisk(n *tree.Node, record *models.Record) (*models.Record, []*models.Record, []*models.Record, error) {
@@ -81,7 +85,7 @@ func (rs *RepositoryService) SyncRepositoryFromDisk(n *tree.Node, record *models
 
 func (rs *RepositoryService) FindForName(name string) (*models.Record, error) {
 
-	recs, err := rs.dao.FindRecordsByExpr(consts.TABLE_REPOSITORIES_NAME, dbx.NewExp(consts.TABLE_REPOSITORIES_FIELD_NAME+" = {:"+consts.TABLE_REPOSITORIES_FIELD_NAME+"}", dbx.Params{consts.TABLE_REPOSITORIES_FIELD_NAME: name}))
+	recs, err := rs.dao.FindRecordsByExpr(consts.TABLE_REPOSITORIES_NAME, consts.ExprEq(consts.TABLE_REPOSITORIES_FIELD_NAME, name))
 	if err != nil {
 		return nil, err
 	}

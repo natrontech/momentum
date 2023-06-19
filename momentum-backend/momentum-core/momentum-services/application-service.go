@@ -11,8 +11,9 @@ import (
 )
 
 type ApplicationService struct {
-	dao          *daos.Dao
-	stageService *StageService
+	dao               *daos.Dao
+	stageService      *StageService
+	repositoryService *RepositoryService
 }
 
 func NewApplicationService(dao *daos.Dao, stageService *StageService) *ApplicationService {
@@ -26,6 +27,11 @@ func NewApplicationService(dao *daos.Dao, stageService *StageService) *Applicati
 	appService.stageService = stageService
 
 	return appService
+}
+
+func (as *ApplicationService) GetById(applicationId string) (*models.Record, error) {
+
+	return as.dao.FindRecordById(consts.TABLE_APPLICATIONS_NAME, applicationId)
 }
 
 func (as *ApplicationService) SyncApplicationsFromDisk(n *tree.Node, record *models.Record) ([]*models.Record, error) {
@@ -75,6 +81,29 @@ func (as *ApplicationService) AddRepository(repositoryRecord *models.Record, app
 	}
 
 	return nil
+}
+
+func (as *ApplicationService) FindByNameAndRepositoryId(name string, repoId string) (*models.Record, error) {
+
+	exprs := consts.ExprsEq(map[string]string{
+		consts.TABLE_APPLICATIONS_FIELD_NAME:             name,
+		consts.TABLE_APPLICATIONS_FIELD_PARENTREPOSITORY: repoId,
+	})
+
+	recs, err := as.dao.FindRecordsByExpr(consts.TABLE_APPLICATIONS_NAME, exprs...)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(recs) > 1 {
+		return nil, errors.New("expected only one result")
+	}
+
+	if len(recs) < 1 {
+		return nil, nil
+	}
+
+	return recs[0], nil
 }
 
 func (as *ApplicationService) GetApplicationCollection() (*models.Collection, error) {
