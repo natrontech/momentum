@@ -1,7 +1,7 @@
 package momentumservices
 
 import (
-	consts "momentum/momentum-core/momentum-config"
+	model "momentum/momentum-core/momentum-model"
 
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
@@ -26,7 +26,7 @@ func NewKeyValueService(dao *daos.Dao) *KeyValueService {
 
 func (kvs *KeyValueService) GetKeyValueCollection() (*models.Collection, error) {
 
-	coll, err := kvs.dao.FindCollectionByNameOrId(consts.TABLE_KEYVALUE_NAME)
+	coll, err := kvs.dao.FindCollectionByNameOrId(model.TABLE_KEYVALUE_NAME)
 	if err != nil {
 		return nil, err
 	}

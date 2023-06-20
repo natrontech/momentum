@@ -3,8 +3,7 @@ package momentumservices
 import (
 	"errors"
 	"fmt"
-	config "momentum/momentum-core/momentum-config"
-	consts "momentum/momentum-core/momentum-config"
+	model "momentum/momentum-core/momentum-model"
 	tree "momentum/momentum-core/momentum-tree"
 	"strings"
 
@@ -49,7 +48,7 @@ func (rs *RepositorySyncService) SyncRepositoryFromDisk(n *tree.Node, record *mo
 	for _, appRec := range appRecords {
 		appRecIds = append(appRecIds, appRec.Id)
 	}
-	record.Set(config.TABLE_REPOSITORIES_FIELD_APPLICATIONS, appRecIds)
+	record.Set(model.TABLE_REPOSITORIES_FIELD_APPLICATIONS, appRecIds)
 
 	// this complex loop is necessary because we need to know which deployments must add the repository
 	// which is currently created, when the creation of the repository is finished.
@@ -57,23 +56,23 @@ func (rs *RepositorySyncService) SyncRepositoryFromDisk(n *tree.Node, record *mo
 	deployments := make([]*models.Record, 0)
 	for _, applicationRecord := range appRecords {
 
-		appRecord, err := rs.dao.FindRecordById(config.TABLE_APPLICATIONS_NAME, applicationRecord.Id)
+		appRecord, err := rs.dao.FindRecordById(model.TABLE_APPLICATIONS_NAME, applicationRecord.Id)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 
-		stagesIds := appRecord.Get(config.TABLE_APPLICATIONS_FIELD_STAGES).([]string)
+		stagesIds := appRecord.Get(model.TABLE_APPLICATIONS_FIELD_STAGES).([]string)
 		for _, stageId := range stagesIds {
 
-			stageRec, err := rs.dao.FindRecordById(config.TABLE_STAGES_NAME, stageId)
+			stageRec, err := rs.dao.FindRecordById(model.TABLE_STAGES_NAME, stageId)
 			if err != nil {
 				return nil, nil, nil, err
 			}
 
-			deploymentIds := stageRec.Get(config.TABLE_STAGES_FIELD_DEPLOYMENTS).([]string)
+			deploymentIds := stageRec.Get(model.TABLE_STAGES_FIELD_DEPLOYMENTS).([]string)
 			for _, deploymentId := range deploymentIds {
 
-				deploymentRec, err := rs.dao.FindRecordById(config.TABLE_DEPLOYMENTS_NAME, deploymentId)
+				deploymentRec, err := rs.dao.FindRecordById(model.TABLE_DEPLOYMENTS_NAME, deploymentId)
 				if err != nil {
 					return nil, nil, nil, err
 				}
@@ -119,13 +118,13 @@ func (rs *RepositorySyncService) SyncApplicationsFromDisk(n *tree.Node, record *
 
 func (rs *RepositorySyncService) AddRepository(repositoryRecord *models.Record, applications []*models.Record) error {
 
-	if repositoryRecord.Collection().Name != consts.TABLE_REPOSITORIES_NAME {
+	if repositoryRecord.Collection().Name != model.TABLE_REPOSITORIES_NAME {
 		return errors.New("repositoryRecord is not record of repositories collection")
 	}
 
 	for _, app := range applications {
 
-		app.Set(consts.TABLE_APPLICATIONS_FIELD_PARENTREPOSITORY, repositoryRecord.Id)
+		app.Set(model.TABLE_APPLICATIONS_FIELD_PARENTREPOSITORY, repositoryRecord.Id)
 		err := rs.saveWithoutEvent(app)
 		if err != nil {
 			return err
@@ -243,8 +242,9 @@ func (rs *RepositorySyncService) syncChildren(children []*tree.Node, parentArtif
 			propertyPath := strings.Split(child.FullPath(), filename)[1]
 
 			childRecord := models.NewRecord(kvColl)
-			childRecord.Set(consts.TABLE_KEYVALUE_FIELD_KEY, propertyPath)
-			childRecord.Set(consts.TABLE_KEYVALUE_FIELD_VALUE, child.Value)
+			childRecord.Set(model.TABLE_KEYVALUE_FIELD_KEY, propertyPath)
+			childRecord.Set(model.TABLE_KEYVALUE_FIELD_VALUE, child.Value)
+			childRecord.Set(model.TABLE_KEYVALUE_FIELD_DISPLAY_NAME, child.NormalizedPath())
 
 			err = rs.saveWithoutEvent(childRecord)
 			if err != nil {
@@ -256,11 +256,11 @@ func (rs *RepositorySyncService) syncChildren(children []*tree.Node, parentArtif
 				break
 			}
 
-			currentKeyValues, ok := parentArtifact.Get(consts.GENERIC_FIELD_KEYVALUES).([]string)
+			currentKeyValues, ok := parentArtifact.Get(model.TABLE_DEPLOYMENTS_FIELD_KEYVALUES).([]string)
 			if ok {
-				parentArtifact.Set(consts.GENERIC_FIELD_KEYVALUES, append(currentKeyValues, childRecord.Id))
+				parentArtifact.Set(model.TABLE_DEPLOYMENTS_FIELD_KEYVALUES, append(currentKeyValues, childRecord.Id))
 			} else {
-				parentArtifact.Set(consts.GENERIC_FIELD_KEYVALUES, childRecord.Id)
+				parentArtifact.Set(model.TABLE_DEPLOYMENTS_FIELD_KEYVALUES, childRecord.Id)
 			}
 			err = rs.saveWithoutEvent(parentArtifact)
 			if err != nil {
@@ -275,9 +275,9 @@ func (rs *RepositorySyncService) syncChildren(children []*tree.Node, parentArtif
 func (rs *RepositorySyncService) addParentArtifact(parentArtifact *models.Record, keyValues *models.Record) error {
 
 	switch parentArtifact.Collection().Name {
-	case consts.TABLE_STAGES_NAME:
+	case model.TABLE_STAGES_NAME:
 		return rs.addParentStage(parentArtifact, []*models.Record{keyValues})
-	case consts.TABLE_DEPLOYMENTS_NAME:
+	case model.TABLE_DEPLOYMENTS_NAME:
 		return rs.addParentDeployment(parentArtifact, []*models.Record{keyValues})
 	default:
 		return errors.New("invalid parent record type")
@@ -286,17 +286,17 @@ func (rs *RepositorySyncService) addParentArtifact(parentArtifact *models.Record
 
 func (rs *RepositorySyncService) addParentStage(stage *models.Record, keyValues []*models.Record) error {
 
-	if stage.Collection().Name != consts.TABLE_STAGES_NAME {
+	if stage.Collection().Name != model.TABLE_STAGES_NAME {
 		return errors.New("parent stage must be record of collection stages")
 	}
 
 	for _, kv := range keyValues {
 
-		if kv.Collection().Name != consts.TABLE_KEYVALUE_NAME {
+		if kv.Collection().Name != model.TABLE_KEYVALUE_NAME {
 			return errors.New("expected keyvalues record type to add parent stage")
 		}
 
-		kv.Set(consts.TABLE_KEYVALUE_FIELD_PARENTSTAGE, stage.Id)
+		kv.Set(model.TABLE_KEYVALUE_FIELD_PARENTSTAGE, stage.Id)
 		err := rs.saveWithoutEvent(kv)
 		if err != nil {
 			return err
@@ -308,17 +308,17 @@ func (rs *RepositorySyncService) addParentStage(stage *models.Record, keyValues 
 
 func (rs *RepositorySyncService) addParentDeployment(deployment *models.Record, keyValues []*models.Record) error {
 
-	if deployment.Collection().Name != consts.TABLE_DEPLOYMENTS_NAME {
+	if deployment.Collection().Name != model.TABLE_DEPLOYMENTS_NAME {
 		return errors.New("parent deployment must be record of collection deploments")
 	}
 
 	for _, kv := range keyValues {
 
-		if kv.Collection().Name != consts.TABLE_KEYVALUE_NAME {
+		if kv.Collection().Name != model.TABLE_KEYVALUE_NAME {
 			return errors.New("expected keyvalues record type to add parent deployment")
 		}
 
-		kv.Set(consts.TABLE_KEYVALUE_FIELD_PARENTDEPLOYMENT, deployment.Id)
+		kv.Set(model.TABLE_KEYVALUE_FIELD_PARENTDEPLOYMENT, deployment.Id)
 		err := rs.saveWithoutEvent(kv)
 		if err != nil {
 			return err

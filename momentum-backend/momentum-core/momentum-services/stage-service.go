@@ -2,7 +2,7 @@ package momentumservices
 
 import (
 	"errors"
-	consts "momentum/momentum-core/momentum-config"
+	model "momentum/momentum-core/momentum-model"
 
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
@@ -30,18 +30,18 @@ func NewStageService(dao *daos.Dao, deploymentService *DeploymentService, keyVal
 
 func (ss *StageService) AddParentApplication(stageIds []string, app *models.Record) error {
 
-	if app.Collection().Name != consts.TABLE_APPLICATIONS_NAME {
+	if app.Collection().Name != model.TABLE_APPLICATIONS_NAME {
 		return errors.New("can only process records of applications collection")
 	}
 
 	for _, stageId := range stageIds {
 
-		stage, err := ss.dao.FindRecordById(consts.TABLE_STAGES_NAME, stageId)
+		stage, err := ss.dao.FindRecordById(model.TABLE_STAGES_NAME, stageId)
 		if err != nil {
 			return err
 		}
 
-		stage.Set(consts.TABLE_STAGES_FIELD_PARENTAPPLICATION, app.Id)
+		stage.Set(model.TABLE_STAGES_FIELD_PARENTAPPLICATION, app.Id)
 		err = ss.saveWithoutEvent(stage)
 		if err != nil {
 			return err
@@ -53,17 +53,17 @@ func (ss *StageService) AddParentApplication(stageIds []string, app *models.Reco
 
 func (ss *StageService) addParentStage(parent *models.Record, child *models.Record) error {
 
-	if parent.Collection().Name != consts.TABLE_STAGES_NAME || child.Collection().Name != consts.TABLE_STAGES_NAME {
+	if parent.Collection().Name != model.TABLE_STAGES_NAME || child.Collection().Name != model.TABLE_STAGES_NAME {
 		return errors.New("can only process records of stages collection")
 	}
 
-	child.Set(consts.TABLE_STAGES_FIELD_PARENTSTAGE, parent.Id)
+	child.Set(model.TABLE_STAGES_FIELD_PARENTSTAGE, parent.Id)
 	return ss.saveWithoutEvent(child)
 }
 
 func (ss *StageService) GetStagesCollection() (*models.Collection, error) {
 
-	return ss.dao.FindCollectionByNameOrId(consts.TABLE_STAGES_NAME)
+	return ss.dao.FindCollectionByNameOrId(model.TABLE_STAGES_NAME)
 }
 
 func (ss *StageService) CreateWithoutEvent(name string, deploymentIds []*models.Record) (*models.Record, error) {
@@ -74,8 +74,8 @@ func (ss *StageService) CreateWithoutEvent(name string, deploymentIds []*models.
 	}
 
 	stageRecord := models.NewRecord(stageCollection)
-	stageRecord.Set(consts.TABLE_STAGES_FIELD_NAME, name)
-	stageRecord.Set(consts.TABLE_STAGES_FIELD_DEPLOYMENTS, deploymentIds)
+	stageRecord.Set(model.TABLE_STAGES_FIELD_NAME, name)
+	stageRecord.Set(model.TABLE_STAGES_FIELD_DEPLOYMENTS, deploymentIds)
 
 	err = ss.saveWithoutEvent(stageRecord)
 

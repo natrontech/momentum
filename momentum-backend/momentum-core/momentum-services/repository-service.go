@@ -2,7 +2,7 @@ package momentumservices
 
 import (
 	"fmt"
-	consts "momentum/momentum-core/momentum-config"
+	model "momentum/momentum-core/momentum-model"
 
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/daos"
@@ -31,7 +31,7 @@ func NewRepositoryService(dao *daos.Dao, appService *ApplicationService) *Reposi
 
 func (rs *RepositoryService) FindForName(name string) (*models.Record, error) {
 
-	recs, err := rs.dao.FindRecordsByExpr(consts.TABLE_REPOSITORIES_NAME, dbx.NewExp(consts.TABLE_REPOSITORIES_FIELD_NAME+" = {:"+consts.TABLE_REPOSITORIES_FIELD_NAME+"}", dbx.Params{consts.TABLE_REPOSITORIES_FIELD_NAME: name}))
+	recs, err := rs.dao.FindRecordsByExpr(model.TABLE_REPOSITORIES_NAME, dbx.NewExp(model.TABLE_REPOSITORIES_FIELD_NAME+" = {:"+model.TABLE_REPOSITORIES_FIELD_NAME+"}", dbx.Params{model.TABLE_REPOSITORIES_FIELD_NAME: name}))
 	if err != nil {
 		return nil, err
 	}

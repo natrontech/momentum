@@ -8,6 +8,7 @@ import (
 	gitclient "momentum/git-client"
 	kustomizeclient "momentum/kustomize-client"
 	config "momentum/momentum-core/momentum-config"
+	model "momentum/momentum-core/momentum-model"
 	services "momentum/momentum-core/momentum-services"
 	tree "momentum/momentum-core/momentum-tree"
 	utils "momentum/momentum-core/momentum-utils"
@@ -47,8 +48,8 @@ func NewRepositoryController(
 
 func (rc *RepositoryController) AddRepository(record *models.Record, conf *config.MomentumConfig) error {
 
-	repoName := record.GetString(config.TABLE_REPOSITORIES_FIELD_NAME)
-	repoUrl := record.GetString(config.TABLE_REPOSITORIES_FIELD_URL)
+	repoName := record.GetString(model.TABLE_REPOSITORIES_FIELD_NAME)
+	repoUrl := record.GetString(model.TABLE_REPOSITORIES_FIELD_URL)
 	path := utils.BuildPath(conf.DataDir(), strings.ReplaceAll(repoName, " ", ""))
 
 	fmt.Println("adding repo", repoName, ", located at", repoUrl, "and to be written to", path)

@@ -2,7 +2,7 @@ package momentumservices
 
 import (
 	"errors"
-	consts "momentum/momentum-core/momentum-config"
+	model "momentum/momentum-core/momentum-model"
 
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
@@ -29,12 +29,12 @@ func NewDeploymentService(dao *daos.Dao, keyValueService *KeyValueService) *Depl
 
 func (ds *DeploymentService) AddParentStage(stage *models.Record, deployments []*models.Record) error {
 
-	if stage.Collection().Name != consts.TABLE_STAGES_NAME {
+	if stage.Collection().Name != model.TABLE_STAGES_NAME {
 		return errors.New("stage is not record of stages collection")
 	}
 
 	for _, deployment := range deployments {
-		deployment.Set(consts.TABLE_DEPLOYMENTS_FIELD_PARENTSTAGE, stage.Id)
+		deployment.Set(model.TABLE_DEPLOYMENTS_FIELD_PARENTSTAGE, stage.Id)
 		err := ds.saveWithoutEvent(deployment)
 		if err != nil {
 			return err
@@ -46,13 +46,13 @@ func (ds *DeploymentService) AddParentStage(stage *models.Record, deployments []
 
 func (ds *DeploymentService) AddRepository(repositoryRecord *models.Record, deployments []*models.Record) error {
 
-	if repositoryRecord.Collection().Name != consts.TABLE_REPOSITORIES_NAME {
+	if repositoryRecord.Collection().Name != model.TABLE_REPOSITORIES_NAME {
 		return errors.New("repositoryRecord is not record of repositories collection")
 	}
 
 	for _, depl := range deployments {
 
-		depl.Set(consts.TABLE_DEPLOYMENTS_FIELD_REPOSITORIES, append(depl.Get(consts.TABLE_DEPLOYMENTS_FIELD_REPOSITORIES).([]string), repositoryRecord.Id))
+		depl.Set(model.TABLE_DEPLOYMENTS_FIELD_REPOSITORIES, append(depl.Get(model.TABLE_DEPLOYMENTS_FIELD_REPOSITORIES).([]string), repositoryRecord.Id))
 		err := ds.saveWithoutEvent(depl)
 		if err != nil {
 			return err
@@ -64,7 +64,7 @@ func (ds *DeploymentService) AddRepository(repositoryRecord *models.Record, depl
 
 func (ds *DeploymentService) GetDeploymentsCollection() (*models.Collection, error) {
 
-	coll, err := ds.dao.FindCollectionByNameOrId(consts.TABLE_DEPLOYMENTS_NAME)
+	coll, err := ds.dao.FindCollectionByNameOrId(model.TABLE_DEPLOYMENTS_NAME)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func (ds *DeploymentService) createWithoutEvent(name string) (*models.Record, er
 	}
 
 	deploymentRecord := models.NewRecord(deploymentCollection)
-	deploymentRecord.Set(consts.TABLE_DEPLOYMENTS_FIELD_NAME, name)
+	deploymentRecord.Set(model.TABLE_DEPLOYMENTS_FIELD_NAME, name)
 
 	err = ds.saveWithoutEvent(deploymentRecord)
 
