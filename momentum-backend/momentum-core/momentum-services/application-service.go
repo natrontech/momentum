@@ -2,9 +2,7 @@ package momentumservices
 
 import (
 	"errors"
-	"fmt"
 	consts "momentum/momentum-core/momentum-config"
-	tree "momentum/momentum-core/momentum-tree"
 
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
@@ -26,37 +24,6 @@ func NewApplicationService(dao *daos.Dao, stageService *StageService) *Applicati
 	appService.stageService = stageService
 
 	return appService
-}
-
-func (as *ApplicationService) SyncApplicationsFromDisk(n *tree.Node, record *models.Record) ([]*models.Record, error) {
-
-	recs := make([]*models.Record, 0)
-	apps := n.Apps()
-	for _, a := range apps {
-		fmt.Println(a)
-	}
-	for _, app := range apps {
-
-		stages, err := as.stageService.SyncStagesFromDisk(app)
-		if err != nil {
-			return nil, err
-		}
-
-		stageIds := make([]string, 0)
-		for _, stage := range stages {
-			stageIds = append(stageIds, stage.Id)
-		}
-
-		rec, err := as.createWithoutEvent(app.NormalizedPath(), stageIds)
-		if err != nil {
-			return nil, err
-		}
-
-		err = as.stageService.AddParentApplication(stageIds, rec)
-
-		recs = append(recs, rec)
-	}
-	return recs, nil
 }
 
 func (as *ApplicationService) AddRepository(repositoryRecord *models.Record, applications []*models.Record) error {

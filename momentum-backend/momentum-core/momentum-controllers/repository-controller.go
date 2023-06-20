@@ -23,22 +23,22 @@ type RepositoryAddedEvent struct {
 }
 
 type RepositoryController struct {
+	repositorySyncService       *services.RepositorySyncService
 	repositoryService           *services.RepositoryService
-	deploymentService           *services.DeploymentService
 	repositoryAddedEventChannel chan *RepositoryAddedEvent
 	kustomizeValidation         *kustomizeclient.KustomizationValidationService
 }
 
 func NewRepositoryController(
+	repoSyncService *services.RepositorySyncService,
 	repoService *services.RepositoryService,
-	deploymentService *services.DeploymentService,
 	repositoryAddedEventChannel chan *RepositoryAddedEvent,
 	kustomizeValidator *kustomizeclient.KustomizationValidationService) *RepositoryController {
 
 	repoController := new(RepositoryController)
 
+	repoController.repositorySyncService = repoSyncService
 	repoController.repositoryService = repoService
-	repoController.deploymentService = deploymentService
 	repoController.repositoryAddedEventChannel = repositoryAddedEventChannel
 	repoController.kustomizeValidation = kustomizeValidator
 
@@ -77,7 +77,7 @@ func (rc *RepositoryController) AddRepository(record *models.Record, conf *confi
 		return err
 	}
 
-	_, apps, deployments, err := rc.repositoryService.SyncRepositoryFromDisk(repo, record)
+	_, apps, deployments, err := rc.repositorySyncService.SyncRepositoryFromDisk(repo, record)
 	if err != nil {
 		fmt.Println("ERROR:", err.Error())
 		utils.DirDelete(path)

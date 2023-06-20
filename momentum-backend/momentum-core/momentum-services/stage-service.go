@@ -3,7 +3,6 @@ package momentumservices
 import (
 	"errors"
 	consts "momentum/momentum-core/momentum-config"
-	tree "momentum/momentum-core/momentum-tree"
 
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
@@ -27,55 +26,6 @@ func NewStageService(dao *daos.Dao, deploymentService *DeploymentService, keyVal
 	stageService.keyValueService = keyValueService
 
 	return stageService
-}
-
-func (ss *StageService) SyncStagesFromDisk(n *tree.Node) ([]*models.Record, error) {
-
-	stages := n.AllStages()
-	stageRecords := make([]*models.Record, 0)
-	var lastStageNode *tree.Node = nil
-	var lastStage *models.Record = nil
-	for _, stage := range stages {
-
-		deployments, err := ss.deploymentService.SyncDeploymentsFromDisk(n)
-		if err != nil {
-			return nil, err
-		}
-
-		stageRecord, err := ss.createWithoutEvent(stage.NormalizedPath(), deployments)
-		if err != nil {
-			return nil, err
-		}
-
-		if stage.Kind == tree.Directory {
-			stageFiles := stage.Files()
-			for _, f := range stageFiles {
-
-				err := ss.keyValueService.SyncFile(f, stageRecord)
-				if err != nil {
-					return nil, err
-				}
-			}
-		}
-
-		err = ss.deploymentService.AddParentStage(stageRecord, deployments)
-		if err != nil {
-			return nil, err
-		}
-
-		if lastStage != nil && lastStageNode != nil && stage.Parent != nil && stage.Parent.IsStage() && lastStageNode.FullPath() == stage.Parent.FullPath() {
-			err = ss.addParentStage(lastStage, stageRecord)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		stageRecords = append(stageRecords, stageRecord)
-		lastStage = stageRecord
-		lastStageNode = stage
-	}
-
-	return stageRecords, nil
 }
 
 func (ss *StageService) AddParentApplication(stageIds []string, app *models.Record) error {
@@ -116,7 +66,7 @@ func (ss *StageService) GetStagesCollection() (*models.Collection, error) {
 	return ss.dao.FindCollectionByNameOrId(consts.TABLE_STAGES_NAME)
 }
 
-func (ss *StageService) createWithoutEvent(name string, deploymentIds []*models.Record) (*models.Record, error) {
+func (ss *StageService) CreateWithoutEvent(name string, deploymentIds []*models.Record) (*models.Record, error) {
 
 	stageCollection, err := ss.GetStagesCollection()
 	if err != nil {

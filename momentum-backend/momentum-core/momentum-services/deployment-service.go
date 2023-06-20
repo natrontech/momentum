@@ -3,7 +3,6 @@ package momentumservices
 import (
 	"errors"
 	consts "momentum/momentum-core/momentum-config"
-	tree "momentum/momentum-core/momentum-tree"
 
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
@@ -26,32 +25,6 @@ func NewDeploymentService(dao *daos.Dao, keyValueService *KeyValueService) *Depl
 	deplyomentService.keyValueService = keyValueService
 
 	return deplyomentService
-}
-
-func (ds *DeploymentService) SyncDeploymentsFromDisk(n *tree.Node) ([]*models.Record, error) {
-
-	deployments := n.AllDeployments()
-
-	deploymentIds := make([]*models.Record, 0)
-	for _, deployment := range deployments {
-
-		deploymentRecord, err := ds.createWithoutEvent(deployment.NormalizedPath())
-		if err != nil {
-			return nil, err
-		}
-
-		if deployment.Kind == tree.File {
-
-			err := ds.keyValueService.SyncFile(deployment, deploymentRecord)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		deploymentIds = append(deploymentIds, deploymentRecord)
-	}
-
-	return deploymentIds, nil
 }
 
 func (ds *DeploymentService) AddParentStage(stage *models.Record, deployments []*models.Record) error {

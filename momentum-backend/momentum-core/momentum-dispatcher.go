@@ -48,10 +48,11 @@ func NewDispatcher(config *conf.MomentumConfig, pb *pocketbase.PocketBase) *Mome
 	stageService := services.NewStageService(pb.Dao(), deploymentService, keyValueService)
 	appService := services.NewApplicationService(pb.Dao(), stageService)
 	repoService := services.NewRepositoryService(pb.Dao(), appService)
+	repoSyncService := services.NewRepositorySyncService(pb.Dao(), appService, stageService, deploymentService, keyValueService)
 
 	dispatcher.kustomizeValidator = kustomizeclient.NewKustomizationValidationService(dispatcher.Config, repoService)
 
-	dispatcher.RepositoryController = controllers.NewRepositoryController(repoService, deploymentService, REPOSITORY_ADDED_EVENT_CHANNEL, dispatcher.kustomizeValidator)
+	dispatcher.RepositoryController = controllers.NewRepositoryController(repoSyncService, repoService, REPOSITORY_ADDED_EVENT_CHANNEL, dispatcher.kustomizeValidator)
 	dispatcher.ApplicationsController = controllers.NewApplicationController(appService, repoService)
 	dispatcher.StagesController = controllers.NewStageController(stageService)
 	dispatcher.DeploymentController = controllers.NewDeploymentController(deploymentService, repoService)
