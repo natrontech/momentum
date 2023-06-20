@@ -31,6 +31,7 @@ type IApplication interface {
 
 type Application struct {
 	IApplication
+	Model
 
 	name               string
 	parentRepositoryId string
@@ -47,7 +48,14 @@ func ToApplication(record *models.Record) (IApplication, error) {
 	app := new(Application)
 	app.SetId(record.Id)
 	app.name = record.GetString(TABLE_APPLICATIONS_FIELD_NAME)
-	app.stageIds = record.Get(TABLE_APPLICATIONS_FIELD_STAGES).([]string)
+
+	ids, ok := record.Get(TABLE_APPLICATIONS_FIELD_STAGES).([]string)
+	if ok {
+		app.stageIds = ids
+	} else {
+		app.stageIds = []string{}
+	}
+
 	app.helmRepositoryUrl = record.GetString(TABLE_APPLICATIONS_FIELD_HELMREPO)
 	app.parentRepositoryId = record.GetString(TABLE_APPLICATIONS_FIELD_PARENTREPOSITORY)
 
@@ -66,6 +74,14 @@ func ToApplicationRecord(app IApplication, recordInstance *models.Record) (*mode
 	recordInstance.Set(TABLE_APPLICATIONS_FIELD_PARENTREPOSITORY, app.ParentRepositoryId())
 
 	return recordInstance, nil
+}
+
+func (a *Application) Id() string {
+	return a.id
+}
+
+func (a *Application) SetId(id string) {
+	a.id = id
 }
 
 func (a *Application) Name() string {

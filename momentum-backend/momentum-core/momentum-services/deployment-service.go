@@ -13,18 +13,17 @@ import (
 )
 
 type DeploymentService struct {
-	dao                *daos.Dao
-	config             *config.MomentumConfig
-	repositoryService  *RepositoryService
-	applicationService *ApplicationService
-	stageService       *StageService
-	keyValueService    *KeyValueService
+	dao             *daos.Dao
+	config          *config.MomentumConfig
+	keyValueService *KeyValueService
+	templateService *TemplateService
 }
 
 func NewDeploymentService(
 	dao *daos.Dao,
 	config *config.MomentumConfig,
-	keyValueService *KeyValueService) *DeploymentService {
+	keyValueService *KeyValueService,
+	templateService *TemplateService) *DeploymentService {
 
 	if dao == nil {
 		panic("cannot initialize service with nil dao")
@@ -35,13 +34,19 @@ func NewDeploymentService(
 	deplyomentService.dao = dao
 	deplyomentService.config = config
 	deplyomentService.keyValueService = keyValueService
+	deplyomentService.templateService = templateService
 
 	return deplyomentService
 }
 
-func (ds *DeploymentService) GetById(deploymentId string) (*models.Record, error) {
+func (ds *DeploymentService) GetById(deploymentId string) (model.IDeployment, error) {
 
-	return ds.dao.FindRecordById(model.TABLE_REPOSITORIES_NAME, deploymentId)
+	record, err := ds.dao.FindRecordById(model.TABLE_REPOSITORIES_NAME, deploymentId)
+	if err != nil {
+		return nil, err
+	}
+
+	return model.ToDeployment(record)
 }
 
 func (ds *DeploymentService) AddParentStage(stage *models.Record, deployments []*models.Record) error {
@@ -80,18 +85,16 @@ func (ds *DeploymentService) AddRepository(repositoryRecord *models.Record, depl
 }
 
 func (ds *DeploymentService) CreateDeployment(
-	deploymentRecord *models.Record,
-	stageNamesSorted []string,
-	appName string,
-	repositoryName string,
+	deployment model.IDeployment,
+	stagesSorted []model.IStage,
+	application model.IApplication,
+	repository model.IRepository,
 	isStagelessDeployment bool) error {
 
-	name := deploymentRecord.GetString(model.TABLE_DEPLOYMENTS_FIELD_NAME)
-
-	repoPath := utils.BuildPath(ds.config.DataDir(), repositoryName)
-	deploymentStagePath := utils.BuildPath(repoPath, appName)
-	for _, s := range stageNamesSorted {
-		deploymentStagePath = utils.BuildPath(deploymentStagePath, s)
+	repoPath := utils.BuildPath(ds.config.DataDir(), repository.Name())
+	deploymentStagePath := utils.BuildPath(repoPath, application.Name())
+	for _, s := range stagesSorted {
+		deploymentStagePath = utils.BuildPath(deploymentStagePath, s.Name())
 	}
 	fmt.Println("adding deployment for stage:", deploymentStagePath)
 
@@ -106,22 +109,67 @@ func (ds *DeploymentService) CreateDeployment(
 	}
 
 	existingDeployments := stageNode.Deployments()
-	for _, deployment := range existingDeployments {
-		if deployment.Path == name {
+	for _, depl := range existingDeployments {
+		if depl.Path == deployment.Name() {
 			return errors.New("unable to create deployment because name already in use")
 		}
 	}
 
-	// 	1. copy template to destination (with deploymentName)
-	deploymentStagePath, err = utils.DirCopy(ds.config.DeploymentTemplateDir(), utils.BuildPath(deploymentStagePath))
+	kustomizationResources, found := stageNode.FindFirst(tree.ToMatchableSearchTerm(utils.BuildPath(KUSTOMIZATION_FILE_NAME, "resources")))
+	if !found {
+		return errors.New("unable to find kustomization resources for stage or application of new deployment")
+	}
+	tree.Print(kustomizationResources)
+
+	deploymentYamlDestinationName := deployment.Name() + ".yaml"
+	deploymentFolderDestinationPath := utils.BuildPath(deploymentStagePath, "_deploy", deployment.Name())
+	deploymentFileDestinationPath := utils.BuildPath(deploymentStagePath, deploymentYamlDestinationName)
+
+	fmt.Println("paths:", deploymentYamlDestinationName)
+	fmt.Println("paths:", deploymentFolderDestinationPath)
+	fmt.Println("paths:", deploymentFileDestinationPath)
+
+	deploymentFolderDestinationPath, err = utils.DirCopy(ds.config.DeploymentTemplateFolderPath(), deploymentFolderDestinationPath)
 	if err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
 
-	// 	2. replace deploymentName in files
-	// 	3. replace applicationName in release yaml
-	// 	4. replace repositoryName in kustomization yaml
-	// 	5. add deployment yaml to kustomization.yaml of parent stage OR application (see isStagelessDeployment toggle)
+	fmt.Println("copied deployment directory:", deploymentFolderDestinationPath)
+
+	fileCopySuccess := utils.FileCopy(ds.config.DeploymentTemplateFilePath(), deploymentFileDestinationPath)
+	if !fileCopySuccess {
+		return errors.New("failed copying deployment file")
+	}
+
+	fmt.Println("copied deployment file:", deploymentFileDestinationPath)
+
+	releaseYamlPath := utils.BuildPath(deploymentFolderDestinationPath, "release.yaml")
+	deploymentKustomizationYamlPath := utils.BuildPath(deploymentFolderDestinationPath, KUSTOMIZATION_FILE_NAME)
+	parentKustomizationYaml := utils.BuildPath(deploymentStagePath, KUSTOMIZATION_FILE_NAME)
+
+	err = ds.templateService.ApplyDeploymentKustomizationTemplate(deploymentKustomizationYamlPath, deployment.Name())
+	if err != nil {
+		fmt.Println("template for", deploymentKustomizationYamlPath, "failed:", err.Error())
+		return err
+	}
+	err = ds.templateService.ApplyDeploymentReleaseTemplate(releaseYamlPath, application.Name())
+	if err != nil {
+		fmt.Println("template for", deploymentKustomizationYamlPath, "failed:", err.Error())
+		return err
+	}
+	err = ds.templateService.ApplyDeploymentStageKustomization(parentKustomizationYaml, deployment.Name(), repository.Name())
+	if err != nil {
+		fmt.Println("template for", deploymentKustomizationYamlPath, "failed:", err.Error())
+		return err
+	}
+
+	kustomizationResources.AddSequenceValue(deploymentYamlDestinationName)
+
+	err = kustomizationResources.Write(true)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -147,6 +195,9 @@ func (ds *DeploymentService) createWithoutEvent(name string) (*models.Record, er
 	deploymentRecord.Set(model.TABLE_DEPLOYMENTS_FIELD_NAME, name)
 
 	err = ds.saveWithoutEvent(deploymentRecord)
+	if err != nil {
+		return nil, err
+	}
 
 	return deploymentRecord, nil
 }

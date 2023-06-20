@@ -27,9 +27,14 @@ func NewApplicationService(dao *daos.Dao, stageService *StageService) *Applicati
 	return appService
 }
 
-func (as *ApplicationService) GetById(applicationId string) (*models.Record, error) {
+func (as *ApplicationService) GetById(applicationId string) (model.IApplication, error) {
 
-	return as.dao.FindRecordById(model.TABLE_APPLICATIONS_NAME, applicationId)
+	record, err := as.dao.FindRecordById(model.TABLE_APPLICATIONS_NAME, applicationId)
+	if err != nil {
+		return nil, err
+	}
+
+	return model.ToApplication(record)
 }
 
 func (as *ApplicationService) AddRepository(repositoryRecord *models.Record, applications []*models.Record) error {
@@ -50,7 +55,7 @@ func (as *ApplicationService) AddRepository(repositoryRecord *models.Record, app
 	return nil
 }
 
-func (as *ApplicationService) FindByNameAndRepositoryId(name string, repoId string) (*models.Record, error) {
+func (as *ApplicationService) FindByNameAndRepositoryId(name string, repoId string) (model.IApplication, error) {
 
 	exprs := ExprsEq(map[string]string{
 		model.TABLE_APPLICATIONS_FIELD_NAME:             name,
@@ -70,7 +75,7 @@ func (as *ApplicationService) FindByNameAndRepositoryId(name string, repoId stri
 		return nil, nil
 	}
 
-	return recs[0], nil
+	return model.ToApplication(recs[0])
 }
 
 func (as *ApplicationService) GetApplicationCollection() (*models.Collection, error) {

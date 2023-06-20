@@ -23,7 +23,7 @@ func NewApplicationController(appService *services.ApplicationService, repoServi
 
 func (ac *ApplicationController) AddRepositoryToApplications(repoAddedEvent *RepositoryAddedEvent) error {
 
-	repositoryRecord, err := ac.repositoryService.FindForName(repoAddedEvent.RepositoryName)
+	repositoryRecord, err := ac.repositoryService.FindByName(repoAddedEvent.RepositoryName)
 	if err != nil {
 		return err
 	}

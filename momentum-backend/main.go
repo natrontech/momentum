@@ -19,6 +19,8 @@ import (
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 )
 
+const ENABLE_CLEANUP = false
+
 func defaultPublicDir() string {
 	if strings.HasPrefix(os.Args[0], os.TempDir()) {
 		// most likely ran with go run
@@ -72,7 +74,9 @@ func main() {
 
 	app.OnAfterBootstrap().Add(func(e *core.BootstrapEvent) error {
 
-		testCleanUp(app.Dao().Clone())
+		if ENABLE_CLEANUP {
+			testCleanUp(app.Dao().Clone())
+		}
 
 		dispatcher := momentumcore.NewDispatcher(momentumConfig, app)
 

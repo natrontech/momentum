@@ -1,6 +1,7 @@
 package tree
 
 import (
+	"errors"
 	"strings"
 
 	utils "momentum/momentum-core/momentum-utils"
@@ -29,9 +30,9 @@ type Node struct {
 	Value      string // Value only set for Kind == Value
 	Parent     *Node
 	Children   []*Node
-	// only sub-trees of (Yaml-)File nodes have yamlNode. otherwise nil.
+	// only sub-trees of (Yaml-)File nodes have YamlNode. otherwise nil.
 	// facilitates writing to writable yaml tree.
-	yamlNode *yaml.Node
+	YamlNode *yaml.Node
 }
 
 func NewNode(kind NodeKind, path string, value string, parent *Node, children []*Node, yamlNode *yaml.Node) *Node {
@@ -42,7 +43,7 @@ func NewNode(kind NodeKind, path string, value string, parent *Node, children []
 	n.Path = strings.ReplaceAll(utils.LastPartOfPath(path), ".", FILE_ENDING_SEPARATOR_REPLACEMENT)
 	n.Value = value
 	n.Parent = parent
-	n.yamlNode = yamlNode
+	n.YamlNode = yamlNode
 
 	if children == nil || len(children) < 1 {
 		n.Children = make([]*Node, 0)
@@ -93,8 +94,8 @@ func (n *Node) SetValue(v string) {
 
 	n.Value = v
 
-	if n.yamlNode != nil {
-		n.yamlNode.Value = v
+	if n.YamlNode != nil {
+		n.YamlNode.Value = v
 	}
 }
 
@@ -129,9 +130,9 @@ func (n *Node) PathWithoutEnding() string {
 	return strings.Split(n.Path, FILE_ENDING_SEPARATOR_REPLACEMENT)[0]
 }
 
-func (n *Node) Write() error {
+func (n *Node) Write(allowOverwrite bool) error {
 
-	_, err := WriteNode(n)
+	_, err := WriteNode(n, allowOverwrite)
 	if err != nil {
 		return err
 	}
@@ -183,5 +184,28 @@ func (n *Node) Directories() []*Node {
 
 func (n *Node) Search(term string) []*Node {
 
-	return DepthFirstSearch(term, n)
+	return BreathFirstSearch(term, n)
+}
+
+func (n *Node) FindFirst(term string) (*Node, bool) {
+
+	results := n.Search(term)
+	if results == nil || len(results) < 1 {
+		return nil, false
+	}
+	return results[0], true
+}
+
+func (n *Node) AddSequenceValue(value string) error {
+
+	if n.Kind != Sequence || n.YamlNode.Kind != yaml.SequenceNode {
+		return errors.New("can only add sequence value to node of type sequence")
+	}
+
+	sequenceValue := CreateSequenceValueNode(value, strTag, yaml.DoubleQuotedStyle)
+	n.YamlNode.Content = append(n.YamlNode.Content, sequenceValue)
+	momentumNode := NewNode(Value, "", value, n, nil, sequenceValue)
+	n.AddChild(momentumNode)
+
+	return nil
 }

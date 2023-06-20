@@ -1,7 +1,7 @@
 package momentumcontrollers
 
 import (
-	"errors"
+	"fmt"
 	config "momentum/momentum-core/momentum-config"
 	model "momentum/momentum-core/momentum-model"
 	services "momentum/momentum-core/momentum-services"
@@ -33,34 +33,54 @@ func NewDeploymentController(
 
 func (dc *DeploymentController) AddDeployment(deploymentRecord *models.Record, conf *config.MomentumConfig) error {
 
-	if deploymentRecord.Collection().Name != model.TABLE_DEPLOYMENTS_NAME {
-		return errors.New("can only add deployment records")
-	}
+	fmt.Println("Adding deployment...")
 
-	stagesSorted, isStagelessDeployment, err := dc.stageService.GetStagesSortedById(deploymentRecord.GetString(model.TABLE_DEPLOYMENTS_FIELD_PARENTSTAGE))
+	// TODO GIT PULL / SYNC REPO
+
+	deploymentWithoutId, err := model.ToDeployment(deploymentRecord)
 	if err != nil {
+		fmt.Println("error mapping record to model:", err.Error())
 		return err
 	}
-	stageNamesSorted := make([]string, 0)
-	for _, stage := range stagesSorted {
-		stageNamesSorted = append(stageNamesSorted, stage.GetString(model.TABLE_STAGES_FIELD_NAME))
-	}
 
-	stageApplicationId := stagesSorted[0].GetString(model.TABLE_STAGES_FIELD_PARENTAPPLICATION)
-	appRecord, err := dc.applicationService.GetById(stageApplicationId)
+	fmt.Println("Creating deployment:", deploymentWithoutId.Name(), deploymentWithoutId.ParentStageId())
+
+	stagesSorted, isStagelessDeployment, err := dc.stageService.GetStagesSortedTopDownById(deploymentWithoutId.ParentStageId())
 	if err != nil {
+		fmt.Println("Loading stages failed:", err.Error())
 		return err
 	}
-	appName := appRecord.GetString(model.TABLE_APPLICATIONS_FIELD_NAME)
-	repoId := appRecord.GetString(model.TABLE_APPLICATIONS_FIELD_PARENTREPOSITORY)
 
-	repoRecord, err := dc.repositoryService.GetById(repoId)
+	fmt.Println("loaded stages", stagesSorted)
+
+	app, err := dc.applicationService.GetById(stagesSorted[0].ParentApplicationId())
 	if err != nil {
+		fmt.Println("Loading app failed:", err.Error())
 		return err
 	}
-	repoName := repoRecord.GetString(model.TABLE_REPOSITORIES_FIELD_NAME)
 
-	dc.deploymentService.CreateDeployment(deploymentRecord, stageNamesSorted, appName, repoName, isStagelessDeployment)
+	fmt.Println("loaded app")
+
+	repo, err := dc.repositoryService.GetById(app.ParentRepositoryId())
+	if err != nil {
+		fmt.Println("Loading repo failed:", err.Error())
+		return err
+	}
+
+	fmt.Println("loaded repo")
+
+	err = dc.deploymentService.CreateDeployment(deploymentWithoutId, stagesSorted, app, repo, isStagelessDeployment)
+	if err != nil {
+		fmt.Println("creating deployment failed:", err.Error())
+		return err
+	}
+
+	// TODO sync files (key values etc)
+
+	// TODO GIT PUSH
+
+	fmt.Println("created deployment")
+
 	return nil
 }
 
@@ -76,7 +96,7 @@ func (dc *DeploymentController) DeleteDeployment(record *models.Record, conf *co
 
 func (dc *DeploymentController) AddRepositoryToDeployments(repositoryAddedEvent *RepositoryAddedEvent) error {
 
-	repositoryRecord, err := dc.repositoryService.FindForName(repositoryAddedEvent.RepositoryName)
+	repositoryRecord, err := dc.repositoryService.FindByName(repositoryAddedEvent.RepositoryName)
 	if err != nil {
 		return err
 	}

@@ -29,12 +29,17 @@ func NewRepositoryService(dao *daos.Dao, appService *ApplicationService) *Reposi
 	return repositoryService
 }
 
-func (rs *RepositoryService) GetById(repositoryId string) (*models.Record, error) {
+func (rs *RepositoryService) GetById(repositoryId string) (model.IRepository, error) {
 
-	return rs.dao.FindRecordById(model.TABLE_REPOSITORIES_NAME, repositoryId)
+	record, err := rs.dao.FindRecordById(model.TABLE_REPOSITORIES_NAME, repositoryId)
+	if err != nil {
+		return nil, err
+	}
+
+	return model.ToRepository(record)
 }
 
-func (rs *RepositoryService) FindForName(name string) (*models.Record, error) {
+func (rs *RepositoryService) FindByName(name string) (*models.Record, error) {
 
 	recs, err := rs.dao.FindRecordsByExpr(model.TABLE_REPOSITORIES_NAME, dbx.NewExp(model.TABLE_REPOSITORIES_FIELD_NAME+" = {:"+model.TABLE_REPOSITORIES_FIELD_NAME+"}", dbx.Params{model.TABLE_REPOSITORIES_FIELD_NAME: name}))
 

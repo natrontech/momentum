@@ -35,6 +35,7 @@ type IKeyValue interface {
 
 type KeyValue struct {
 	IKeyValue
+	Model
 
 	key                string
 	value              string
@@ -50,7 +51,9 @@ func ToKeyValue(record *models.Record) (IKeyValue, error) {
 	}
 
 	kv := new(KeyValue)
-	kv.SetId(record.Id)
+	if record.Id != "" {
+		kv.SetId(record.Id)
+	}
 	kv.key = record.GetString(TABLE_KEYVALUE_FIELD_KEY)
 	kv.value = record.GetString(TABLE_KEYVALUE_FIELD_VALUE)
 	kv.displayName = record.GetString(TABLE_KEYVALUE_FIELD_DISPLAY_NAME)
@@ -73,6 +76,14 @@ func ToKeyValueRecord(kv IKeyValue, recordInstance *models.Record) (*models.Reco
 	recordInstance.Set(TABLE_KEYVALUE_FIELD_PARENTDEPLOYMENT, kv.ParentDeploymentId())
 
 	return recordInstance, nil
+}
+
+func (kv *KeyValue) Id() string {
+	return kv.id
+}
+
+func (kv *KeyValue) SetId(id string) {
+	kv.id = id
 }
 
 func (kv *KeyValue) Key() string {

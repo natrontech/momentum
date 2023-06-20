@@ -128,12 +128,12 @@ func YamlTree(n *Node) (*yaml.Node, error) {
 		return nil, errors.New("unable to create yaml tree from directory")
 	}
 
-	if n.yamlNode == nil {
+	if n.YamlNode == nil {
 
 		return nil, errors.New("for this node no yaml node exists")
 	}
 
-	return n.yamlNode, nil
+	return n.YamlNode, nil
 }
 
 func handleValueEntries(n *yaml.Node, parent *Node) (*Node, bool, error) {
@@ -154,7 +154,7 @@ func handleValueEntries(n *yaml.Node, parent *Node) (*Node, bool, error) {
 		parent.Children[lastChildIndex].Kind == Property {
 
 		parent.Children[lastChildIndex].Value = n.Value
-		parent.Children[lastChildIndex].yamlNode = n
+		parent.Children[lastChildIndex].YamlNode = n
 
 		return parent.Children[lastChildIndex], false, nil
 	}

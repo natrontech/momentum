@@ -17,7 +17,11 @@ func TestEncodeDecodeRoundTrip(t *testing.T) {
 
 	printAll(root.Content, 0)
 
-	yaml.EncodeToFile(root, YAML_TEST_OUTPUT_FILE)
+	_, err := yaml.EncodeToFile(root, YAML_TEST_OUTPUT_FILE, false)
+	if err != nil {
+		fmt.Println("failed writing yaml:", err.Error())
+		t.FailNow()
+	}
 
 	os.Remove(YAML_TEST_OUTPUT_FILE)
 }

@@ -52,7 +52,6 @@ func (rs *RepositorySyncService) SyncRepositoryFromDisk(n *tree.Node, record *mo
 
 	// this complex loop is necessary because we need to know which deployments must add the repository
 	// which is currently created, when the creation of the repository is finished.
-	// TODO for a future refactoring: extract logic to specific services.
 	deployments := make([]*models.Record, 0)
 	for _, applicationRecord := range appRecords {
 
@@ -110,6 +109,9 @@ func (rs *RepositorySyncService) SyncApplicationsFromDisk(n *tree.Node, record *
 		}
 
 		err = rs.stageService.AddParentApplication(stageIds, rec)
+		if err != nil {
+			return nil, err
+		}
 
 		recs = append(recs, rec)
 	}
@@ -147,7 +149,7 @@ func (rs *RepositorySyncService) SyncStagesFromDisk(n *tree.Node) ([]*models.Rec
 			return nil, err
 		}
 
-		stageRecord, err := rs.stageService.CreateWithoutEvent(stage.NormalizedPath(), deployments)
+		stageRecord, err := rs.stageService.createWithoutEvent(stage.NormalizedPath(), deployments)
 		if err != nil {
 			return nil, err
 		}

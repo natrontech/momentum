@@ -1,15 +1,17 @@
 package momentumconfig
 
 import (
+	"errors"
 	utils "momentum/momentum-core/momentum-utils"
 	"os"
 )
 
 type MomentumConfig struct {
-	dataDir                string
-	validationTmpDir       string
-	templatesDir           string
-	deploymentTemplatePath string
+	dataDir                      string
+	validationTmpDir             string
+	templatesDir                 string
+	deploymentTemplateFilePath   string
+	deploymentTemplateFolderPath string
 }
 
 func (m *MomentumConfig) DataDir() string {
@@ -24,8 +26,25 @@ func (m *MomentumConfig) TemplateDir() string {
 	return m.templatesDir
 }
 
-func (m *MomentumConfig) DeploymentTemplateDir() string {
-	return m.deploymentTemplatePath
+func (m *MomentumConfig) DeploymentTemplateFolderPath() string {
+	return m.deploymentTemplateFolderPath
+}
+
+func (m *MomentumConfig) DeploymentTemplateFilePath() string {
+	return m.deploymentTemplateFilePath
+}
+
+func (m *MomentumConfig) checkMandatoryTemplates() error {
+
+	if !utils.FileExists(m.DeploymentTemplateFolderPath()) {
+		return errors.New("provide mandatory template for deployment folders at " + m.DeploymentTemplateFolderPath())
+	}
+
+	if !utils.FileExists(m.DeploymentTemplateFilePath()) {
+		return errors.New("provide mandatory template for deployment files at " + m.DeploymentTemplateFilePath())
+	}
+
+	return nil
 }
 
 func InitializeMomentumCore() (*MomentumConfig, error) {
@@ -38,16 +57,22 @@ func InitializeMomentumCore() (*MomentumConfig, error) {
 	momentumDir := utils.BuildPath(usrHome, ".momentum")
 	dataDir := utils.BuildPath(momentumDir, "data")
 	validationTmpDir := utils.BuildPath(momentumDir, "validation")
-	templatesDir := "./templates"
+	templatesDir := utils.BuildPath(momentumDir, "templates")
 
 	createPathIfNotPresent(dataDir, momentumDir)
 	createPathIfNotPresent(validationTmpDir, momentumDir)
 
 	config := new(MomentumConfig)
+
 	config.dataDir = dataDir
+
 	config.validationTmpDir = validationTmpDir
+
 	config.templatesDir = templatesDir
-	config.deploymentTemplatePath = utils.BuildPath(templatesDir, "deployments")
+	config.deploymentTemplateFolderPath = utils.BuildPath(templatesDir, "deployments", "deploymentName")
+	config.deploymentTemplateFilePath = utils.BuildPath(templatesDir, "deployments", "deploymentName.yaml")
+
+	err = config.checkMandatoryTemplates()
 
 	return config, err
 }
