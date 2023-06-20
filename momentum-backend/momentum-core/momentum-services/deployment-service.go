@@ -3,7 +3,8 @@ package momentumservices
 import (
 	"errors"
 	"fmt"
-	consts "momentum/momentum-core/momentum-config"
+	config "momentum/momentum-core/momentum-config"
+	model "momentum/momentum-core/momentum-model"
 	tree "momentum/momentum-core/momentum-tree"
 	utils "momentum/momentum-core/momentum-utils"
 
@@ -13,7 +14,7 @@ import (
 
 type DeploymentService struct {
 	dao                *daos.Dao
-	config             *consts.MomentumConfig
+	config             *config.MomentumConfig
 	repositoryService  *RepositoryService
 	applicationService *ApplicationService
 	stageService       *StageService
@@ -22,7 +23,7 @@ type DeploymentService struct {
 
 func NewDeploymentService(
 	dao *daos.Dao,
-	config *consts.MomentumConfig,
+	config *config.MomentumConfig,
 	keyValueService *KeyValueService) *DeploymentService {
 
 	if dao == nil {
@@ -40,43 +41,17 @@ func NewDeploymentService(
 
 func (ds *DeploymentService) GetById(deploymentId string) (*models.Record, error) {
 
-	return ds.dao.FindRecordById(consts.TABLE_REPOSITORIES_NAME, deploymentId)
-}
-
-func (ds *DeploymentService) SyncDeploymentsFromDisk(n *tree.Node) ([]*models.Record, error) {
-
-	deployments := n.AllDeployments()
-
-	deploymentIds := make([]*models.Record, 0)
-	for _, deployment := range deployments {
-
-		deploymentRecord, err := ds.createWithoutEvent(deployment.NormalizedPath())
-		if err != nil {
-			return nil, err
-		}
-
-		if deployment.Kind == tree.File {
-
-			err := ds.keyValueService.SyncFile(deployment, deploymentRecord)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		deploymentIds = append(deploymentIds, deploymentRecord)
-	}
-
-	return deploymentIds, nil
+	return ds.dao.FindRecordById(model.TABLE_REPOSITORIES_NAME, deploymentId)
 }
 
 func (ds *DeploymentService) AddParentStage(stage *models.Record, deployments []*models.Record) error {
 
-	if stage.Collection().Name != consts.TABLE_STAGES_NAME {
+	if stage.Collection().Name != model.TABLE_STAGES_NAME {
 		return errors.New("stage is not record of stages collection")
 	}
 
 	for _, deployment := range deployments {
-		deployment.Set(consts.TABLE_DEPLOYMENTS_FIELD_PARENTSTAGE, stage.Id)
+		deployment.Set(model.TABLE_DEPLOYMENTS_FIELD_PARENTSTAGE, stage.Id)
 		err := ds.saveWithoutEvent(deployment)
 		if err != nil {
 			return err
@@ -88,13 +63,13 @@ func (ds *DeploymentService) AddParentStage(stage *models.Record, deployments []
 
 func (ds *DeploymentService) AddRepository(repositoryRecord *models.Record, deployments []*models.Record) error {
 
-	if repositoryRecord.Collection().Name != consts.TABLE_REPOSITORIES_NAME {
+	if repositoryRecord.Collection().Name != model.TABLE_REPOSITORIES_NAME {
 		return errors.New("repositoryRecord is not record of repositories collection")
 	}
 
 	for _, depl := range deployments {
 
-		depl.Set(consts.TABLE_DEPLOYMENTS_FIELD_REPOSITORIES, append(depl.Get(consts.TABLE_DEPLOYMENTS_FIELD_REPOSITORIES).([]string), repositoryRecord.Id))
+		depl.Set(model.TABLE_DEPLOYMENTS_FIELD_REPOSITORIES, append(depl.Get(model.TABLE_DEPLOYMENTS_FIELD_REPOSITORIES).([]string), repositoryRecord.Id))
 		err := ds.saveWithoutEvent(depl)
 		if err != nil {
 			return err
@@ -111,7 +86,7 @@ func (ds *DeploymentService) CreateDeployment(
 	repositoryName string,
 	isStagelessDeployment bool) error {
 
-	name := deploymentRecord.GetString(consts.TABLE_DEPLOYMENTS_FIELD_NAME)
+	name := deploymentRecord.GetString(model.TABLE_DEPLOYMENTS_FIELD_NAME)
 
 	repoPath := utils.BuildPath(ds.config.DataDir(), repositoryName)
 	deploymentStagePath := utils.BuildPath(repoPath, appName)
@@ -153,7 +128,7 @@ func (ds *DeploymentService) CreateDeployment(
 
 func (ds *DeploymentService) GetDeploymentsCollection() (*models.Collection, error) {
 
-	coll, err := ds.dao.FindCollectionByNameOrId(consts.TABLE_DEPLOYMENTS_NAME)
+	coll, err := ds.dao.FindCollectionByNameOrId(model.TABLE_DEPLOYMENTS_NAME)
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +144,7 @@ func (ds *DeploymentService) createWithoutEvent(name string) (*models.Record, er
 	}
 
 	deploymentRecord := models.NewRecord(deploymentCollection)
-	deploymentRecord.Set(consts.TABLE_DEPLOYMENTS_FIELD_NAME, name)
+	deploymentRecord.Set(model.TABLE_DEPLOYMENTS_FIELD_NAME, name)
 
 	err = ds.saveWithoutEvent(deploymentRecord)
 

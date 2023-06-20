@@ -8,6 +8,7 @@ import (
 	gitclient "momentum/git-client"
 	kustomizeclient "momentum/kustomize-client"
 	config "momentum/momentum-core/momentum-config"
+	model "momentum/momentum-core/momentum-model"
 	services "momentum/momentum-core/momentum-services"
 	tree "momentum/momentum-core/momentum-tree"
 	utils "momentum/momentum-core/momentum-utils"
@@ -23,22 +24,22 @@ type RepositoryAddedEvent struct {
 }
 
 type RepositoryController struct {
+	repositorySyncService       *services.RepositorySyncService
 	repositoryService           *services.RepositoryService
-	deploymentService           *services.DeploymentService
 	repositoryAddedEventChannel chan *RepositoryAddedEvent
 	kustomizeValidation         *kustomizeclient.KustomizationValidationService
 }
 
 func NewRepositoryController(
+	repoSyncService *services.RepositorySyncService,
 	repoService *services.RepositoryService,
-	deploymentService *services.DeploymentService,
 	repositoryAddedEventChannel chan *RepositoryAddedEvent,
 	kustomizeValidator *kustomizeclient.KustomizationValidationService) *RepositoryController {
 
 	repoController := new(RepositoryController)
 
+	repoController.repositorySyncService = repoSyncService
 	repoController.repositoryService = repoService
-	repoController.deploymentService = deploymentService
 	repoController.repositoryAddedEventChannel = repositoryAddedEventChannel
 	repoController.kustomizeValidation = kustomizeValidator
 
@@ -47,8 +48,8 @@ func NewRepositoryController(
 
 func (rc *RepositoryController) AddRepository(record *models.Record, conf *config.MomentumConfig) error {
 
-	repoName := record.GetString(config.TABLE_REPOSITORIES_FIELD_NAME)
-	repoUrl := record.GetString(config.TABLE_REPOSITORIES_FIELD_URL)
+	repoName := record.GetString(model.TABLE_REPOSITORIES_FIELD_NAME)
+	repoUrl := record.GetString(model.TABLE_REPOSITORIES_FIELD_URL)
 	path := utils.BuildPath(conf.DataDir(), strings.ReplaceAll(repoName, " ", ""))
 
 	fmt.Println("adding repo", repoName, ", located at", repoUrl, "and to be written to", path)
@@ -77,7 +78,7 @@ func (rc *RepositoryController) AddRepository(record *models.Record, conf *confi
 		return err
 	}
 
-	_, apps, deployments, err := rc.repositoryService.SyncRepositoryFromDisk(repo, record)
+	_, apps, deployments, err := rc.repositorySyncService.SyncRepositoryFromDisk(repo, record)
 	if err != nil {
 		fmt.Println("ERROR:", err.Error())
 		utils.DirDelete(path)

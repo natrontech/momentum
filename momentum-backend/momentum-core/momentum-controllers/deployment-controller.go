@@ -3,6 +3,7 @@ package momentumcontrollers
 import (
 	"errors"
 	config "momentum/momentum-core/momentum-config"
+	model "momentum/momentum-core/momentum-model"
 	services "momentum/momentum-core/momentum-services"
 
 	"github.com/pocketbase/pocketbase/models"
@@ -32,32 +33,32 @@ func NewDeploymentController(
 
 func (dc *DeploymentController) AddDeployment(deploymentRecord *models.Record, conf *config.MomentumConfig) error {
 
-	if deploymentRecord.Collection().Name != config.TABLE_DEPLOYMENTS_NAME {
+	if deploymentRecord.Collection().Name != model.TABLE_DEPLOYMENTS_NAME {
 		return errors.New("can only add deployment records")
 	}
 
-	stagesSorted, isStagelessDeployment, err := dc.stageService.GetStagesSortedById(deploymentRecord.GetString(config.TABLE_DEPLOYMENTS_FIELD_PARENTSTAGE))
+	stagesSorted, isStagelessDeployment, err := dc.stageService.GetStagesSortedById(deploymentRecord.GetString(model.TABLE_DEPLOYMENTS_FIELD_PARENTSTAGE))
 	if err != nil {
 		return err
 	}
 	stageNamesSorted := make([]string, 0)
 	for _, stage := range stagesSorted {
-		stageNamesSorted = append(stageNamesSorted, stage.GetString(config.TABLE_STAGES_FIELD_NAME))
+		stageNamesSorted = append(stageNamesSorted, stage.GetString(model.TABLE_STAGES_FIELD_NAME))
 	}
 
-	stageApplicationId := stagesSorted[0].GetString(config.TABLE_STAGES_FIELD_PARENTAPPLICATION)
+	stageApplicationId := stagesSorted[0].GetString(model.TABLE_STAGES_FIELD_PARENTAPPLICATION)
 	appRecord, err := dc.applicationService.GetById(stageApplicationId)
 	if err != nil {
 		return err
 	}
-	appName := appRecord.GetString(config.TABLE_APPLICATIONS_FIELD_NAME)
-	repoId := appRecord.GetString(config.TABLE_APPLICATIONS_FIELD_PARENTREPOSITORY)
+	appName := appRecord.GetString(model.TABLE_APPLICATIONS_FIELD_NAME)
+	repoId := appRecord.GetString(model.TABLE_APPLICATIONS_FIELD_PARENTREPOSITORY)
 
 	repoRecord, err := dc.repositoryService.GetById(repoId)
 	if err != nil {
 		return err
 	}
-	repoName := repoRecord.GetString(config.TABLE_REPOSITORIES_FIELD_NAME)
+	repoName := repoRecord.GetString(model.TABLE_REPOSITORIES_FIELD_NAME)
 
 	dc.deploymentService.CreateDeployment(deploymentRecord, stageNamesSorted, appName, repoName, isStagelessDeployment)
 	return nil
