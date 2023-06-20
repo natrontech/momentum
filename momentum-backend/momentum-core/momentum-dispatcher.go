@@ -7,6 +7,7 @@ import (
 	kustomizeclient "momentum/kustomize-client"
 	conf "momentum/momentum-core/momentum-config"
 	controllers "momentum/momentum-core/momentum-controllers"
+	model "momentum/momentum-core/momentum-model"
 	services "momentum/momentum-core/momentum-services"
 
 	"github.com/pocketbase/pocketbase"
@@ -48,10 +49,11 @@ func NewDispatcher(config *conf.MomentumConfig, pb *pocketbase.PocketBase) *Mome
 	stageService := services.NewStageService(pb.Dao(), deploymentService, keyValueService)
 	appService := services.NewApplicationService(pb.Dao(), stageService)
 	repoService := services.NewRepositoryService(pb.Dao(), appService)
+	repoSyncService := services.NewRepositorySyncService(pb.Dao(), appService, stageService, deploymentService, keyValueService)
 
 	dispatcher.kustomizeValidator = kustomizeclient.NewKustomizationValidationService(dispatcher.Config, repoService)
 
-	dispatcher.RepositoryController = controllers.NewRepositoryController(repoService, deploymentService, REPOSITORY_ADDED_EVENT_CHANNEL, dispatcher.kustomizeValidator)
+	dispatcher.RepositoryController = controllers.NewRepositoryController(repoSyncService, repoService, REPOSITORY_ADDED_EVENT_CHANNEL, dispatcher.kustomizeValidator)
 	dispatcher.ApplicationsController = controllers.NewApplicationController(appService, repoService)
 	dispatcher.StagesController = controllers.NewStageController(stageService)
 	dispatcher.DeploymentController = controllers.NewDeploymentController(deploymentService, repoService)
@@ -109,34 +111,34 @@ func (d *MomentumDispatcher) DispatchDelete(recordEvent *core.RecordDeleteEvent)
 
 func (d *MomentumDispatcher) setupCreateRules() []*MomentumDispatcherRule {
 	return []*MomentumDispatcherRule{
-		{conf.TABLE_REPOSITORIES_NAME, d.RepositoryController.AddRepository},
-		{conf.TABLE_APPLICATIONS_NAME, d.ApplicationsController.AddApplication},
-		{conf.TABLE_STAGES_NAME, d.StagesController.AddStage},
-		{conf.TABLE_DEPLOYMENTS_NAME, d.DeploymentController.AddDeployment},
+		{model.TABLE_REPOSITORIES_NAME, d.RepositoryController.AddRepository},
+		{model.TABLE_APPLICATIONS_NAME, d.ApplicationsController.AddApplication},
+		{model.TABLE_STAGES_NAME, d.StagesController.AddStage},
+		{model.TABLE_DEPLOYMENTS_NAME, d.DeploymentController.AddDeployment},
 	}
 }
 
 func (d *MomentumDispatcher) setupUpdateRules() []*MomentumDispatcherRule {
 	return []*MomentumDispatcherRule{
-		{conf.TABLE_REPOSITORIES_NAME, d.RepositoryController.UpdateRepository},
-		{conf.TABLE_APPLICATIONS_NAME, d.ApplicationsController.UpdateApplication},
-		{conf.TABLE_STAGES_NAME, d.StagesController.UpdateStage},
-		{conf.TABLE_DEPLOYMENTS_NAME, d.DeploymentController.UpdateDeployment},
+		{model.TABLE_REPOSITORIES_NAME, d.RepositoryController.UpdateRepository},
+		{model.TABLE_APPLICATIONS_NAME, d.ApplicationsController.UpdateApplication},
+		{model.TABLE_STAGES_NAME, d.StagesController.UpdateStage},
+		{model.TABLE_DEPLOYMENTS_NAME, d.DeploymentController.UpdateDeployment},
 	}
 }
 
 func (d *MomentumDispatcher) setupDeleteRules() []*MomentumDispatcherRule {
 	return []*MomentumDispatcherRule{
-		{conf.TABLE_REPOSITORIES_NAME, d.RepositoryController.DeleteRepository},
-		{conf.TABLE_APPLICATIONS_NAME, d.ApplicationsController.DeleteApplication},
-		{conf.TABLE_STAGES_NAME, d.StagesController.DeleteStage},
-		{conf.TABLE_DEPLOYMENTS_NAME, d.DeploymentController.DeleteDeployment},
+		{model.TABLE_REPOSITORIES_NAME, d.RepositoryController.DeleteRepository},
+		{model.TABLE_APPLICATIONS_NAME, d.ApplicationsController.DeleteApplication},
+		{model.TABLE_STAGES_NAME, d.StagesController.DeleteStage},
+		{model.TABLE_DEPLOYMENTS_NAME, d.DeploymentController.DeleteDeployment},
 	}
 }
 
 func (d *MomentumDispatcher) setupRepositoryAddedEventChannelObserver() {
 
-	d.Pocketbase.OnRecordAfterCreateRequest(conf.TABLE_REPOSITORIES_NAME).Add(func(e *core.RecordCreateEvent) error {
+	d.Pocketbase.OnRecordAfterCreateRequest(model.TABLE_REPOSITORIES_NAME).Add(func(e *core.RecordCreateEvent) error {
 
 		event := <-REPOSITORY_ADDED_EVENT_CHANNEL
 
