@@ -19,7 +19,7 @@ import (
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 )
 
-const ENABLE_CLEANUP = false
+const ENABLE_CLEANUP = true
 
 func defaultPublicDir() string {
 	if strings.HasPrefix(os.Args[0], os.TempDir()) {

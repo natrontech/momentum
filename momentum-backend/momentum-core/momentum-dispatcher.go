@@ -57,7 +57,7 @@ func NewDispatcher(config *conf.MomentumConfig, pb *pocketbase.PocketBase) *Mome
 	dispatcher.RepositoryController = controllers.NewRepositoryController(repoSyncService, repoService, REPOSITORY_ADDED_EVENT_CHANNEL, dispatcher.kustomizeValidator)
 	dispatcher.ApplicationsController = controllers.NewApplicationController(appService, repoService)
 	dispatcher.StagesController = controllers.NewStageController(stageService)
-	dispatcher.DeploymentController = controllers.NewDeploymentController(deploymentService, stageService, appService, repoService)
+	dispatcher.DeploymentController = controllers.NewDeploymentController(deploymentService, stageService, appService, repoService, keyValueService, dispatcher.kustomizeValidator)
 
 	dispatcher.CreateRules = dispatcher.setupCreateRules()
 	dispatcher.UpdateRules = dispatcher.setupUpdateRules()

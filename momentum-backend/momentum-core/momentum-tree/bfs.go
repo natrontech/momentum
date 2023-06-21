@@ -1,7 +1,6 @@
 package tree
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -56,7 +55,7 @@ func bfsMultilevelPathMatch(sortedTerms []string, startNode *Node, result []*Nod
 
 func bfsMultilevelPathMatchByTerm(term string, n *Node, result []*Node) []*Node {
 
-	fmt.Println("Searching in", ToMatchableSearchTerm(n.FullPath()), "for", term)
+	// fmt.Println("Searching in", ToMatchableSearchTerm(n.FullPath()), "for", term)
 
 	if strings.Contains(ToMatchableSearchTerm(n.FullPath()), term) {
 

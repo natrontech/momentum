@@ -60,7 +60,7 @@ func (rc *RepositoryController) AddRepository(record *models.Record, conf *confi
 
 	fmt.Println("Cloning repo to:", path)
 
-	err := gitclient.PullRepoTo(repoUrl, "", "", path)
+	err := gitclient.CloneRepoTo(repoUrl, "", "", path)
 	if err != nil {
 		return err
 	}

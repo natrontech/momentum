@@ -40,7 +40,7 @@ func FILESYSTEMTEST_TestAddSequenceValue(t *testing.T) {
 	}
 
 	resourcesSequence.Children[0].SetValue("Ciao")
-	err = resourcesSequence.AddSequenceValue("World")
+	err = resourcesSequence.AddSequenceValue("World", 0)
 	if err != nil {
 		fmt.Println(err.Error())
 		t.FailNow()

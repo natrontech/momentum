@@ -30,7 +30,7 @@ func FileExists(name string) bool {
 
 func FileAsLines(f *os.File) []string {
 
-	file := fileAsString(f)
+	file := FileAsString(f)
 	return strings.Split(file, NEW_LINE)
 }
 
@@ -73,13 +73,9 @@ func DirDelete(path string) error {
 
 func dirCopyRecursive(rootOrigin string, rootDestination string, relativeToParent string) error {
 
-	fmt.Println("recursive copy")
-
 	errs := make([]error, 0)
 	from := BuildPath(rootOrigin, relativeToParent)
 	to := BuildPath(rootDestination, relativeToParent)
-
-	fmt.Println("copying from/to", from, to)
 
 	info, err := os.Stat(from)
 	if err != nil {
@@ -226,7 +222,7 @@ func write(path string, fileSize int64, buf []byte) bool {
 	return int64(n) == fileSize
 }
 
-func fileAsString(f *os.File) string {
+func FileAsString(f *os.File) string {
 
 	buf := make([]byte, fileSizeByFile(f))
 	_, err := f.Read(buf)

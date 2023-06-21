@@ -196,13 +196,13 @@ func (n *Node) FindFirst(term string) (*Node, bool) {
 	return results[0], true
 }
 
-func (n *Node) AddSequenceValue(value string) error {
+func (n *Node) AddSequenceValue(value string, style yaml.Style) error {
 
 	if n.Kind != Sequence || n.YamlNode.Kind != yaml.SequenceNode {
 		return errors.New("can only add sequence value to node of type sequence")
 	}
 
-	sequenceValue := CreateSequenceValueNode(value, strTag, yaml.DoubleQuotedStyle)
+	sequenceValue := CreateSequenceValueNode(value, strTag, style)
 	n.YamlNode.Content = append(n.YamlNode.Content, sequenceValue)
 	momentumNode := NewNode(Value, "", value, n, nil, sequenceValue)
 	n.AddChild(momentumNode)

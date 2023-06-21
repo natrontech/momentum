@@ -96,10 +96,10 @@ func (ds *DeploymentService) CreateDeployment(
 	for _, s := range stagesSorted {
 		deploymentStagePath = utils.BuildPath(deploymentStagePath, s.Name())
 	}
-	fmt.Println("adding deployment for stage:", deploymentStagePath)
 
 	repoTree, err := tree.Parse(repoPath, []string{".git"})
 	if err != nil {
+		fmt.Println("failed parsing repository:", err.Error())
 		return err
 	}
 
@@ -115,19 +115,14 @@ func (ds *DeploymentService) CreateDeployment(
 		}
 	}
 
-	kustomizationResources, found := stageNode.FindFirst(tree.ToMatchableSearchTerm(utils.BuildPath(KUSTOMIZATION_FILE_NAME, "resources")))
+	kustomizationResources, found := stageNode.FindFirst(tree.ToMatchableSearchTerm(utils.BuildPath(stageNode.FullPath(), KUSTOMIZATION_FILE_NAME, "resources")))
 	if !found {
 		return errors.New("unable to find kustomization resources for stage or application of new deployment")
 	}
-	tree.Print(kustomizationResources)
 
 	deploymentYamlDestinationName := deployment.Name() + ".yaml"
 	deploymentFolderDestinationPath := utils.BuildPath(deploymentStagePath, "_deploy", deployment.Name())
 	deploymentFileDestinationPath := utils.BuildPath(deploymentStagePath, deploymentYamlDestinationName)
-
-	fmt.Println("paths:", deploymentYamlDestinationName)
-	fmt.Println("paths:", deploymentFolderDestinationPath)
-	fmt.Println("paths:", deploymentFileDestinationPath)
 
 	deploymentFolderDestinationPath, err = utils.DirCopy(ds.config.DeploymentTemplateFolderPath(), deploymentFolderDestinationPath)
 	if err != nil {
@@ -135,18 +130,13 @@ func (ds *DeploymentService) CreateDeployment(
 		return err
 	}
 
-	fmt.Println("copied deployment directory:", deploymentFolderDestinationPath)
-
 	fileCopySuccess := utils.FileCopy(ds.config.DeploymentTemplateFilePath(), deploymentFileDestinationPath)
 	if !fileCopySuccess {
 		return errors.New("failed copying deployment file")
 	}
 
-	fmt.Println("copied deployment file:", deploymentFileDestinationPath)
-
 	releaseYamlPath := utils.BuildPath(deploymentFolderDestinationPath, "release.yaml")
 	deploymentKustomizationYamlPath := utils.BuildPath(deploymentFolderDestinationPath, KUSTOMIZATION_FILE_NAME)
-	parentKustomizationYaml := utils.BuildPath(deploymentStagePath, KUSTOMIZATION_FILE_NAME)
 
 	err = ds.templateService.ApplyDeploymentKustomizationTemplate(deploymentKustomizationYamlPath, deployment.Name())
 	if err != nil {
@@ -158,16 +148,21 @@ func (ds *DeploymentService) CreateDeployment(
 		fmt.Println("template for", deploymentKustomizationYamlPath, "failed:", err.Error())
 		return err
 	}
-	err = ds.templateService.ApplyDeploymentStageKustomization(parentKustomizationYaml, deployment.Name(), repository.Name())
+	err = ds.templateService.ApplyDeploymentStageDeploymentDescriptionTemplate(deploymentFileDestinationPath, deployment.Name(), repository.Name())
 	if err != nil {
 		fmt.Println("template for", deploymentKustomizationYamlPath, "failed:", err.Error())
 		return err
 	}
 
-	kustomizationResources.AddSequenceValue(deploymentYamlDestinationName)
+	err = kustomizationResources.AddSequenceValue(deploymentYamlDestinationName, 0)
+	if err != nil {
+		fmt.Println("failed adding deployment to resources:", err.Error())
+		return err
+	}
 
 	err = kustomizationResources.Write(true)
 	if err != nil {
+		fmt.Println("failed writing deployment to resources:", err.Error())
 		return err
 	}
 
