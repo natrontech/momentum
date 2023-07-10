@@ -35,6 +35,7 @@ type IStage interface {
 
 type Stage struct {
 	IStage
+	Model
 
 	name                string
 	parentApplicationId string
@@ -50,12 +51,26 @@ func ToStage(record *models.Record) (IStage, error) {
 	}
 
 	st := new(Stage)
-	st.SetId(record.Id)
+	if record.Id != "" {
+		st.SetId(record.Id)
+	}
 	st.name = record.GetString(TABLE_STAGES_FIELD_NAME)
 	st.parentApplicationId = record.GetString(TABLE_STAGES_FIELD_PARENTAPPLICATION)
 	st.parentStageId = record.GetString(TABLE_STAGES_FIELD_PARENTSTAGE)
-	st.deploymentIds = record.Get(TABLE_STAGES_FIELD_DEPLOYMENTS).([]string)
-	st.keyValueIds = record.Get(TABLE_STAGES_FIELD_KEYVALUES).([]string)
+
+	ids, ok := record.Get(TABLE_STAGES_FIELD_DEPLOYMENTS).([]string)
+	if ok {
+		st.deploymentIds = ids
+	} else {
+		st.deploymentIds = []string{}
+	}
+
+	ids, ok = record.Get(TABLE_STAGES_FIELD_KEYVALUES).([]string)
+	if ok {
+		st.keyValueIds = ids
+	} else {
+		st.keyValueIds = []string{}
+	}
 
 	return st, nil
 }
@@ -73,6 +88,14 @@ func ToStageRecord(st IStage, recordInstance *models.Record) (*models.Record, er
 	recordInstance.Set(TABLE_STAGES_FIELD_DEPLOYMENTS, st.DeploymentIds())
 
 	return recordInstance, nil
+}
+
+func (s *Stage) Id() string {
+	return s.id
+}
+
+func (s *Stage) SetId(id string) {
+	s.id = id
 }
 
 func (s *Stage) Name() string {

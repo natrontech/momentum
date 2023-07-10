@@ -44,8 +44,9 @@ func NewDispatcher(config *conf.MomentumConfig, pb *pocketbase.PocketBase) *Mome
 	dispatcher := new(MomentumDispatcher)
 	dispatcher.Config = config
 
+	templateService := services.NewTemplateService()
 	keyValueService := services.NewKeyValueService(pb.Dao())
-	deploymentService := services.NewDeploymentService(pb.Dao(), keyValueService)
+	deploymentService := services.NewDeploymentService(pb.Dao(), config, keyValueService, templateService)
 	stageService := services.NewStageService(pb.Dao(), deploymentService, keyValueService)
 	appService := services.NewApplicationService(pb.Dao(), stageService)
 	repoService := services.NewRepositoryService(pb.Dao(), appService)
@@ -56,7 +57,7 @@ func NewDispatcher(config *conf.MomentumConfig, pb *pocketbase.PocketBase) *Mome
 	dispatcher.RepositoryController = controllers.NewRepositoryController(repoSyncService, repoService, REPOSITORY_ADDED_EVENT_CHANNEL, dispatcher.kustomizeValidator)
 	dispatcher.ApplicationsController = controllers.NewApplicationController(appService, repoService)
 	dispatcher.StagesController = controllers.NewStageController(stageService)
-	dispatcher.DeploymentController = controllers.NewDeploymentController(deploymentService, repoService)
+	dispatcher.DeploymentController = controllers.NewDeploymentController(deploymentService, stageService, appService, repoService, keyValueService, dispatcher.kustomizeValidator)
 
 	dispatcher.CreateRules = dispatcher.setupCreateRules()
 	dispatcher.UpdateRules = dispatcher.setupUpdateRules()
@@ -72,10 +73,12 @@ func NewDispatcher(config *conf.MomentumConfig, pb *pocketbase.PocketBase) *Mome
 func (d *MomentumDispatcher) DispatchCreate(recordEvent *core.RecordCreateEvent) error {
 
 	for _, rule := range d.CreateRules {
-		fmt.Println("Rule:", rule.tableName)
+		fmt.Println("Rule:", rule.tableName, "(record: "+recordEvent.Record.TableName()+")")
 		if rule.tableName == recordEvent.Record.TableName() {
+			fmt.Println("Rule match")
 			err := rule.action(recordEvent.Record, d.Config)
 			if err != nil {
+				fmt.Println("Dispatch failed:", err.Error())
 				return err
 			}
 		}

@@ -11,7 +11,7 @@ import (
 const testdataDir = "./testdata"
 const baseKustomization = "kustomization.yaml"
 
-func TestTreeDfs(t *testing.T) {
+func TestTreeBfs(t *testing.T) {
 
 	testPath := utils.BuildPath(testdataDir, baseKustomization)
 	searchTerm := "kind"
@@ -40,7 +40,7 @@ func TestTreeDfs(t *testing.T) {
 	}
 }
 
-func TestMultiLevelPathDfs(t *testing.T) {
+func TestMultiLevelPathBfs(t *testing.T) {
 
 	testPath := "testdata"
 	searchTerm := "testdata.testdata_sub.kustomization::yaml.kind"

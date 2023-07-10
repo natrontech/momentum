@@ -35,6 +35,7 @@ type IDeployment interface {
 
 type Deployment struct {
 	IDeployment
+	Model
 
 	name          string
 	description   string
@@ -45,17 +46,35 @@ type Deployment struct {
 
 func ToDeployment(record *models.Record) (IDeployment, error) {
 
+	if record == nil {
+		return nil, errors.New("nil record")
+	}
+
 	if record.TableName() != TABLE_DEPLOYMENTS_NAME {
 		return nil, errors.New("unallowed record type")
 	}
 
 	dep := new(Deployment)
-	dep.SetId(record.Id)
+	if record.Id != "" {
+		dep.SetId(record.Id)
+	}
 	dep.name = record.GetString(TABLE_APPLICATIONS_FIELD_NAME)
 	dep.description = record.GetString(TABLE_DEPLOYMENTS_FIELD_DESCRIPTION)
 	dep.parentStageId = record.GetString(TABLE_DEPLOYMENTS_FIELD_PARENTSTAGE)
-	dep.keyValueIds = record.Get(TABLE_DEPLOYMENTS_FIELD_KEYVALUES).([]string)
-	dep.repositoryIds = record.Get(TABLE_DEPLOYMENTS_FIELD_REPOSITORIES).([]string)
+
+	ids, ok := record.Get(TABLE_DEPLOYMENTS_FIELD_KEYVALUES).([]string)
+	if ok {
+		dep.keyValueIds = ids
+	} else {
+		dep.keyValueIds = []string{}
+	}
+
+	ids, ok = record.Get(TABLE_DEPLOYMENTS_FIELD_REPOSITORIES).([]string)
+	if ok {
+		dep.repositoryIds = ids
+	} else {
+		dep.repositoryIds = []string{}
+	}
 
 	return dep, nil
 }
@@ -73,6 +92,14 @@ func ToDeploymentRecord(dep IDeployment, recordInstance *models.Record) (*models
 	recordInstance.Set(TABLE_DEPLOYMENTS_FIELD_PARENTSTAGE, dep.ParentStageId())
 
 	return recordInstance, nil
+}
+
+func (d *Deployment) Id() string {
+	return d.id
+}
+
+func (d *Deployment) SetId(id string) {
+	d.id = id
 }
 
 func (d *Deployment) Name() string {

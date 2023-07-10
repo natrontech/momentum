@@ -30,7 +30,7 @@ func FileExists(name string) bool {
 
 func FileAsLines(f *os.File) []string {
 
-	file := fileAsString(f)
+	file := FileAsString(f)
 	return strings.Split(file, NEW_LINE)
 }
 
@@ -49,13 +49,16 @@ func FileCopy(from string, to string) bool {
 	return fileSaveHandle(from, copy)
 }
 
-func DirCopy(from string, to string) (string, error) {
+// Copies a directory recursively from origin to destination.
+// You can define renamings. I empty or nil no renamings are executed.
+// The keys of the renamings are alwasy base name (not entire paths) and must match exactly.
+func DirCopy(origin string, destination string) (string, error) {
 
-	if !IsDirectory(from) || FileExists(to) {
-		return to, errors.New("from path must be directory and to path must be non existent")
+	if !IsDirectory(origin) || FileExists(destination) {
+		return destination, errors.New("from path must be directory and to path must be non existent")
 	}
 
-	return to, dirCopyRecursive(from, to, "")
+	return destination, dirCopyRecursive(origin, destination, "")
 }
 
 func DirCreate(path string) error {
@@ -68,11 +71,11 @@ func DirDelete(path string) error {
 	return os.RemoveAll(path)
 }
 
-func dirCopyRecursive(rootFrom string, rootTo string, relativeToParent string) error {
+func dirCopyRecursive(rootOrigin string, rootDestination string, relativeToParent string) error {
 
 	errs := make([]error, 0)
-	from := BuildPath(rootFrom, relativeToParent)
-	to := BuildPath(rootTo, relativeToParent)
+	from := BuildPath(rootOrigin, relativeToParent)
+	to := BuildPath(rootDestination, relativeToParent)
 
 	info, err := os.Stat(from)
 	if err != nil {
@@ -219,7 +222,7 @@ func write(path string, fileSize int64, buf []byte) bool {
 	return int64(n) == fileSize
 }
 
-func fileAsString(f *os.File) string {
+func FileAsString(f *os.File) string {
 
 	buf := make([]byte, fileSizeByFile(f))
 	_, err := f.Read(buf)

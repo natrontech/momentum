@@ -27,6 +27,7 @@ type IRepository interface {
 
 type Repository struct {
 	IRepository
+	Model
 
 	name           string
 	url            string
@@ -59,6 +60,14 @@ func ToRepositoryRecord(repo IRepository, recordInstance *models.Record) (*model
 	recordInstance.Set(TABLE_REPOSITORIES_FIELD_APPLICATIONS, repo.ApplicationIds())
 
 	return recordInstance, nil
+}
+
+func (r *Repository) Id() string {
+	return r.id
+}
+
+func (r *Repository) SetId(id string) {
+	r.id = id
 }
 
 func (r *Repository) Name() string {
