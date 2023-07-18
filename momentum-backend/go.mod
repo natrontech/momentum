@@ -6,6 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/uuid v1.3.0
 	github.com/json-iterator/go v1.1.12
+	github.com/swaggo/swag v1.16.1
 	gopkg.in/src-d/go-git.v4 v4.13.1
 	sigs.k8s.io/kustomize/api v0.14.0
 	sigs.k8s.io/kustomize/kyaml v0.14.3
@@ -20,7 +21,8 @@ require (
 	github.com/labstack/gommon v0.2.9 // indirect
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
-	github.com/swaggo/swag v1.16.1 // indirect
+	github.com/swaggo/files v1.0.1 // indirect
+	github.com/swaggo/gin-swagger v1.6.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.0.1 // indirect
 	golang.org/x/tools v0.9.3 // indirect

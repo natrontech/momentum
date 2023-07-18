@@ -767,7 +767,7 @@ var SwaggerInfo = &swag.Spec{
 	Version:          "early-alpha",
 	Host:             "localhost:8080",
 	BasePath:         "/",
-	Schemes:          []string{},
+	Schemes:          []string{"http,", "https"},
 	Title:            "Momentum Core API",
 	Description:      "The momentum core api manages the core structure of momentum",
 	InfoInstanceName: "swagger",

@@ -10,13 +10,14 @@ import (
 	_ "github.com/pdrum/swagger-automation/docs" // This line is necessary for go-swagger to find your docs!
 )
 
-// @title			Momentum Core API
+// @title		Momentum Core API
 // @version		early-alpha
 // @description	The momentum core api manages the core structure of momentum
-
+//
 // @license.name	Apache 2.0
-// @license.url	http://www.apache.org/licenses/LICENSE-2.0.html
-
+// @license.url		http://www.apache.org/licenses/LICENSE-2.0.html
+//
+// @schemes 	http, https
 // @host		localhost:8080
 // @BasePath	/
 func main() {

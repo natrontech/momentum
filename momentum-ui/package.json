@@ -7,6 +7,9 @@
     "dev:backend": "cd ../momentum-backend && make run",
     "build": "vite build",
     "build:backend": "cd ../momentum-backend && make build",
+    "generate:api-spec": "cd ../momentum-backend && make generate-api-spec && cp docs/swagger.yaml ../momentum-ui/swagger.yaml",
+    "generate:api-client": "openapi-generator-cli generate -i swagger.yaml -g typescript-angular -o src/lib/momentum-core-client",
+    "generate:api": "npm run generate:api-spec && npm run generate:api-client",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
@@ -42,6 +45,7 @@
   "type": "module",
   "dependencies": {
     "@floating-ui/dom": "^1.2.8",
+    "@openapitools/openapi-generator-cli": "^2.7.0",
     "@picocss/pico": "^1.5.10",
     "@sveltejs/adapter-node": "^1.2.1",
     "@sveltejs/adapter-static": "^2.0.2",

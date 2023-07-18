@@ -22,7 +22,7 @@ Now visit http://localhost:5173 (ui) or http://localhost:8090 (pb)
 
 ## Generated Types
 
-The file `generated-types.ts` contains TypeScript definitions of `Record` types mirroring the fields in your database collections. But it needs to be regenerated every time you modify the schema. This can be done by simply running the `typegen` script in the frontend's `package.json`. So remember to run `npm run typegen` after every schema change.
+In `src/lib/momentum-core-client` you can find the generated client for the momentum-core backend. If there is a new version and you have to recreate the client, just call `npm run generate:api` which first generates the latest openapi spec and the generates a typescript client from the spec.
 
 ## Building
 
@@ -35,7 +35,7 @@ the admin UI before running build below.
 ```bash
 # compile frontend
 npm run build
-# and then serve it with pocketbase
+# and then serve the backend
 npm run backend
 ```
 

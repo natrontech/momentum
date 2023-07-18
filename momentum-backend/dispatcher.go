@@ -5,6 +5,11 @@ import (
 	"momentum-core/routers"
 
 	"github.com/gin-gonic/gin"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "momentum-core/docs"
 )
 
 type Dispatcher struct {
@@ -42,6 +47,8 @@ func NewDispatcher(config *config.MomentumConfig,
 	dispatcher.applicationRouter.RegisterApplicationRoutes(dispatcher.server)
 	dispatcher.stageRouter.RegisterStageRoutes(dispatcher.server)
 	dispatcher.deploymentRouter.RegisterDeploymentRoutes(dispatcher.server)
+
+	dispatcher.server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	return dispatcher
 }

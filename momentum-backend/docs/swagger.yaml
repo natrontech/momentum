@@ -491,4 +491,7 @@ paths:
       summary: add a new stage
       tags:
       - stages
+schemes:
+- http,
+- https
 swagger: "2.0"
