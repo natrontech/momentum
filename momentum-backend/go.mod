@@ -12,14 +12,18 @@ require (
 )
 
 require (
+	github.com/KyleBanks/depth v1.2.1 // indirect
+	github.com/go-openapi/spec v0.20.9 // indirect
 	github.com/go-swagger/go-swagger v0.30.5 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/labstack/echo v3.3.10+incompatible // indirect
 	github.com/labstack/gommon v0.2.9 // indirect
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
+	github.com/swaggo/swag v1.16.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.0.1 // indirect
+	golang.org/x/tools v0.9.3 // indirect
 )
 
 require (
