@@ -110,7 +110,7 @@ npm run dev:backend
 npm run dev
 ```
 
-Now visit http://localhost:5173 (sk) or http://localhost:8090 (pb)
+Now visit http://localhost:5173 (sk) or http://localhost:8080 (core)
 
 Now making changes in the Svelte code (frontend) or Go code (backend) will show
 results (almost) immediately.
@@ -118,12 +118,6 @@ results (almost) immediately.
 ### Building
 
 See the build process details in the README files for backend and frontend.
-
-### Configurable Hooks
-
-Please read about the "hooks" system in [./momentum-backend/README.md](./momentum-backend/README.md)
-It is a very easy and powerful way to extend your application with minimal
-configuration and perhaps no code.
 
 ## Contributing
 
