@@ -1,53 +1,67 @@
 package main
 
 import (
-	"fmt"
-	"momentum-core/clients"
-	"momentum-core/config"
-	"momentum-core/routers"
-	"momentum-core/services"
+	"log"
+	"os"
+	"path/filepath"
+	"strings"
 
-	_ "github.com/pdrum/swagger-automation/docs" // This line is necessary for go-swagger to find your docs!
+	hooks "momentum/hooks"
+
+	"github.com/pocketbase/pocketbase"
+	"github.com/pocketbase/pocketbase/apis"
+	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/plugins/jsvm"
+	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 )
 
-// @title		Momentum Core API
-// @version		early-alpha
-// @description	The momentum core api manages the core structure of momentum
-//
-// @license.name	Apache 2.0
-// @license.url		http://www.apache.org/licenses/LICENSE-2.0.html
-//
-// @schemes 	http, https
-// @host		localhost:8080
-// @BasePath	/
-func main() {
-
-	fmt.Println("Starting momentum-core")
-
-	config, err := config.InitializeMomentumCore()
-	if err != nil {
-		panic("failed initializing momentum. problem: " + err.Error())
+func defaultPublicDir() string {
+	if strings.HasPrefix(os.Args[0], os.TempDir()) {
+		// most likely ran with go run
+		return "./pb_public"
 	}
 
-	gitClient := clients.NewGitClient(config)
-	kustomizeClient := clients.NewKustomizationValidationClient(config)
+	return filepath.Join(os.Args[0], "../pb_public")
+}
 
-	templateService := services.NewTemplateService()
-	treeService := services.NewTreeService(config)
-	repositoryService := services.NewRepositoryService(config, treeService, gitClient, kustomizeClient)
-	applicationService := services.NewApplicationService(config, treeService, templateService)
-	stageService := services.NewStageService(config, treeService, templateService)
-	deploymentService := services.NewDeploymentService(config, stageService, templateService, treeService)
-	// valueService := services.NewValueService()
+func main() {
 
-	templateRouter := routers.NewTemplateRouter()
-	valueRouter := routers.NewValueRouter()
-	deploymentRouter := routers.NewDeploymentRouter(deploymentService)
-	stageRouter := routers.NewStageRouter(stageService)
-	applicationRouter := routers.NewApplicationRouter(applicationService)
-	repositoryRouter := routers.NewRepositoryRouter(repositoryService, applicationService, stageService, deploymentService)
+	app := pocketbase.New()
 
-	dispatcher := NewDispatcher(config, repositoryRouter, applicationRouter, stageRouter, deploymentRouter, valueRouter, templateRouter)
+	var publicDirFlag string
 
-	dispatcher.Serve()
+	// add "--publicDir" option flag
+	app.RootCmd.PersistentFlags().StringVar(
+		&publicDirFlag,
+		"publicDir",
+		defaultPublicDir(),
+		"the directory to serve static files",
+	)
+	migrationsDir := "" // default to "pb_migrations" (for js) and "migrations" (for go)
+
+	// load js files to allow loading external JavaScript migrations
+	jsvm.MustRegisterMigrations(app, &jsvm.MigrationsOptions{
+		Dir: migrationsDir,
+	})
+
+	// register the `migrate` command
+	migratecmd.MustRegister(app, app.RootCmd, &migratecmd.Options{
+		TemplateLang: migratecmd.TemplateLangJS, // or migratecmd.TemplateLangGo (default)
+		Dir:          migrationsDir,
+		Automigrate:  true,
+	})
+
+	// call this only if you want to use the configurable "hooks" functionality
+	hooks.PocketBaseInit(app)
+
+	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		// serves static files from the provided public dir (if exists)
+		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS(publicDirFlag), true))
+
+		return nil
+	})
+
+	if err := app.Start(); err != nil {
+		log.Fatal(err)
+	}
 }
