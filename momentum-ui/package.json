@@ -4,11 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "vite dev",
-    "dev:backend": "cd ../momentum-backend && modd",
-    "backend": "cd ../momentum-backend && ./momentum serve --publicDir=../momentum-ui/build",
+    "dev:backend": "cd ../momentum-backend && make run",
     "build": "vite build",
-    "build:backend": "cd ../momentum-backend && go build",
-    "typegen": "pocketbase-typegen --db ../momentum-backend/pb_data/data.db --out ./src/lib/pocketbase/generated-types.ts",
+    "build:backend": "cd ../momentum-backend && make build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",

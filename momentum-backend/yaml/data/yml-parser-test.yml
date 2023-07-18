@@ -1,0 +1,28 @@
+# comment
+Property1: Value1                                 # MAP (EMPTY) 
+                                                  #   STR: STR
+ListContainerProperty:                            #   STR:
+  - List element 1                                #   SEQ (Empty) 
+                                                  #     STR
+  - List element 2 # comment                      #     STR
+ListContainerProperty2:                           #     STR
+  - ListProperty1: ListValue1                     #   SEQ (Empty) 
+                                                  #     MAP (Empty) 
+                                                  #       STR: STR
+    ListProperty2: ListValue2                     #       STR: STR
+    InnerList:                                    #       STR:
+      - InnerListvalue1                           #     SEQ (Empty) 
+                                                  #       STR
+      - InnerListvalue2 #comment                  #       STR
+    ListProperty3: ListValue3                     #     STR: STR
+    ListProperty4: ListValue4                     #     STR: STR
+    InnerList2:                                   #     STR:
+      - InnerListvalue1                           #     SEQ (Empty) 
+                                                  #       STR
+      - InnerListvalue2 #comment                  #       STR
+Property2:                                        #       STR:
+  SubProperty21:                                  #   MAP (Empty) 
+                                                  #     STR:
+    SubSubProperty211: value 211 #comment         #       MAP (Empty) 
+                                                  #         STR: STR
+LastProperty: lastValue                           #   STR: STR

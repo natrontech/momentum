@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:
+  gitops.natron.io/application: "mywebserver"
+resources:
+- ns.yaml
+- release.yaml
+configMapGenerator:
+- name: base-values
+  files:
+  - ../../_base/values.yaml
+  options:
+    disableNameSuffixHash: true
+- name: hetzner-prod-1-values
+  files:
+  - values.yaml
+  options:
+    disableNameSuffixHash: true
