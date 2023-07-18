@@ -90,7 +90,6 @@ docker compose up -d
 - [Docker Compose](https://docs.docker.com/compose/install/)
 - [Node.js](https://nodejs.org/en/download/) (v20+)
 - [Go](https://golang.org/doc/install) (v1.20+)
-- [modd](https://github.com/cortesi/modd/releases)
 
 ### Setup
 
