@@ -8,13 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// swagger:model
 type RepositoryCreateRequest struct {
 	Name string `json:"name"`
 	Url  string `json:"url"`
 }
 
-// swagger:model
 type Repository struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`

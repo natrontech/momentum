@@ -31,6 +31,18 @@ func (d *DeploymentRouter) RegisterDeploymentRoutes(server *gin.Engine) {
 	server.POST(ROUTING_PATH_DEPLOYMENT, d.addDeployment)
 }
 
+// GetDeployment godoc
+//
+//	@Summary		get a deployment of a repository by id
+//	@Tags			deployments
+//	@Produce		json
+//	@Param			repositoryName		path		string					true	"Repository Name"
+//	@Param			deploymentId		path		string					true	"Deployment ID"
+//	@Success		200		{object}	models.Deployment
+//	@Failure		400		{object}	models.ApiError
+//	@Failure		404		{object}	models.ApiError
+//	@Failure		500		{object}	models.ApiError
+//	@Router			/repository/{repositoryName}/app/stage/deployment/{deploymentId} [get]
 func (d *DeploymentRouter) getDeployment(c *gin.Context) {
 
 	traceId := config.LOGGER.TraceId()
@@ -48,6 +60,18 @@ func (d *DeploymentRouter) getDeployment(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// GetDeployment godoc
+//
+//	@Summary		get a deployment of a repository by id
+//	@Tags			deployments
+//	@Accept			json
+//	@Produce		json
+//	@Param			deploymentCreateRequest	body		models.DeploymentCreateRequest	true	"Create Deployment"
+//	@Success		200		{object}	models.Deployment
+//	@Failure		400		{object}	models.ApiError
+//	@Failure		404		{object}	models.ApiError
+//	@Failure		500		{object}	models.ApiError
+//	@Router			/deployment [post]
 func (d *DeploymentRouter) addDeployment(c *gin.Context) {
 
 	traceId := config.LOGGER.TraceId()

@@ -53,6 +53,17 @@ func (r *RepositoryRouter) RegisterRepositoryRoutes(server *gin.Engine) {
 	server.GET(ROUTING_PATH_REPOSITORY_DEPLOYMENTS, r.getDeployments)
 }
 
+// GetRepositories godoc
+//
+//	@Summary		load repositories
+//	@Description	load all repositories managed by this instance
+//	@Tags			repositories
+//	@Produce		json
+//	@Success		200		{array}		models.Repository
+//	@Failure		400		{object}	models.ApiError
+//	@Failure		404		{object}	models.ApiError
+//	@Failure		500		{object}	models.ApiError
+//	@Router			/repositories [get]
 func (r *RepositoryRouter) getRepositories(c *gin.Context) {
 
 	traceId := config.LOGGER.TraceId()
@@ -60,6 +71,19 @@ func (r *RepositoryRouter) getRepositories(c *gin.Context) {
 	c.JSON(http.StatusOK, repos)
 }
 
+// AddRepository godoc
+//
+//	@Summary		add a new repository
+//	@Description	adds a new repository to the instance
+//	@Tags			repositories
+//	@Accept			json
+//	@Produce		json
+//	@Param			repositoryCreateRequest	body		models.RepositoryCreateRequest	true	"Create Repository"
+//	@Success		200		{object}	models.Repository
+//	@Failure		400		{object}	models.ApiError
+//	@Failure		404		{object}	models.ApiError
+//	@Failure		500		{object}	models.ApiError
+//	@Router			/repository [post]
 func (r *RepositoryRouter) addRepository(c *gin.Context) {
 
 	traceId := config.LOGGER.TraceId()
@@ -84,6 +108,17 @@ type repoUrl struct {
 	repositoryName string `uri:"repositoryName" binding:"required"`
 }
 
+// GetRepository godoc
+//
+//	@Summary		get a repository
+//	@Tags			repositories
+//	@Produce		json
+//	@Param			repositoryName		path		string					true	"Repository Name"
+//	@Success		200		{object}	models.Repository
+//	@Failure		400		{object}	models.ApiError
+//	@Failure		404		{object}	models.ApiError
+//	@Failure		500		{object}	models.ApiError
+//	@Router			/repository/{repositoryName} [get]
 func (r *RepositoryRouter) getRepository(c *gin.Context) {
 
 	traceId := config.LOGGER.TraceId()
@@ -105,6 +140,18 @@ func (r *RepositoryRouter) getRepository(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// GetApplications godoc
+//
+//	@Summary		get all applications of a repository
+//	@Tags			applications
+//	@Accept			json
+//	@Produce		json
+//	@Param			repositoryName		path		string					true	"Repository Name"
+//	@Success		200		{array}		models.Application
+//	@Failure		400		{object}	models.ApiError
+//	@Failure		404		{object}	models.ApiError
+//	@Failure		500		{object}	models.ApiError
+//	@Router			/repository/{repositoryName}/applications [get]
 func (r *RepositoryRouter) getApplications(c *gin.Context) {
 
 	traceId := config.LOGGER.TraceId()
@@ -126,6 +173,17 @@ func (r *RepositoryRouter) getApplications(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// GetStages godoc
+//
+//	@Summary		get stages
+//	@Tags			stages
+//	@Produce		json
+//	@Param			repositoryName		path		string					true	"Repository Name"
+//	@Success		200		{array}		models.Stage
+//	@Failure		400		{object}	models.ApiError
+//	@Failure		404		{object}	models.ApiError
+//	@Failure		500		{object}	models.ApiError
+//	@Router			/repository/{repositoryName}/stages [get]
 func (r *RepositoryRouter) getStages(c *gin.Context) {
 
 	traceId := config.LOGGER.TraceId()
@@ -147,6 +205,17 @@ func (r *RepositoryRouter) getStages(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// GetDeployments godoc
+//
+//	@Summary		get deployments
+//	@Tags			deployments
+//	@Produce		json
+//	@Param			repositoryName		path		string					true	"Repository Name"
+//	@Success		200		{array}		models.Deployment
+//	@Failure		400		{object}	models.ApiError
+//	@Failure		404		{object}	models.ApiError
+//	@Failure		500		{object}	models.ApiError
+//	@Router			/repository/{repositoryName}/deployments [get]
 func (r *RepositoryRouter) getDeployments(c *gin.Context) {
 
 	traceId := config.LOGGER.TraceId()

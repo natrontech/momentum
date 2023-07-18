@@ -3,7 +3,6 @@ package models
 import "github.com/gin-gonic/gin"
 
 // https://datatracker.ietf.org/doc/html/rfc7807
-// swagger:model
 type ApiError struct {
 	error
 

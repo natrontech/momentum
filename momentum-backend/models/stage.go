@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// swagger:model
 type StageCreateRequest struct {
 	Name                string `json:"name"`
 	RepositoryName      string `json:"repositoryName"`
@@ -17,7 +16,6 @@ type StageCreateRequest struct {
 	ParentStageId       string `json:"parentStageId"`
 }
 
-// swagger:model
 type Stage struct {
 	Id                  string `json:"id"`
 	Name                string `json:"name"`

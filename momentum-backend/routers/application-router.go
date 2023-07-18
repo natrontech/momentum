@@ -31,6 +31,18 @@ func (a *ApplicationRouter) RegisterApplicationRoutes(server *gin.Engine) {
 	server.POST(ROUTING_PATH_APPLICATION, a.addApplication)
 }
 
+// GetApplication godoc
+//
+//	@Summary		get an application of a repository by id
+//	@Tags			applications
+//	@Produce		json
+//	@Param			repositoryName		path		string					true	"Repository Name"
+//	@Param			applicationId		path		string					true	"Application ID"
+//	@Success		200		{object}	models.Application
+//	@Failure		400		{object}	models.ApiError
+//	@Failure		404		{object}	models.ApiError
+//	@Failure		500		{object}	models.ApiError
+//	@Router			/repository/{repositoryName}/{applicationId} [get]
 func (a *ApplicationRouter) getApplication(c *gin.Context) {
 
 	traceId := config.LOGGER.TraceId()
@@ -65,6 +77,18 @@ func (a *ApplicationRouter) getApplication(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// AddApplication godoc
+//
+//	@Summary		add an application
+//	@Tags			applications
+//	@Accept			json
+//	@Produce		json
+//	@Param			applicationCreateRequest	body		models.ApplicationCreateRequest	true	"Create Application"
+//	@Success		200		{object}	models.Application
+//	@Failure		400		{object}	models.ApiError
+//	@Failure		404		{object}	models.ApiError
+//	@Failure		500		{object}	models.ApiError
+//	@Router			/application [post]
 func (d *ApplicationRouter) addApplication(c *gin.Context) {
 
 	traceId := config.LOGGER.TraceId()

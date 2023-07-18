@@ -2,6 +2,8 @@
 
 Since the generation of a good openapi spec is crucial to momentums core api, it's documented here how this was implemented.
 
+We were unable to find a tool which is ready enough to generate openapi spec for version 3. Due to this we will remain on version 2 and upgrade later.
+
 ## What is generated
 
 - Models (folder *models*)
@@ -11,20 +13,12 @@ Since the generation of a good openapi spec is crucial to momentums core api, it
 
 ## Which tool is used
 
-We use [go-swagger](https://github.com/go-swagger/go-swagger)
+We use [swag](https://github.com/swaggo/swag)
 
 ## Requirements
 
-- package 'docs' (folder *docs* (this doc is in it))
+run `make install-swagger` to install `swag` which generates the spec.
 
-## Encountered difficulties & how they were conquered (or not)
+## Hint
 
-
-
-## Useful References
-
-Stuff I was thankful to read during the integration and might help you as well:
-
-- [perfect entrypoint](https://medium.com/@pedram.esmaeeli/generate-swagger-specification-from-go-source-code-648615f7b9d9)
-- [generate swagger json from go code](https://goswagger.io/generate/spec.html)
-- [spec on how to define what shall be generated]((https://goswagger.io/use/spec.html) )
+During the implementation the examples in of the [swag](https://github.com/swaggo/swag) repository were really helpful.

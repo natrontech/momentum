@@ -35,7 +35,6 @@ func (n *Node) AllStages() []*Node {
 	apps := n.Apps()
 	stgs := make([]*Node, 0)
 	for _, app := range apps {
-		fmt.Println("app", app.Path, app.Id)
 		stgs = append(stgs, app.stages()...)
 	}
 	return stgs
@@ -110,7 +109,6 @@ func deployments(stage *Node) []*Node {
 	files := stage.Files()
 	deployFolders := stage.Search("_deploy")
 	if len(deployFolders) < 1 {
-		fmt.Println("node does not contain deployments")
 		return make([]*Node, 0)
 	}
 	deployFolder := deployFolders[0]

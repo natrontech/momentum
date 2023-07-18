@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// swagger:model
 type KeyValueCreateRequest struct {
 	Key                string `json:"key"`
 	Value              string `json:"value"`
@@ -18,7 +17,6 @@ type KeyValueCreateRequest struct {
 	ParentKeyValueId   string `json:"parentKeyValueId"`
 }
 
-// swagger:model
 type KeyValue struct {
 	Id                 string `json:"id"`
 	Key                string `json:"key"`

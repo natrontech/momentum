@@ -1,191 +1,494 @@
 basePath: /
-consumes:
-    - application/json
 definitions:
-    ApiError:
-        description: https://datatracker.ietf.org/doc/html/rfc7807
-        x-go-package: momentum-core/models
-    Application:
-        x-go-package: momentum-core/models
-    ApplicationCreateRequest:
-        x-go-package: momentum-core/models
-    Deployment:
-        x-go-package: momentum-core/models
-    DeploymentCreateRequest:
-        x-go-package: momentum-core/models
-    KeyValue:
-        x-go-package: momentum-core/models
-    KeyValueCreateRequest:
-        x-go-package: momentum-core/models
-    Repository:
-        x-go-package: momentum-core/models
-    RepositoryCreateRequest:
-        x-go-package: momentum-core/models
-    Stage:
-        x-go-package: momentum-core/models
-    StageCreateRequest:
-        x-go-package: momentum-core/models
-host: momentum.natron.io
+  models.ApiError:
+    properties:
+      detail:
+        type: string
+      error: {}
+      instance:
+        type: string
+      status:
+        type: integer
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  models.Application:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      repositoryName:
+        type: string
+    type: object
+  models.ApplicationCreateRequest:
+    properties:
+      name:
+        type: string
+      repositoryName:
+        type: string
+    type: object
+  models.Deployment:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      parentStageId:
+        type: string
+      repositoryId:
+        type: string
+    type: object
+  models.DeploymentCreateRequest:
+    properties:
+      applicationName:
+        type: string
+      name:
+        type: string
+      parentStageId:
+        type: string
+      repositoryName:
+        type: string
+    type: object
+  models.Repository:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  models.RepositoryCreateRequest:
+    properties:
+      name:
+        type: string
+      url:
+        type: string
+    type: object
+  models.Stage:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      parentApplicationId:
+        type: string
+      parentStageId:
+        type: string
+    type: object
+  models.StageCreateRequest:
+    properties:
+      name:
+        type: string
+      parentApplicationId:
+        type: string
+      parentStageId:
+        type: string
+      repositoryName:
+        type: string
+    type: object
+host: localhost:8080
 info:
-    description: Documentation of the momentum-core API.
-    title: momentum-core-api.
-    version: 1.0.0
+  contact: {}
+  description: The momentum core api manages the core structure of momentum
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Momentum Core API
+  version: early-alpha
 paths:
-    /application:
-        post:
-            description: adds repository
-            operationId: add-app-routeid
-            parameters:
-                - in: body
-                  name: Body
-                  schema: {}
-            responses:
-                "200":
-                    $ref: '#/responses/applicationResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - application
-    /deployment:
-        post:
-            description: adds deployment
-            operationId: add-deployment-routeid
-            parameters:
-                - in: body
-                  name: Body
-                  schema: {}
-            responses:
-                "200":
-                    $ref: '#/responses/deploymentResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - deployment
-    /repositories:
-        get:
-            description: read all repositories
-            operationId: get-repos-routeid
-            responses:
-                "200":
-                    $ref: '#/responses/stringArrayResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - repository
-    /repository:
-        post:
-            description: adds repository
-            operationId: add-repo-routeid
-            parameters:
-                - in: query
-                  name: Body
-            responses:
-                "200":
-                    $ref: '#/responses/repositoryResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - repository
-    /repository/{repositoryName}:
-        get:
-            description: read a repository with defined repositoryName
-            operationId: get-repo-routeid
-            parameters:
-                - description: name of the repository
-                  in: path
-                  name: repositoryName
-                  required: true
-                  type: string
-            responses:
-                "200":
-                    $ref: '#/responses/repositoryResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - repository
-    /repository/{repositoryName}/{applicationId}:
-        get:
-            description: read an application from defined repository repositoryName and applicationId
-            operationId: get-app-routeid
-            parameters:
-                - description: name of the repository
-                  in: path
-                  name: repositoryName
-                  required: true
-                  type: string
-                - description: id of the application
-                  in: path
-                  name: applicationId
-                  required: true
-                  type: string
-            responses:
-                "200":
-                    $ref: '#/responses/applicationResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - repository
-    /repository/{repositoryName}/app/stage/deployment/{deploymentId}:
-        get:
-            description: read a deployment from defined repository repositoryName and deploymentId
-            operationId: get-deployment-routeid
-            parameters:
-                - description: name of the repository
-                  in: path
-                  name: repositoryName
-                  required: true
-                  type: string
-                - description: id of the deployment
-                  in: path
-                  name: deploymentId
-                  required: true
-                  type: string
-            responses:
-                "200":
-                    $ref: '#/responses/deploymentResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - repository
-produces:
-    - application/json
-responses:
-    applicationResponse:
-        description: ""
-    deploymentResponse:
-        description: ""
-    errorResponse:
-        description: ""
-    repositoryResponse:
-        description: ""
-        headers:
-            id:
-                type: string
-            name:
-                type: string
-    stringArrayResponse:
-        description: ""
+  /application:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create Application
+        in: body
+        name: applicationCreateRequest
+        required: true
         schema:
+          $ref: '#/definitions/models.ApplicationCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Application'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiError'
+      summary: add an application
+      tags:
+      - applications
+  /deployment:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create Deployment
+        in: body
+        name: deploymentCreateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.DeploymentCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Deployment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiError'
+      summary: get a deployment of a repository by id
+      tags:
+      - deployments
+  /repositories:
+    get:
+      description: load all repositories managed by this instance
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
             items:
-                type: string
+              $ref: '#/definitions/models.Repository'
             type: array
-schemes:
-    - http
-securityDefinitions:
-    basic:
-        type: basic
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiError'
+      summary: load repositories
+      tags:
+      - repositories
+  /repository:
+    post:
+      consumes:
+      - application/json
+      description: adds a new repository to the instance
+      parameters:
+      - description: Create Repository
+        in: body
+        name: repositoryCreateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.RepositoryCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Repository'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiError'
+      summary: add a new repository
+      tags:
+      - repositories
+  /repository/{repositoryName}:
+    get:
+      parameters:
+      - description: Repository Name
+        in: path
+        name: repositoryName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Repository'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiError'
+      summary: get a repository
+      tags:
+      - repositories
+  /repository/{repositoryName}/{applicationId}:
+    get:
+      parameters:
+      - description: Repository Name
+        in: path
+        name: repositoryName
+        required: true
+        type: string
+      - description: Application ID
+        in: path
+        name: applicationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Application'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiError'
+      summary: get an application of a repository by id
+      tags:
+      - applications
+  /repository/{repositoryName}/app/stage/{stageId}:
+    get:
+      parameters:
+      - description: Repository Name
+        in: path
+        name: repositoryName
+        required: true
+        type: string
+      - description: Stage ID
+        in: path
+        name: stageId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Deployment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiError'
+      summary: get a stage of a repository by id
+      tags:
+      - stages
+  /repository/{repositoryName}/app/stage/deployment/{deploymentId}:
+    get:
+      parameters:
+      - description: Repository Name
+        in: path
+        name: repositoryName
+        required: true
+        type: string
+      - description: Deployment ID
+        in: path
+        name: deploymentId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Deployment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiError'
+      summary: get a deployment of a repository by id
+      tags:
+      - deployments
+  /repository/{repositoryName}/applications:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Repository Name
+        in: path
+        name: repositoryName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Application'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiError'
+      summary: get all applications of a repository
+      tags:
+      - applications
+  /repository/{repositoryName}/deployments:
+    get:
+      parameters:
+      - description: Repository Name
+        in: path
+        name: repositoryName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Deployment'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiError'
+      summary: get deployments
+      tags:
+      - deployments
+  /repository/{repositoryName}/stages:
+    get:
+      parameters:
+      - description: Repository Name
+        in: path
+        name: repositoryName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Stage'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiError'
+      summary: get stages
+      tags:
+      - stages
+  /stage:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create Stage
+        in: body
+        name: stageCreateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.StageCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Stage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiError'
+      summary: add a new stage
+      tags:
+      - stages
 swagger: "2.0"

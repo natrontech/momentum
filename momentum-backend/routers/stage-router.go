@@ -31,6 +31,18 @@ func (s *StageRouter) RegisterStageRoutes(server *gin.Engine) {
 	server.POST(ROUTING_PATH_STAGE, s.addStage)
 }
 
+// GetStage godoc
+//
+//	@Summary		get a stage of a repository by id
+//	@Tags			stages
+//	@Produce		json
+//	@Param			repositoryName		path		string					true	"Repository Name"
+//	@Param			stageId				path		string					true	"Stage ID"
+//	@Success		200		{object}	models.Deployment
+//	@Failure		400		{object}	models.ApiError
+//	@Failure		404		{object}	models.ApiError
+//	@Failure		500		{object}	models.ApiError
+//	@Router			/repository/{repositoryName}/app/stage/{stageId} [get]
 func (s *StageRouter) getStage(c *gin.Context) {
 
 	traceId := config.LOGGER.TraceId()
@@ -48,6 +60,18 @@ func (s *StageRouter) getStage(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// AddStage godoc
+//
+//	@Summary		add a new stage
+//	@Tags			stages
+//	@Accept			json
+//	@Produce		json
+//	@Param			stageCreateRequest	body		models.StageCreateRequest	true	"Create Stage"
+//	@Success		200		{object}	models.Stage
+//	@Failure		400		{object}	models.ApiError
+//	@Failure		404		{object}	models.ApiError
+//	@Failure		500		{object}	models.ApiError
+//	@Router			/stage [post]
 func (sr *StageRouter) addStage(c *gin.Context) {
 
 	traceId := config.LOGGER.TraceId()
