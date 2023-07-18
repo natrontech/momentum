@@ -24,10 +24,8 @@ func (n *Node) Apps() []*Node {
 
 	root := n.MomentumRoot()
 	apps := make([]*Node, 0)
-	for _, app := range root.Children {
-		if app.Kind == Directory {
-			apps = append(apps, app)
-		}
+	for _, app := range root.Directories() {
+		apps = append(apps, app)
 	}
 	return apps
 }
@@ -37,9 +35,24 @@ func (n *Node) AllStages() []*Node {
 	apps := n.Apps()
 	stgs := make([]*Node, 0)
 	for _, app := range apps {
-		stgs = append(stgs, stages(app.Children, stgs)...)
+		fmt.Println("app", app.Path, app.Id)
+		stgs = append(stgs, app.stages()...)
 	}
 	return stgs
+}
+
+func (n *Node) stages() []*Node {
+
+	nodesStages := make([]*Node, 0)
+	for _, possibleStage := range n.Directories() {
+		fmt.Println(possibleStage.Id, ":", possibleStage.FullPath())
+		if possibleStage.Kind == Directory && !strings.HasPrefix(possibleStage.Path, META_PREFIX) {
+			childStages := possibleStage.stages()
+			nodesStages = append([]*Node{possibleStage}, childStages...)
+		}
+	}
+
+	return nodesStages
 }
 
 func (n *Node) IsStage() bool {
@@ -90,22 +103,6 @@ func (n *Node) Deployment(deploymentId string) *Node {
 	}
 
 	return nil
-}
-
-func stages(parents []*Node, stgs []*Node) []*Node {
-
-	if len(parents) == 0 {
-		return stgs
-	}
-
-	for _, node := range parents {
-		if node.Kind == Directory && !strings.HasPrefix(node.Path, META_PREFIX) {
-			stgs = stages(node.Children, stgs)
-			stgs = append([]*Node{node}, stgs...)
-		}
-	}
-
-	return stgs
 }
 
 func deployments(stage *Node) []*Node {
