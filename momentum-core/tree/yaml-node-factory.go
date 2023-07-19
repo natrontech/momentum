@@ -19,35 +19,86 @@ const (
 	mergeTag     = "!!merge"
 )
 
-func AddContent(parent *Node, content *Node) error {
+func (n *Node) AddYamlSequence(key string, values []string, style yaml.Style) error {
 
-	if parent == nil || content == nil {
-		return errors.New("parent or content is nil")
-	}
-
-	if parent.YamlNode.Kind != yaml.DocumentNode &&
-		parent.YamlNode.Kind != yaml.MappingNode &&
-		parent.YamlNode.Kind != yaml.SequenceNode {
-		return errors.New("can only add content to document mapping and sequence yaml nodes")
-	}
-
-	if parent.Kind != File &&
-		parent.Kind != Mapping &&
-		parent.Kind != Sequence {
-		return errors.New("can only add content to file mapping and sequence nodes")
+	if len(values) < 1 {
+		return errors.New("sequence must have at least one value")
 	}
 
 	var err error = nil
-	p := parent
-	if parent.Kind == File {
-		p, err = parent.FileMapping()
+	var anchor *Node = n
+	if n.Kind == File {
+		anchor, err = n.FileMapping()
 		if err != nil {
-			return errors.New("unable to retrieve parent files mapping")
+			return errors.New("failed retrieving file mapping of file node")
 		}
 	}
 
-	p.YamlNode.Content = append(p.YamlNode.Content, content.YamlNode)
-	p.AddChild(content)
+	yamlSequenceName := CreateScalarNode(key, StrTag, 0)
+	yamlSequenceNode := CreateSequenceNode(style)
+	anchor.YamlNode.Content = append(anchor.YamlNode.Content, yamlSequenceName, yamlSequenceNode)
+
+	sequenceNode := NewNode(Sequence, key, "", nil, nil, yamlSequenceNode)
+	anchor.AddChild(sequenceNode)
+
+	for _, val := range values {
+		err := sequenceNode.AddYamlValue(val, 0)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (n *Node) AddYamlMapping(key string, style yaml.Style) (*Node, error) {
+
+	var err error = nil
+	var anchor *Node = n
+	if n.Kind == File {
+		anchor, err = n.FileMapping()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	yamlMappingName := CreateScalarNode(key, StrTag, 0)
+	yamlMappingNode := CreateMappingNode(key, style)
+
+	anchor.YamlNode.Content = append(anchor.YamlNode.Content, yamlMappingName, yamlMappingNode)
+
+	mappingNode := NewNode(Mapping, key, "", nil, nil, yamlMappingNode)
+	anchor.AddChild(mappingNode)
+
+	return mappingNode, nil
+}
+
+func (n *Node) AddYamlProperty(key string, value string, valueTag string, style yaml.Style) error {
+
+	if n.Kind != Mapping || n.YamlNode.Kind != yaml.MappingNode {
+		return errors.New("properties can only be added to mapping nodes")
+	}
+
+	yamlKeyNode, yamlValueNode := CreatePropertyNodes(key, value, valueTag, style)
+
+	mappingNode := NewNode(Property, key, value, n, nil, yamlValueNode)
+
+	n.YamlNode.Content = append(n.YamlNode.Content, yamlKeyNode, yamlValueNode)
+	n.AddChild(mappingNode)
+
+	return nil
+}
+
+func (n *Node) AddYamlValue(value string, style yaml.Style) error {
+
+	if n.Kind != Sequence || n.YamlNode.Kind != yaml.SequenceNode {
+		return errors.New("can only add sequence value to node of type sequence")
+	}
+
+	sequenceValue := CreateScalarNode(value, StrTag, style)
+	n.YamlNode.Content = append(n.YamlNode.Content, sequenceValue)
+	momentumNode := NewNode(Value, "", value, n, nil, sequenceValue)
+	n.AddChild(momentumNode)
 
 	return nil
 }
@@ -60,13 +111,13 @@ func CreatePropertyNodes(key string, value string, valueTag string, style yaml.S
 	return keyNode, valueNode
 }
 
-func CreateSequenceNode(key string, style yaml.Style) *yaml.Node {
+func CreateSequenceNode(style yaml.Style) *yaml.Node {
 
 	n := new(yaml.Node)
 
 	n.Kind = yaml.SequenceNode
 	n.Tag = seqTag
-	n.Value = key
+	n.Value = ""
 	n.Style = style
 
 	return n
@@ -78,7 +129,7 @@ func CreateMappingNode(key string, style yaml.Style) *yaml.Node {
 
 	n.Kind = yaml.MappingNode
 	n.Tag = mapTag
-	n.Value = key
+	n.Value = ""
 	n.Style = style
 
 	return n

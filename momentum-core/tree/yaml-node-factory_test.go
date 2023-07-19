@@ -39,8 +39,10 @@ func FILESYSTEMTEST_TestAddSequenceValue(t *testing.T) {
 		t.FailNow()
 	}
 
+	tree.Print(parsed)
+
 	resourcesSequence.Children[0].SetValue("Ciao")
-	err = resourcesSequence.AddValue("World", 0)
+	err = resourcesSequence.AddYamlValue("World", 0)
 	if err != nil {
 		fmt.Println(err.Error())
 		t.FailNow()
@@ -66,7 +68,7 @@ func FILESYSTEMTEST_TestAddSequenceValue(t *testing.T) {
 		t.FailNow()
 	}
 
-	tree.Print(resourcesSequence)
+	tree.Print(afterWriteTree)
 
 	if len(resourcesSequence.Children) != 2 {
 		fmt.Println("expected two children in resources")
@@ -111,7 +113,7 @@ func FILESYSTEMTEST_TestAddSequence(t *testing.T) {
 
 	utils.FileDelete(TEST_FILE_PATH)
 
-	err = parsed.AddSequence("sequence", []string{"value"}, 0)
+	err = parsed.AddYamlSequence("sequence", []string{"value"}, 0)
 	if err != nil {
 		fmt.Println("failed to write sequence:", err.Error())
 		t.FailNow()
@@ -131,9 +133,13 @@ func FILESYSTEMTEST_TestAddSequence(t *testing.T) {
 		t.FailNow()
 	}
 
-	tree.Print(parsed)
+	_, found := parsed.FindFirst("sequence")
+	if !found {
+		fmt.Println("unable to find new sequence in testfile after update")
+		t.FailNow()
+	}
 
-	utils.FileDelete(TEST_FILE_PATH)
+	tree.Print(parsed)
 }
 
 func FILESYSTEMTEST_TestAddMapping(t *testing.T) {
@@ -159,8 +165,6 @@ func FILESYSTEMTEST_TestAddMapping(t *testing.T) {
 		t.FailNow()
 	}
 
-	utils.FileDelete(TEST_FILE_PATH)
-
 	fileMapping, err := parsed.FileMapping()
 	if err != nil {
 		fmt.Println("unable to find file mapping", err.Error())
@@ -169,13 +173,13 @@ func FILESYSTEMTEST_TestAddMapping(t *testing.T) {
 
 	fmt.Println("FILEMAP:", fileMapping)
 
-	mappingNode, err := fileMapping.AddMapping("mapping-key", 0)
+	mappingNode, err := fileMapping.AddYamlMapping("mapping-key", 0)
 	if err != nil {
 		fmt.Println("creating mapping node failed:", err.Error())
 		t.FailNow()
 	}
 
-	err = mappingNode.AddProperty("subprob", "subpropvalue", tree.StrTag, 0)
+	err = mappingNode.AddYamlProperty("subprob", "subpropvalue", tree.StrTag, 0)
 	if err != nil {
 		fmt.Println("creating mappings property node failed:", err.Error())
 		t.FailNow()
@@ -202,8 +206,6 @@ func FILESYSTEMTEST_TestAddMapping(t *testing.T) {
 		fmt.Println("mapping was not added as expected")
 		t.FailNow()
 	}
-
-	utils.FileDelete(TEST_FILE_PATH)
 }
 
 func FILESYSTEMTEST_TestAddProperty(t *testing.T) {
@@ -221,6 +223,7 @@ func FILESYSTEMTEST_TestAddProperty(t *testing.T) {
 		fmt.Println("unable to instantiate testfile")
 		t.FailNow()
 	}
+	defer utils.FileDelete(TEST_FILE_PATH)
 
 	parsed, err := tree.Parse(TEST_FILE_PATH)
 	if err != nil {
@@ -228,15 +231,13 @@ func FILESYSTEMTEST_TestAddProperty(t *testing.T) {
 		t.FailNow()
 	}
 
-	utils.FileDelete(TEST_FILE_PATH)
-
 	fileMapping, err := parsed.FileMapping()
 	if err != nil {
 		fmt.Println("unable to find file mapping", err.Error())
 		t.FailNow()
 	}
 
-	fileMapping.AddProperty("property-key", "property-value", tree.StrTag, 0)
+	fileMapping.AddYamlProperty("property-key", "property-value", tree.StrTag, 0)
 
 	err = parsed.Write(true)
 	if err != nil {
@@ -252,11 +253,15 @@ func FILESYSTEMTEST_TestAddProperty(t *testing.T) {
 
 	tree.Print(parsed)
 
-	utils.FileDelete(TEST_FILE_PATH)
+	_, found := parsed.FindFirst("property-key")
+	if !found {
+		fmt.Println("mapping was not added as expected")
+		t.FailNow()
+	}
 }
 
 func writeTestFile(p string) bool {
-	return utils.FileWriteLines(p, strings.Split("kind: Test\nresources:\n- \"Hello\"", "\n"))
+	return utils.FileWriteLines(p, strings.Split("kind: Test\nresources:\n- \"Hello\"\nprop: \"value\"", "\n"))
 }
 
 func cleanup(t *testing.T, p string) {

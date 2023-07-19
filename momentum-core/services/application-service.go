@@ -100,7 +100,7 @@ func (as *ApplicationService) AddApplication(request *models.ApplicationCreateRe
 		return nil, errors.New("unable to find kustomization resources for repository of new application")
 	}
 
-	err = repositoryKustomizationResources.AddValue(request.Name, 0)
+	err = repositoryKustomizationResources.AddYamlValue(request.Name, 0)
 	if err != nil {
 		config.LOGGER.LogWarning("failed adding application to resources", err, traceId)
 		return nil, err

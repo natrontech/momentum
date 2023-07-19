@@ -125,7 +125,7 @@ func (s *StageService) AddStage(request *models.StageCreateRequest, traceId stri
 			return nil, err
 		}
 
-		err = kustomizationFileNode.AddSequence("resources", []string{request.Name}, 0)
+		err = kustomizationFileNode.AddYamlSequence("resources", []string{request.Name}, 0)
 		if err != nil {
 			config.LOGGER.LogError(err.Error(), err, traceId)
 			return nil, err
@@ -137,7 +137,7 @@ func (s *StageService) AddStage(request *models.StageCreateRequest, traceId stri
 			return nil, err
 		}
 	} else {
-		err = parentKustomizationResources.AddValue(request.Name, 0)
+		err = parentKustomizationResources.AddYamlValue(request.Name, 0)
 		if err != nil {
 			config.LOGGER.LogWarning("failed adding stage to resources", err, traceId)
 			return nil, err
