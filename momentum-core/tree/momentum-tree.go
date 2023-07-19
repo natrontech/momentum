@@ -1,7 +1,6 @@
 package tree
 
 import (
-	"fmt"
 	"momentum-core/config"
 	"strings"
 )
@@ -44,7 +43,6 @@ func (n *Node) stages() []*Node {
 
 	nodesStages := make([]*Node, 0)
 	for _, possibleStage := range n.Directories() {
-		fmt.Println(possibleStage.Id, ":", possibleStage.FullPath())
 		if possibleStage.Kind == Directory && !strings.HasPrefix(possibleStage.Path, META_PREFIX) {
 			childStages := possibleStage.stages()
 			nodesStages = append([]*Node{possibleStage}, childStages...)

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"momentum-core/config"
 	"momentum-core/models"
-	"momentum-core/tree"
 	"momentum-core/utils"
 )
 
@@ -108,13 +107,11 @@ func (ds *DeploymentService) AddDeployment(request *models.DeploymentCreateReque
 	}
 
 	if parentStageKustomizationResources != nil {
-		err = parentStageKustomizationResources.AddValue(deploymentYamlDestinationName, 0)
+		err = parentStageKustomizationResources.AddYamlValue(deploymentYamlDestinationName, 0)
 		if err != nil {
 			config.LOGGER.LogWarning("failed adding deployment to resources", err, traceId)
 			return nil, err
 		}
-
-		tree.Print(parentStageKustomizationResources)
 
 		err = parentStageKustomizationResources.Write(true)
 		if err != nil {
@@ -128,13 +125,11 @@ func (ds *DeploymentService) AddDeployment(request *models.DeploymentCreateReque
 			return nil, err
 		}
 
-		err = parentStageKustomization.AddSequence("resources", []string{deploymentYamlDestinationName}, 0)
+		err = parentStageKustomization.AddYamlSequence("resources", []string{deploymentYamlDestinationName}, 0)
 		if err != nil {
 			config.LOGGER.LogError("unable to add resources sequence to parents stage kustomization", err, traceId)
 			return nil, err
 		}
-
-		tree.Print(parentStageKustomization)
 
 		err = parentStageKustomization.Write(true)
 		if err != nil {
