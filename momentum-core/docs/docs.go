@@ -661,7 +661,13 @@ const docTemplate = `{
         "models.ApplicationCreateRequest": {
             "type": "object",
             "properties": {
+                "chartVersion": {
+                    "type": "string"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "reconcileInterval": {
                     "type": "string"
                 },
                 "repositoryName": {
@@ -692,10 +698,16 @@ const docTemplate = `{
                 "applicationName": {
                     "type": "string"
                 },
+                "chartVersion": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
                 "parentStageId": {
+                    "type": "string"
+                },
+                "reconcileInterval": {
                     "type": "string"
                 },
                 "repositoryName": {
@@ -745,6 +757,9 @@ const docTemplate = `{
         "models.StageCreateRequest": {
             "type": "object",
             "properties": {
+                "chartVersion": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -752,6 +767,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "parentStageId": {
+                    "type": "string"
+                },
+                "reconcileInterval": {
                     "type": "string"
                 },
                 "repositoryName": {

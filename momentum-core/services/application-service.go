@@ -72,8 +72,6 @@ func (as *ApplicationService) AddApplication(request *models.ApplicationCreateRe
 		}
 	}
 
-	appChartName := request.Name + "-chart"
-
 	appMountPath := utils.BuildPath(repo.MomentumRoot().FullPath(), request.Name)
 	appBasePath := utils.BuildPath(appMountPath, "_base")
 
@@ -88,7 +86,7 @@ func (as *ApplicationService) AddApplication(request *models.ApplicationCreateRe
 	appBaseKustomizationPath := utils.BuildPath(appBasePath, KUSTOMIZATION_FILE_NAME)
 	appBaseReleasePath := utils.BuildPath(appBasePath, "release.yaml")
 
-	template := as.templateService.NewApplicationTemplate(appRepositoryPath, appNamespacePath, appBaseKustomizationPath, appBaseReleasePath, request.Name, appChartName)
+	template := as.templateService.NewApplicationTemplate(appRepositoryPath, appNamespacePath, appBaseKustomizationPath, appBaseReleasePath, request.Name, request.ReconcileInterval, request.ChartVersion)
 	err = as.templateService.ApplyApplicationTemplate(template)
 	if err != nil {
 		config.LOGGER.LogWarning("failed applying application template", err, traceId)

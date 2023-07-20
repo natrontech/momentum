@@ -3,10 +3,10 @@ kind: HelmRelease
 metadata:
   name: {{ .ApplicationName }}
 spec:
-  interval: 10m
+  interval: '{{ .ReconcileInterval }}'
   chart:
     spec:
-      chart: '{{ .ApplicationChartName }}'
+      version: '{{ .ChartVersion }}'
       sourceRef:
         kind: HelmRepository
         name: '{{ .ApplicationName }}-charts'

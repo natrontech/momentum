@@ -25,8 +25,9 @@ type ApplicationKustomizationTemplate struct {
 }
 
 type ApplicationReleaseTemplate struct {
-	ApplicationName      string
-	ApplicationChartName string
+	ApplicationName   string
+	ReconcileInterval string
+	ChartVersion      string
 }
 
 type StageTemplate struct {
@@ -37,12 +38,15 @@ type StageTemplate struct {
 }
 
 type StageKustomizationTemplate struct {
-	StageName string
+	ApplicationName string
+	StageName       string
 }
 
 type StageReleaseTemplate struct {
-	StageName       string
-	ApplicationName string
+	StageName         string
+	ApplicationName   string
+	ReconcileInterval string
+	ChartVersion      string
 }
 
 type DeploymentTemplate struct {
@@ -61,11 +65,14 @@ type DeploymentKustomizationTemplate struct {
 type DeploymentStageDeploymentDescriptionTemplate struct {
 	DeploymentNameWithoutEnding string
 	DeploymentName              string
+	PathFromMomentumRoot        string
 	RepositoryName              string
 }
 
 type DeploymentReleaseTemplate struct {
-	ApplicationName string
+	ApplicationName   string
+	ReconcileInterval string
+	ChartVersion      string
 }
 
 type TemplateService struct{}
@@ -80,7 +87,8 @@ func (ts *TemplateService) NewApplicationTemplate(
 	applicationBaseKustomizationPath string,
 	applicationBaseReleasePath string,
 	applicationName string,
-	applicationChartName string,
+	reconcileInterval string,
+	chartVersion string,
 ) *ApplicationTemplate {
 
 	template := new(ApplicationTemplate)
@@ -95,7 +103,8 @@ func (ts *TemplateService) NewApplicationTemplate(
 
 	applicationReleaseTemplate := new(ApplicationReleaseTemplate)
 	applicationReleaseTemplate.ApplicationName = applicationName
-	applicationReleaseTemplate.ApplicationChartName = applicationChartName
+	applicationReleaseTemplate.ReconcileInterval = reconcileInterval
+	applicationReleaseTemplate.ChartVersion = chartVersion
 
 	template.applicationKustomizationTemplate = applicationKustomizationTemplate
 	template.applicationReleaseTemplate = applicationReleaseTemplate
@@ -108,6 +117,8 @@ func (ts *TemplateService) NewStageTemplate(
 	stageBaseReleasePath string,
 	stageName string,
 	applicationName string,
+	stageReconcileInterval string,
+	stageChartVersion string,
 ) *StageTemplate {
 
 	template := new(StageTemplate)
@@ -117,10 +128,13 @@ func (ts *TemplateService) NewStageTemplate(
 
 	stageBaseKustomization := new(StageKustomizationTemplate)
 	stageBaseKustomization.StageName = stageName
+	stageBaseKustomization.ApplicationName = applicationName
 
 	stageBaseRelease := new(StageReleaseTemplate)
 	stageBaseRelease.StageName = stageName
 	stageBaseRelease.ApplicationName = applicationName
+	stageBaseRelease.ReconcileInterval = stageReconcileInterval
+	stageBaseRelease.ChartVersion = stageChartVersion
 
 	template.stageKustomizationTemplate = stageBaseKustomization
 	template.stageReleaseTemplate = stageBaseRelease
@@ -133,6 +147,9 @@ func (ts *TemplateService) NewDeploymentTemplate(
 	deploymentStageDeploymentDescriptionTemplatePath string,
 	deploymentReleaseTemplatePath string,
 	deploymentFileName string,
+	pathFromMomentumRoot string,
+	reconcileInterval string,
+	chartVersion string,
 	applicationName string,
 	repositoryName string) *DeploymentTemplate {
 
@@ -148,6 +165,7 @@ func (ts *TemplateService) NewDeploymentTemplate(
 	templateStageDeployment := new(DeploymentStageDeploymentDescriptionTemplate)
 	templateStageDeployment.DeploymentName = deploymentFileName
 	templateStageDeployment.DeploymentNameWithoutEnding = deploymentNameWithoutEnding
+	templateStageDeployment.PathFromMomentumRoot = "./" + pathFromMomentumRoot
 	templateStageDeployment.RepositoryName = repositoryName
 
 	deploymentKustomizationTemplate := new(DeploymentKustomizationTemplate)
@@ -155,6 +173,8 @@ func (ts *TemplateService) NewDeploymentTemplate(
 
 	deploymentReleaseTemplate := new(DeploymentReleaseTemplate)
 	deploymentReleaseTemplate.ApplicationName = applicationName
+	deploymentReleaseTemplate.ReconcileInterval = reconcileInterval
+	deploymentReleaseTemplate.ChartVersion = chartVersion
 
 	template.deploymentKustomizationTemplate = deploymentKustomizationTemplate
 	template.deploymentStageDeploymentDescriptionTemplate = templateStageDeployment
@@ -165,25 +185,25 @@ func (ts *TemplateService) NewDeploymentTemplate(
 
 func (ts *TemplateService) ApplyApplicationTemplate(template *ApplicationTemplate) error {
 
-	err := ts.ApplyApplicationKustomizationTemplate(template.applicationBaseKustomizationTemplatePath, template.applicationKustomizationTemplate)
+	err := ts.ParseReplaceWrite(template.applicationBaseKustomizationTemplatePath, template.applicationKustomizationTemplate)
 	if err != nil {
 		config.LOGGER.LogError("failed applying base kustomization template", err, "")
 		return err
 	}
 
-	err = ts.ApplyApplicationReleaseTemplate(template.applicationBaseReleaseTemplatePath, template.applicationReleaseTemplate)
+	err = ts.ParseReplaceWrite(template.applicationBaseReleaseTemplatePath, template.applicationReleaseTemplate)
 	if err != nil {
 		config.LOGGER.LogError("failed applying base release template", err, "")
 		return err
 	}
 
-	err = ts.ApplyApplicationKustomizationTemplate(template.applicationRepositoryPath, template.applicationKustomizationTemplate)
+	err = ts.ParseReplaceWrite(template.applicationRepositoryPath, template.applicationKustomizationTemplate)
 	if err != nil {
 		config.LOGGER.LogError("failed applying release template", err, "")
 		return err
 	}
 
-	err = ts.ApplyApplicationKustomizationTemplate(template.applicationNamespacePath, template.applicationKustomizationTemplate)
+	err = ts.ParseReplaceWrite(template.applicationNamespacePath, template.applicationKustomizationTemplate)
 	if err != nil {
 		config.LOGGER.LogError("failed applying namespace template", err, "")
 		return err
@@ -194,12 +214,12 @@ func (ts *TemplateService) ApplyApplicationTemplate(template *ApplicationTemplat
 
 func (ts *TemplateService) ApplyStageTemplate(template *StageTemplate) error {
 
-	err := ts.ApplyStageKustomizationTemplate(template.stageBaseKustomizationPath, template.stageKustomizationTemplate)
+	err := ts.ParseReplaceWrite(template.stageBaseKustomizationPath, template.stageKustomizationTemplate)
 	if err != nil {
 		return err
 	}
 
-	err = ts.ApplyStageReleaseTemplate(template.stageBaseReleasePath, template.stageReleaseTemplate)
+	err = ts.ParseReplaceWrite(template.stageBaseReleasePath, template.stageReleaseTemplate)
 	if err != nil {
 		return err
 	}
@@ -209,50 +229,22 @@ func (ts *TemplateService) ApplyStageTemplate(template *StageTemplate) error {
 
 func (ts *TemplateService) ApplyDeploymentTemplate(template *DeploymentTemplate) error {
 
-	err := ts.ApplyDeploymentStageDeploymentDescriptionTemplate(template.deploymentStageDeploymentDescriptionTemplatePath, template.deploymentStageDeploymentDescriptionTemplate)
+	err := ts.ParseReplaceWrite(template.deploymentStageDeploymentDescriptionTemplatePath, template.deploymentStageDeploymentDescriptionTemplate)
 	if err != nil {
 		return err
 	}
 
-	err = ts.ApplyDeploymentKustomizationTemplate(template.deploymentKustomizationTemplatePath, template.deploymentKustomizationTemplate)
+	err = ts.ParseReplaceWrite(template.deploymentKustomizationTemplatePath, template.deploymentKustomizationTemplate)
 	if err != nil {
 		return err
 	}
 
-	err = ts.ApplyDeploymentReleaseTemplate(template.deploymentReleaseTemplatePath, template.deploymentReleaseTemplate)
+	err = ts.ParseReplaceWrite(template.deploymentReleaseTemplatePath, template.deploymentReleaseTemplate)
 	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func (ts *TemplateService) ApplyApplicationKustomizationTemplate(path string, template *ApplicationKustomizationTemplate) error {
-	return ts.ParseReplaceWrite(path, template)
-}
-
-func (ts *TemplateService) ApplyApplicationReleaseTemplate(path string, template *ApplicationReleaseTemplate) error {
-	return ts.ParseReplaceWrite(path, template)
-}
-
-func (ts *TemplateService) ApplyStageKustomizationTemplate(path string, template *StageKustomizationTemplate) error {
-	return ts.ParseReplaceWrite(path, template)
-}
-
-func (ts *TemplateService) ApplyStageReleaseTemplate(path string, template *StageReleaseTemplate) error {
-	return ts.ParseReplaceWrite(path, template)
-}
-
-func (ts *TemplateService) ApplyDeploymentStageDeploymentDescriptionTemplate(path string, template *DeploymentStageDeploymentDescriptionTemplate) error {
-	return ts.ParseReplaceWrite(path, template)
-}
-
-func (ts *TemplateService) ApplyDeploymentKustomizationTemplate(path string, template *DeploymentKustomizationTemplate) error {
-	return ts.ParseReplaceWrite(path, template)
-}
-
-func (ts *TemplateService) ApplyDeploymentReleaseTemplate(path string, template *DeploymentReleaseTemplate) error {
-	return ts.ParseReplaceWrite(path, template)
 }
 
 func (ts *TemplateService) ParseReplaceWrite(path string, data any) error {

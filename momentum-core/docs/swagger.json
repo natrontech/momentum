@@ -658,7 +658,13 @@
         "models.ApplicationCreateRequest": {
             "type": "object",
             "properties": {
+                "chartVersion": {
+                    "type": "string"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "reconcileInterval": {
                     "type": "string"
                 },
                 "repositoryName": {
@@ -689,10 +695,16 @@
                 "applicationName": {
                     "type": "string"
                 },
+                "chartVersion": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
                 "parentStageId": {
+                    "type": "string"
+                },
+                "reconcileInterval": {
                     "type": "string"
                 },
                 "repositoryName": {
@@ -742,6 +754,9 @@
         "models.StageCreateRequest": {
             "type": "object",
             "properties": {
+                "chartVersion": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -749,6 +764,9 @@
                     "type": "string"
                 },
                 "parentStageId": {
+                    "type": "string"
+                },
+                "reconcileInterval": {
                     "type": "string"
                 },
                 "repositoryName": {

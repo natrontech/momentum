@@ -3,6 +3,11 @@ kind: HelmRelease
 metadata:
   name: '{{ .ApplicationName }}'
 spec:
+  interval: '{{ .ReconcileInterval }}'
+  chart:
+    spec:
+      version: '{{ .ChartVersion }}'
+spec:
   valuesFrom:
     - kind: ConfigMap
       name: base-values

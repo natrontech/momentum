@@ -10,8 +10,10 @@ import (
 )
 
 type ApplicationCreateRequest struct {
-	Name           string `json:"name"`
-	RepositoryName string `json:"repositoryName"`
+	Name              string `json:"name"`
+	ReconcileInterval string `json:"reconcileInterval"`
+	ChartVersion      string `json:"chartVersion"`
+	RepositoryName    string `json:"repositoryName"`
 }
 
 type Application struct {
