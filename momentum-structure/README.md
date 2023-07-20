@@ -8,13 +8,13 @@ The structure is as follows (generated with `tree -a -I`):
 
 ```bash
 .
-└── {root}
-    ├── kustomization.yaml
-    └── {application} # An application e.g. my-app (level 1)
+└── momentum-root # This is the root of the repository
+    ├── kustomization.yaml # This is the root kustomization file
+    └── {application}
         ├── _base
         │   ├── kustomization.yaml
         │   ├── ns.yaml
-        │   ├── release.yaml
+        │   ├── release.yaml # This is the helm release for base
         │   ├── secrets.yaml
         │   └── values.yaml
         ├── _deploy
@@ -24,13 +24,13 @@ The structure is as follows (generated with `tree -a -I`):
         │       ├── secrets.yaml
         │       └── values.yaml
         ├── _template
-        │   ├── secrets.yaml # The helmrelease keys for secrets templated with go template
-        │   └── values.yaml # The helmrelease values templated with go template
+        │   ├── secrets.yaml
+        │   └── values.yaml
         ├── kustomization.yaml
-        ├── ns.yaml # The namespace of the application (to store the helmrepository stuff)
-        ├── repository.yaml # The helm repository of the application
-        ├── {deployment}.yaml # A deployment of the application, which is a flux kustomization
-        └── {stage} # A stage of the application e.g. cluster-test, cluster-prod (level 2)
+        ├── ns.yaml
+        ├── repository.yaml
+        ├── {deployment}.yaml
+        └── {stage}
             ├── _base
             │   ├── kustomization.yaml
             │   ├── release.yaml
@@ -47,7 +47,7 @@ The structure is as follows (generated with `tree -a -I`):
             │   └── values.yaml
             ├── kustomization.yaml
             ├── {deployment}.yaml
-            └── {stage} # A stage of the application e.g. test,prod (level 3)
+            └── {stage}
                 ├── _base
                 │   ├── kustomization.yaml
                 │   ├── release.yaml
