@@ -31,11 +31,17 @@ export type AuthSystemFields<T = never> = {
 
 // Record types for each collection
 
+export enum RepositoriesStatusOptions {
+	"UP" = "UP",
+	"ERROR" = "ERROR",
+	"SYNC" = "SYNC",
+}
 export type RepositoriesRecord = {
 	name?: string
 	coreHost?: string
 	corePort?: string
 	coreBasePath?: string
+	status?: RepositoriesStatusOptions
 }
 
 export type UsersRecord = {

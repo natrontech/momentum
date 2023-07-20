@@ -48,6 +48,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@angular/common": "^16.1.6",
     "@floating-ui/dom": "^1.2.8",
     "@openapitools/openapi-generator-cli": "^2.7.0",
     "@picocss/pico": "^1.5.10",

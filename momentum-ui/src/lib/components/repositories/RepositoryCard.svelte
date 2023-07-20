@@ -14,11 +14,11 @@
 
 <div
   class="card rounded-md border-2 transition-all duration-300 ease-in-out
-  {repository.status === RepositoriesStatusOptions['UP-TO-DATE']
+  {repository.status === RepositoriesStatusOptions.UP
     ? 'border-green-400 hover:border-green-500'
     : repository.status === RepositoriesStatusOptions.ERROR
     ? 'border-red-400 hover:border-red-500'
-    : repository.status === RepositoriesStatusOptions.PENDING
+    : repository.status === RepositoriesStatusOptions.SYNC
     ? 'border-yellow-400 hover:border-yellow-500'
     : 'border-gray-400 hover:border-gray-500'}
 "
@@ -27,25 +27,25 @@
     <button
       on:click={onHandleStatusClick}
       class="p-6 rounded-l-md cursor-pointer w-52 group hover:w-full transition-all duration-300 ease-in-out
-      {repository.status === RepositoriesStatusOptions['UP-TO-DATE']
+      {repository.status === RepositoriesStatusOptions.UP
         ? 'bg-green-400 hover:bg-green-500'
         : repository.status === RepositoriesStatusOptions.ERROR
         ? 'bg-red-400 hover:bg-red-500'
-        : repository.status === RepositoriesStatusOptions.PENDING
+        : repository.status === RepositoriesStatusOptions.SYNC
         ? 'bg-yellow-400 hover:bg-yellow-500'
         : 'bg-gray-400 hover:bg-gray-500'}
     "
     >
       <div class="flex flex-col justify-center items-center ">
-        {#if repository.status === RepositoriesStatusOptions.PENDING}
+        {#if repository.status === RepositoriesStatusOptions.SYNC}
           <RefreshCw
             class="text-white group-hover:rotate-180 transition-all duration-300 ease-in-out"
           />
         {:else if repository.status === RepositoriesStatusOptions.ERROR}
           <Ban class="text-white" />
-        {:else if repository.status === RepositoriesStatusOptions["UP-TO-DATE"]}
+        {:else if repository.status === RepositoriesStatusOptions.UP}
           <Check class="text-white" />
-        {:else if repository.status === RepositoriesStatusOptions.SYNCING}
+        {:else if repository.status === RepositoriesStatusOptions.SYNC}
           <RefreshCw class="animate-spin text-white" />
         {/if}
         <p class=" text-xs text-white">
