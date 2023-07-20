@@ -3,6 +3,10 @@ kind: HelmRelease
 metadata:
   name: '{application}'
 spec:
+  interval: '{application-interval}'
+  chart:
+    spec:
+      version: '{application-chart-version}'
   valuesFrom:
     - kind: ConfigMap
       name: base-values

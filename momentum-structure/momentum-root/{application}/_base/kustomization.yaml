@@ -11,7 +11,7 @@ configMapGenerator:
     disableNameSuffixHash: true
 secretGenerator:
 - files:
-  - secrets.yaml
+  - values.yaml=secrets.yaml
   name: base-secrets
   options:
     disableNameSuffixHash: true

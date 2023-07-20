@@ -3,10 +3,10 @@ kind: HelmRelease
 metadata:
   name: '{application}'
 spec:
-  interval: 10m
+  interval: '{application-interval}'
   chart:
     spec:
-      chart: '{application-chart}'
+      version: '{application-chart-version}'
       sourceRef:
         kind: HelmRepository
         name: '{application}-charts'

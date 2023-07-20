@@ -1,10 +1,12 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: '{deployment}-{stage}-{stage}' # next stage would be '{deployment}-{stage}--{stage}-{next_stage}'
+  name: '{deployment}-{stage}-{stage}' # next stage would be '{deployment}-{stage}-{stage}-{next_stage}'
+  namespace: flux-system
 spec:
+  targetNamespace: '{deployment}-{stage}-{stage}'
   interval: 5m0s
-  path: ./_deploy/{deployment}/
+  path: ./momentum-root/{application}/{stage}/{stage}/_deploy/{deployment}/
   prune: true
   sourceRef:
     kind: GitRepository

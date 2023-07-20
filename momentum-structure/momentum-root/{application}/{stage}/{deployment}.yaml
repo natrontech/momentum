@@ -6,7 +6,7 @@ metadata:
 spec:
   targetNamespace: '{deployment}-{stage}'
   interval: 5m0s
-  path: ./_deploy/{deployment}/
+  path: ./momentum-root/{application}/{stage}/_deploy/{deployment}/
   prune: true
   sourceRef:
     kind: GitRepository
