@@ -2,9 +2,11 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: '{{ .DeploymentNameWithoutEnding }}'
+  namespace: flux-system
 spec:
+  targetNamespace: '{{ .DeploymentNameWithoutEnding }}'
   interval: 5m0s
-  path: ./_deploy/{{ .DeploymentName }}/
+  path: {{ .PathFromMomentumRoot }}
   prune: true
   sourceRef:
     kind: GitRepository
