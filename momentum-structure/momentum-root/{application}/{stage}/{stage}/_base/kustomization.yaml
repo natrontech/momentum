@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../../../_base/
+configMapGenerator:
+- files:
+  - values.yaml
+  name: '{stage}-{stage}-values'
+  options:
+    disableNameSuffixHash: true
+secretGenerator:
+- files:
+  - values.yaml=secrets.yaml
+  name: '{stage}-{stage}-secrets'
+  options:
+    disableNameSuffixHash: true
+patches:
+  - path: release.yaml
