@@ -33,3 +33,5 @@ dist/
 .ash_history
 /docker-compose.override.yml
 _temp/
+
+./momentum-core/momentum-core
