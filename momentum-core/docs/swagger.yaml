@@ -492,6 +492,5 @@ paths:
       tags:
       - stages
 schemes:
-- http,
-- https
+- http
 swagger: "2.0"

@@ -40,14 +40,5 @@
         {/each}
       </div>
     </nav>
-    <div class="bottom-6 absolute w-full flex items-center justify-center">
-      <!-- <a
-        href="/logout"
-        class="text-gray-500 unstyled group flex items-center hover:text-gray-600 px-2 py-2 text-sm font-medium"
-        aria-current="page"
-      >
-        <Icon className="w-5 h-5" src={HiOutlineLogout} />{@html "&nbsp;"}Sign-out
-      </a> -->
-    </div>
   </div>
 </div>

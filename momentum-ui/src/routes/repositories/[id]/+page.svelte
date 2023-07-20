@@ -1,12 +1,10 @@
 <script lang="ts">
   import BackButton from "$lib/components/base/BackButton.svelte";
-    import { RepositoryClientFactory } from "$lib/components/client-factories/repository-client-factory";
+  import { buildBasePath } from "$lib/components/client-factories/client-factory";
   import type { RepositoriesResponse } from "$lib/pocketbase/generated-types";
   import { metadata } from "$lib/stores/metadata";
   import type { PageData } from "./$types";
   export let data: PageData;
-
-  const repoPathBuilder = new RepositoryClientFactory();
 
   $: repository = data.record as RepositoriesResponse;
 
@@ -20,5 +18,5 @@
     {repository.name}
   </h2>
 
-  <a href="{repoPathBuilder.buildBasePath(repository)}/swagger/index.html">{repoPathBuilder.buildBasePath(repository)}/swagger/index.html</a>
+  <a href="{buildBasePath(repository)}swagger/index.html">{buildBasePath(repository)}swagger/index.html</a>
 </div>

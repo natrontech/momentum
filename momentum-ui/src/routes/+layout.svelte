@@ -12,6 +12,7 @@
   import { site } from "$lib/config";
   import { beforeNavigate } from "$app/navigation";
   import { fly } from "svelte/transition";
+    import RepositorySelector from "$lib/components/repositories/RepositorySelector.svelte";
 
   export let data: any;
 
@@ -78,20 +79,15 @@
   </div>
   <div class="bottom-0 top-32 bg-gray-100 absolute -z-10 w-full" />
   <AppShell>
+    
     <svelte:fragment slot="sidebarLeft">
       <Nav {routes} />
     </svelte:fragment>
+
+    <RepositorySelector repos={data.records}/>
+
   </AppShell>
-  <!-- <div
-      class="absolute top-0 left-0 right-0 bottom-0 bg-white bg-opacity-0 flex justify-center items-center z-40 animate-pulse"
-    />
-    <div class="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center z-50">
-      <div class="flex flex-col items-center">
-        <Loader2 class="w-16 h-16 text-primary-500 animate-spin" />
-        <p class="text-gray-500 font-bold text-2xl ml-4">Loading...</p>
-      </div>
-    </div>
-  {:else} -->
+
   {#key data.pathname}
     <div
       class="absolute pr-4 pt-4 pb-4 left-64 right-0 top-32 bottom-0 overflow-y-scroll hide-scrollbar"

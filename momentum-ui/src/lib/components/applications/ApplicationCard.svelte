@@ -1,5 +1,6 @@
 <script lang="ts">
-  import type { ModelsApplication } from "$lib/momentum-core-client/model/models";
+  
+  import type { ModelsApplication } from "$lib/momentum-core-client/api";
 
   export let application: ModelsApplication;
 
