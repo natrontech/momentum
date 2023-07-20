@@ -25,7 +25,11 @@ definitions:
     type: object
   models.ApplicationCreateRequest:
     properties:
+      chartVersion:
+        type: string
       name:
+        type: string
+      reconcileInterval:
         type: string
       repositoryName:
         type: string
@@ -45,9 +49,13 @@ definitions:
     properties:
       applicationName:
         type: string
+      chartVersion:
+        type: string
       name:
         type: string
       parentStageId:
+        type: string
+      reconcileInterval:
         type: string
       repositoryName:
         type: string
@@ -79,11 +87,15 @@ definitions:
     type: object
   models.StageCreateRequest:
     properties:
+      chartVersion:
+        type: string
       name:
         type: string
       parentApplicationId:
         type: string
       parentStageId:
+        type: string
+      reconcileInterval:
         type: string
       repositoryName:
         type: string

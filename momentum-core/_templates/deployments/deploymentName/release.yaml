@@ -6,4 +6,4 @@ spec:
   interval: '{{ .ReconcileInterval }}'
   chart:
     spec:
-      version: '{{ .HelmChartVersion }}'
+      version: '{{ .ChartVersion }}'

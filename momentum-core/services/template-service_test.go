@@ -19,7 +19,7 @@ func FILESYSTEMTEST_TestApplyDeploymentReleaseTemplate(t *testing.T) {
 
 	appName := "{CoolApp}"
 
-	err := templateService.ApplyDeploymentReleaseTemplate(TEMPLATE_TEST_FILE_PATH, &services.DeploymentReleaseTemplate{appName})
+	err := templateService.ParseReplaceWrite(TEMPLATE_TEST_FILE_PATH, &services.DeploymentReleaseTemplate{appName, "", ""})
 	if err != nil {
 		fmt.Println("applying template failed:", err.Error())
 		t.FailNow()
@@ -53,7 +53,7 @@ func FILESYSTEMTEST_TestApplyDeploymentStageDeploymentDescriptionTemplate(t *tes
 	deploymentName := "CoolDeployment"
 	repositoryName := "CoolRepository"
 
-	err := templateService.ApplyDeploymentStageDeploymentDescriptionTemplate(TEMPLATE_TEST_FILE_PATH, &services.DeploymentStageDeploymentDescriptionTemplate{deploymentName, deploymentName, repositoryName})
+	err := templateService.ParseReplaceWrite(TEMPLATE_TEST_FILE_PATH, &services.DeploymentStageDeploymentDescriptionTemplate{deploymentName, deploymentName, "myrootdir", repositoryName})
 	if err != nil {
 		fmt.Println("applying template failed:", err.Error())
 		t.FailNow()
@@ -73,7 +73,7 @@ func FILESYSTEMTEST_TestApplyDeploymentKustomizationTemplate(t *testing.T) {
 
 	deploymentName := "CoolDeployment"
 
-	err := templateService.ApplyDeploymentKustomizationTemplate(TEMPLATE_TEST_FILE_PATH, &services.DeploymentKustomizationTemplate{deploymentName})
+	err := templateService.ParseReplaceWrite(TEMPLATE_TEST_FILE_PATH, &services.DeploymentKustomizationTemplate{deploymentName})
 	if err != nil {
 		fmt.Println("applying template failed:", err.Error())
 		t.FailNow()

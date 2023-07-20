@@ -11,6 +11,8 @@ import (
 
 type StageCreateRequest struct {
 	Name                string `json:"name"`
+	ReconcileInterval   string `json:"reconcileInterval"`
+	ChartVersion        string `json:"chartVersion"`
 	RepositoryName      string `json:"repositoryName"`
 	ParentApplicationId string `json:"parentApplicationId"`
 	ParentStageId       string `json:"parentStageId"`

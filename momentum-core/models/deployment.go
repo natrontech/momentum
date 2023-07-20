@@ -5,15 +5,18 @@ import (
 	"momentum-core/clients"
 	"momentum-core/tree"
 	"momentum-core/utils"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
 type DeploymentCreateRequest struct {
-	Name            string `json:"name"`
-	ParentStageId   string `json:"parentStageId"`
-	RepositoryName  string `json:"repositoryName"`
-	ApplicationName string `json:"applicationName"`
+	Name              string `json:"name"`
+	ReconcileInterval string `json:"reconcileInterval"`
+	ChartVersion      string `json:"chartVersion"`
+	ParentStageId     string `json:"parentStageId"`
+	RepositoryName    string `json:"repositoryName"`
+	ApplicationName   string `json:"applicationName"`
 }
 
 type Deployment struct {
@@ -41,7 +44,7 @@ func ToDeploymentFromNode(n *tree.Node, repositoryId string) (*Deployment, error
 	deployment := new(Deployment)
 
 	deployment.Id = n.Id
-	deployment.Name = n.Path
+	deployment.Name = strings.Split(n.Path, "::")[0]
 	deployment.Path = n.FullPath()
 	deployment.RepositoryId = repositoryId
 	deployment.ParentStageId = n.Parent.Id

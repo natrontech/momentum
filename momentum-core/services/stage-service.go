@@ -105,7 +105,7 @@ func (s *StageService) AddStage(request *models.StageCreateRequest, traceId stri
 	stageBaseKustomizationPath := utils.BuildPath(stageBasePath, KUSTOMIZATION_FILE_NAME)
 	stageBaseReleasePath := utils.BuildPath(stageBasePath, "release.yaml")
 
-	template := s.templateService.NewStageTemplate(stageBaseKustomizationPath, stageBaseReleasePath, request.Name, parentAppNode.Path)
+	template := s.templateService.NewStageTemplate(stageBaseKustomizationPath, stageBaseReleasePath, request.Name, parentAppNode.Path, request.ReconcileInterval, request.ChartVersion)
 	err = s.templateService.ApplyStageTemplate(template)
 	if err != nil {
 		return nil, err

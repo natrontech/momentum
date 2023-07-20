@@ -5,6 +5,7 @@ import (
 	"momentum-core/config"
 	"momentum-core/models"
 	"momentum-core/utils"
+	"strings"
 )
 
 type DeploymentService struct {
@@ -92,8 +93,21 @@ func (ds *DeploymentService) AddDeployment(request *models.DeploymentCreateReque
 
 	releaseYamlPath := utils.BuildPath(deploymentFolderDestinationPath, "release.yaml")
 	deploymentKustomizationYamlPath := utils.BuildPath(deploymentFolderDestinationPath, KUSTOMIZATION_FILE_NAME)
+	pathFromMomentumRoot := strings.Split(deploymentFolderDestinationPath, config.MOMENTUM_ROOT)[1]
+	pathFromMomentumRoot = utils.BuildPath(config.MOMENTUM_ROOT, pathFromMomentumRoot)
 
-	template := ds.templateService.NewDeploymentTemplate(deploymentKustomizationYamlPath, deploymentFileDestinationPath, releaseYamlPath, deploymentYamlDestinationName, request.ApplicationName, request.RepositoryName)
+	template := ds.templateService.NewDeploymentTemplate(
+		deploymentKustomizationYamlPath,
+		deploymentFileDestinationPath,
+		releaseYamlPath,
+		deploymentYamlDestinationName,
+		pathFromMomentumRoot,
+		request.ReconcileInterval,
+		request.ChartVersion,
+		request.ApplicationName,
+		request.RepositoryName,
+	)
+
 	err = ds.templateService.ApplyDeploymentTemplate(template)
 	if err != nil {
 		config.LOGGER.LogWarning("failed applying deployment template", err, traceId)
