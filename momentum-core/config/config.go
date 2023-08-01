@@ -10,9 +10,9 @@ import (
 
 const MOMENTUM_ROOT = "momentum-root"
 
-const GIT_USER = "GIT_USER"
-const GIT_EMAIL = "GIT_EMAIL"
-const GIT_TOKEN = "GIT_TOKEN"
+const MOMENTUM_GIT_USER = "MOMENTUM_GIT_USER"
+const MOMENTUM_GIT_EMAIL = "MOMENTUM_GIT_EMAIL"
+const MOMENTUM_GIT_TOKEN = "MOMENTUM_GIT_TOKEN"
 
 type ILoggerClient interface {
 	LogTrace(msg string, traceId string)
@@ -99,16 +99,16 @@ func (m *MomentumConfig) intitializeGitAccessToken() error {
 
 	m.transactionToken = new(gittransaction.Token)
 
-	m.transactionToken.Username = os.Getenv(GIT_USER)
-	m.transactionToken.Email = os.Getenv(GIT_EMAIL)
-	m.transactionToken.Token = os.Getenv(GIT_TOKEN)
+	m.transactionToken.Username = os.Getenv(MOMENTUM_GIT_USER)
+	m.transactionToken.Email = os.Getenv(MOMENTUM_GIT_EMAIL)
+	m.transactionToken.Token = os.Getenv(MOMENTUM_GIT_TOKEN)
 
 	if m.transactionToken == nil ||
 		m.transactionToken.Username == "" ||
 		m.transactionToken.Email == "" ||
 		m.transactionToken.Token == "" {
 
-		return errors.New("failed initializing git transaction user please make sure to set " + GIT_USER + " and " + GIT_EMAIL + " and " + GIT_TOKEN)
+		return errors.New("failed initializing git transaction user please make sure to set " + MOMENTUM_GIT_USER + " and " + MOMENTUM_GIT_EMAIL + " and " + MOMENTUM_GIT_TOKEN)
 	}
 
 	return nil

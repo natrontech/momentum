@@ -6,8 +6,8 @@ The core implements a REST-API empowering consumers to manage their repository i
 
 # Environment variables
 
-| Name         | Description |
-|--------------|-------------|
-| GIT_USER     | Username for user who creates transactions 
-| GIT_EMAIL    | Email for the user who creates the transactions
-| GIT_TOKEN    | Access token which belongs to the user who creates the transaction
+| Name         | Description | Mandatory
+|--------------|-------------|-----------
+| MOMENTUM_GIT_USER     | Username for user who creates transactions | yes
+| MOMENTUM_GIT_EMAIL    | Email for the user who creates the transactions | yes
+| MOMENTUM_GIT_TOKEN    | Access token which belongs to the user who creates the transaction | yes
