@@ -18,3 +18,6 @@ generate-api-spec: check-swagger
 
 install-swagger:
 	go install github.com/swaggo/swag/cmd/swag@latest
+
+setup-dev: dev-setup.sh
+	. ./dev-setup.sh
