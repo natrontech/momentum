@@ -98,6 +98,7 @@ func (sr *StageRouter) addStage(c *gin.Context) {
 
 	stage, err := sr.stageService.AddStage(request, traceId)
 	if err != nil {
+		transaction.Rollback(ctx)
 		c.IndentedJSON(http.StatusBadRequest, models.NewApiError(err, http.StatusBadRequest, c, traceId))
 		config.LOGGER.LogError(err.Error(), err, traceId)
 		return

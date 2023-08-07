@@ -98,6 +98,7 @@ func (d *DeploymentRouter) addDeployment(c *gin.Context) {
 
 	deployment, err := d.deploymentService.AddDeployment(request, traceId)
 	if err != nil {
+		transaction.Rollback(ctx)
 		c.IndentedJSON(http.StatusBadRequest, models.NewApiError(err, http.StatusBadRequest, c, traceId))
 		config.LOGGER.LogError(err.Error(), err, traceId)
 		return

@@ -118,6 +118,7 @@ func (a *ApplicationRouter) addApplication(c *gin.Context) {
 
 	application, err := a.applicationService.AddApplication(request, traceId)
 	if err != nil {
+		transaction.Rollback(ctx)
 		c.IndentedJSON(http.StatusBadRequest, models.NewApiError(err, http.StatusBadRequest, c, traceId))
 		config.LOGGER.LogError(err.Error(), err, traceId)
 		return
