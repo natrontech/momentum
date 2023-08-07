@@ -3,7 +3,7 @@ module momentum-core
 go 1.20
 
 require (
-	github.com/Joel-Haeberli/git-transaction v0.1.2
+	github.com/Joel-Haeberli/git-transaction v0.1.3
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/uuid v1.3.0
 	github.com/json-iterator/go v1.1.12

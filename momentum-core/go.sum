@@ -2,6 +2,8 @@ github.com/Joel-Haeberli/git-transaction v0.1.1 h1:DsmVZAx5cEsUq8VqNkJZ8a5JRRk1a
 github.com/Joel-Haeberli/git-transaction v0.1.1/go.mod h1:cd98lb1P64RZtEpTQXXclpG7+OSp9eDNQjiMFkkxFpA=
 github.com/Joel-Haeberli/git-transaction v0.1.2 h1:xXIgHFKfaZw8Dko29+/sNPQTkDKYOczv0Xk1Kh/kauQ=
 github.com/Joel-Haeberli/git-transaction v0.1.2/go.mod h1:cd98lb1P64RZtEpTQXXclpG7+OSp9eDNQjiMFkkxFpA=
+github.com/Joel-Haeberli/git-transaction v0.1.3 h1:aXdQkM7WUCBWeAVHhLF4HIWBSrAy28AqKALZswrk9k4=
+github.com/Joel-Haeberli/git-transaction v0.1.3/go.mod h1:cd98lb1P64RZtEpTQXXclpG7+OSp9eDNQjiMFkkxFpA=
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
 github.com/Microsoft/go-winio v0.5.2/go.mod h1:WpS1mjBmmwHBEWmogvA2mj8546UReBk4v8QkMxJ6pZY=
