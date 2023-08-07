@@ -105,6 +105,7 @@ func (d *DeploymentRouter) addDeployment(c *gin.Context) {
 
 	err = transaction.Write(ctx)
 	if err != nil {
+		transaction.Rollback(ctx)
 		c.IndentedJSON(http.StatusInternalServerError, models.NewApiError(err, http.StatusInternalServerError, c, traceId))
 		config.LOGGER.LogError(err.Error(), err, traceId)
 		return
@@ -112,6 +113,7 @@ func (d *DeploymentRouter) addDeployment(c *gin.Context) {
 
 	err = transaction.Commit(ctx)
 	if err != nil {
+		transaction.Rollback(ctx)
 		c.IndentedJSON(http.StatusInternalServerError, models.NewApiError(err, http.StatusInternalServerError, c, traceId))
 		config.LOGGER.LogError(err.Error(), err, traceId)
 		return

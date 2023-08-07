@@ -95,7 +95,7 @@ func (m *MomentumConfig) checkMandatoryTemplates() error {
 	return nil
 }
 
-func (m *MomentumConfig) intitializeGitAccessToken() error {
+func (m *MomentumConfig) initializeGitAccessToken() error {
 
 	m.transactionToken = new(gittransaction.Token)
 
@@ -141,7 +141,7 @@ func InitializeMomentumCore() (*MomentumConfig, error) {
 	config.deploymentTemplateFolderPath = utils.BuildPath(templatesDir, "deployments", "deploymentName")
 	config.deploymentTemplateFilePath = utils.BuildPath(templatesDir, "deployments", "deploymentName.yaml")
 
-	err = config.intitializeGitAccessToken()
+	err = config.initializeGitAccessToken()
 	if err != nil {
 		return nil, err
 	}
