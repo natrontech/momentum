@@ -102,6 +102,40 @@ func (n *Node) Deployment(deploymentId string) *Node {
 	return nil
 }
 
+func (n *Node) DeploymentFolderFiles() []*Node {
+
+	deploymentFolders := childrenWithName(n.Parent, "_deploy")
+	for _, depl := range deploymentFolders {
+
+		if strings.EqualFold(n.PathWithoutEnding(), depl.PathWithoutEnding()) {
+			return depl.Files()
+		}
+	}
+
+	return make([]*Node, 0)
+}
+
+func (n *Node) Values() []*Node {
+
+	if n == nil || n.Kind != File {
+		return make([]*Node, 0)
+	}
+
+	return n.flat(make([]*Node, 0))
+}
+
+func (n *Node) flat(result []*Node) []*Node {
+
+	if len(n.Children) > 0 {
+		result = append(result, n.Children...)
+		for _, child := range n.Children {
+			result = append(result, child.flat(result)...)
+		}
+	}
+
+	return result
+}
+
 func deployments(stage *Node) []*Node {
 
 	files := stage.Files()
@@ -141,4 +175,16 @@ func deployments(stage *Node) []*Node {
 	}
 
 	return depls
+}
+
+func childrenWithName(n *Node, name string) []*Node {
+
+	matches := make([]*Node, 0)
+	for _, child := range n.Children {
+		if strings.EqualFold(child.Path, name) {
+			matches = append(matches, child)
+		}
+	}
+
+	return matches
 }

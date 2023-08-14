@@ -31,7 +31,7 @@ func (a *ApplicationRouter) RegisterApplicationRoutes(server *gin.Engine) {
 	server.POST(ROUTING_PATH_APPLICATION, a.addApplication)
 }
 
-// GetApplication godoc
+// getApplication godoc
 //
 //	@Summary		get an application of a repository by id
 //	@Tags			applications
@@ -77,7 +77,7 @@ func (a *ApplicationRouter) getApplication(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// AddApplication godoc
+// addApplication godoc
 //
 //	@Summary		add an application
 //	@Tags			applications

@@ -79,6 +79,24 @@ func (ts *TreeService) deployment(repositoryName string, deploymentId string, tr
 	return nil, errors.New("no deployment with id " + deploymentId)
 }
 
+func (ts *TreeService) value(repositoryName string, valueId string, traceId string) (*tree.Node, error) {
+
+	repo, err := ts.repository(repositoryName, traceId)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO -> AllValues / ValueById etc. on Momentum-Tree abstraction.
+
+	values := repo.AllDeployments()
+	for _, value := range values {
+		if value.Id == valueId {
+			return value, nil
+		}
+	}
+	return nil, errors.New("no value with id " + valueId)
+}
+
 func (ts *TreeService) find(traceId string, repositoryName string, terms ...string) (*tree.Node, error) {
 
 	repo, err := ts.repository(repositoryName, traceId)
