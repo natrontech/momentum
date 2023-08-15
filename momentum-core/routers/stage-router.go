@@ -6,6 +6,7 @@ import (
 	"momentum-core/services"
 	"net/http"
 
+	gittransaction "github.com/Joel-Haeberli/git-transaction"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,14 +14,18 @@ const ROUTING_PATH_STAGE_BY_ID = VERSION + "/repository/:repositoryName/app/stag
 const ROUTING_PATH_STAGE = VERSION + "/stage"
 
 type StageRouter struct {
-	stageService *services.StageService
+	stageService      *services.StageService
+	repositoryService *services.RepositoryService
+	config            *config.MomentumConfig
 }
 
-func NewStageRouter(stageService *services.StageService) *StageRouter {
+func NewStageRouter(stageService *services.StageService, repositoryService *services.RepositoryService, config *config.MomentumConfig) *StageRouter {
 
 	router := new(StageRouter)
 
 	router.stageService = stageService
+	router.repositoryService = repositoryService
+	router.config = config
 
 	return router
 }
@@ -82,9 +87,35 @@ func (sr *StageRouter) addStage(c *gin.Context) {
 		return
 	}
 
+	repo, err := sr.repositoryService.GetRepository(request.RepositoryName, traceId)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, models.NewApiError(err, http.StatusInternalServerError, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	ctx, transaction, err := gittransaction.New(config.TRANSACTION_MODE, repo.Path, sr.config.TransactionToken())
+
 	stage, err := sr.stageService.AddStage(request, traceId)
 	if err != nil {
+		transaction.Rollback(ctx)
 		c.IndentedJSON(http.StatusBadRequest, models.NewApiError(err, http.StatusBadRequest, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	err = transaction.Write(ctx)
+	if err != nil {
+		transaction.Rollback(ctx)
+		c.IndentedJSON(http.StatusInternalServerError, models.NewApiError(err, http.StatusInternalServerError, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	err = transaction.Commit(ctx)
+	if err != nil {
+		transaction.Rollback(ctx)
+		c.IndentedJSON(http.StatusInternalServerError, models.NewApiError(err, http.StatusInternalServerError, c, traceId))
 		config.LOGGER.LogError(err.Error(), err, traceId)
 		return
 	}

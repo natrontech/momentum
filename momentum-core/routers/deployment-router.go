@@ -6,6 +6,7 @@ import (
 	"momentum-core/services"
 	"net/http"
 
+	gittransaction "github.com/Joel-Haeberli/git-transaction"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,13 +15,17 @@ const ROUTING_PATH_DEPLOYMENT = VERSION + "/deployment"
 
 type DeploymentRouter struct {
 	deploymentService *services.DeploymentService
+	repositoryService *services.RepositoryService
+	config            *config.MomentumConfig
 }
 
-func NewDeploymentRouter(deploymentService *services.DeploymentService) *DeploymentRouter {
+func NewDeploymentRouter(deploymentService *services.DeploymentService, repositoryService *services.RepositoryService, config *config.MomentumConfig) *DeploymentRouter {
 
 	router := new(DeploymentRouter)
 
 	router.deploymentService = deploymentService
+	router.repositoryService = repositoryService
+	router.config = config
 
 	return router
 }
@@ -82,9 +87,35 @@ func (d *DeploymentRouter) addDeployment(c *gin.Context) {
 		return
 	}
 
+	repo, err := d.repositoryService.GetRepository(request.RepositoryName, traceId)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, models.NewApiError(err, http.StatusInternalServerError, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	ctx, transaction, err := gittransaction.New(config.TRANSACTION_MODE, repo.Path, d.config.TransactionToken())
+
 	deployment, err := d.deploymentService.AddDeployment(request, traceId)
 	if err != nil {
+		transaction.Rollback(ctx)
 		c.IndentedJSON(http.StatusBadRequest, models.NewApiError(err, http.StatusBadRequest, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	err = transaction.Write(ctx)
+	if err != nil {
+		transaction.Rollback(ctx)
+		c.IndentedJSON(http.StatusInternalServerError, models.NewApiError(err, http.StatusInternalServerError, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	err = transaction.Commit(ctx)
+	if err != nil {
+		transaction.Rollback(ctx)
+		c.IndentedJSON(http.StatusInternalServerError, models.NewApiError(err, http.StatusInternalServerError, c, traceId))
 		config.LOGGER.LogError(err.Error(), err, traceId)
 		return
 	}

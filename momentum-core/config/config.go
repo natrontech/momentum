@@ -4,9 +4,17 @@ import (
 	"errors"
 	"momentum-core/utils"
 	"os"
+
+	gittransaction "github.com/Joel-Haeberli/git-transaction"
 )
 
 const MOMENTUM_ROOT = "momentum-root"
+
+const TRANSACTION_MODE = gittransaction.DEBUG
+
+const MOMENTUM_GIT_USER = "MOMENTUM_GIT_USER"
+const MOMENTUM_GIT_EMAIL = "MOMENTUM_GIT_EMAIL"
+const MOMENTUM_GIT_TOKEN = "MOMENTUM_GIT_TOKEN"
 
 type ILoggerClient interface {
 	LogTrace(msg string, traceId string)
@@ -23,6 +31,8 @@ type MomentumConfig struct {
 	validationTmpDir string
 	templatesDir     string
 	logDir           string
+
+	transactionToken *gittransaction.Token
 
 	applicationTemplateFolderPath string
 	stageTemplateFolderPath       string
@@ -62,6 +72,10 @@ func (m *MomentumConfig) DeploymentTemplateFilePath() string {
 	return m.deploymentTemplateFilePath
 }
 
+func (m *MomentumConfig) TransactionToken() *gittransaction.Token {
+	return m.transactionToken
+}
+
 func (m *MomentumConfig) checkMandatoryTemplates() error {
 
 	if !utils.FileExists(m.ApplicationTemplateFolderPath()) {
@@ -78,6 +92,25 @@ func (m *MomentumConfig) checkMandatoryTemplates() error {
 
 	if !utils.FileExists(m.DeploymentTemplateFilePath()) {
 		return errors.New("provide mandatory template for deployment files at " + m.DeploymentTemplateFilePath())
+	}
+
+	return nil
+}
+
+func (m *MomentumConfig) initializeGitAccessToken() error {
+
+	m.transactionToken = new(gittransaction.Token)
+
+	m.transactionToken.Username = os.Getenv(MOMENTUM_GIT_USER)
+	m.transactionToken.Email = os.Getenv(MOMENTUM_GIT_EMAIL)
+	m.transactionToken.Token = os.Getenv(MOMENTUM_GIT_TOKEN)
+
+	if m.transactionToken == nil ||
+		m.transactionToken.Username == "" ||
+		m.transactionToken.Email == "" ||
+		m.transactionToken.Token == "" {
+
+		return errors.New("failed initializing git transaction user please make sure to set " + MOMENTUM_GIT_USER + " and " + MOMENTUM_GIT_EMAIL + " and " + MOMENTUM_GIT_TOKEN)
 	}
 
 	return nil
@@ -109,6 +142,11 @@ func InitializeMomentumCore() (*MomentumConfig, error) {
 	config.stageTemplateFolderPath = utils.BuildPath(templatesDir, "stages")
 	config.deploymentTemplateFolderPath = utils.BuildPath(templatesDir, "deployments", "deploymentName")
 	config.deploymentTemplateFilePath = utils.BuildPath(templatesDir, "deployments", "deploymentName.yaml")
+
+	err = config.initializeGitAccessToken()
+	if err != nil {
+		return nil, err
+	}
 
 	err = config.checkMandatoryTemplates()
 	if err != nil {
