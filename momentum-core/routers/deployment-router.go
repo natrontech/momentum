@@ -94,7 +94,7 @@ func (d *DeploymentRouter) addDeployment(c *gin.Context) {
 		return
 	}
 
-	ctx, transaction, err := gittransaction.New(TRANSACTION_MODE, repo.Path, d.config.TransactionToken())
+	ctx, transaction, err := gittransaction.New(config.TRANSACTION_MODE, repo.Path, d.config.TransactionToken())
 
 	deployment, err := d.deploymentService.AddDeployment(request, traceId)
 	if err != nil {
