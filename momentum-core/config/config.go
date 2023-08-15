@@ -10,6 +10,8 @@ import (
 
 const MOMENTUM_ROOT = "momentum-root"
 
+const TRANSACTION_MODE = gittransaction.DEBUG
+
 const MOMENTUM_GIT_USER = "MOMENTUM_GIT_USER"
 const MOMENTUM_GIT_EMAIL = "MOMENTUM_GIT_EMAIL"
 const MOMENTUM_GIT_TOKEN = "MOMENTUM_GIT_TOKEN"

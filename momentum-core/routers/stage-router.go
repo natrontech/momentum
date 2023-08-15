@@ -94,7 +94,7 @@ func (sr *StageRouter) addStage(c *gin.Context) {
 		return
 	}
 
-	ctx, transaction, err := gittransaction.New(gittransaction.SINGLEBRANCH, repo.Path, sr.config.TransactionToken())
+	ctx, transaction, err := gittransaction.New(TRANSACTION_MODE, repo.Path, sr.config.TransactionToken())
 
 	stage, err := sr.stageService.AddStage(request, traceId)
 	if err != nil {

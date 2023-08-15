@@ -114,7 +114,7 @@ func (a *ApplicationRouter) addApplication(c *gin.Context) {
 		return
 	}
 
-	ctx, transaction, err := gittransaction.New(gittransaction.SINGLEBRANCH, repo.Path, a.config.TransactionToken())
+	ctx, transaction, err := gittransaction.New(TRANSACTION_MODE, repo.Path, a.config.TransactionToken())
 
 	application, err := a.applicationService.AddApplication(request, traceId)
 	if err != nil {
