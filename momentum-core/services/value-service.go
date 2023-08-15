@@ -4,7 +4,6 @@ import (
 	"errors"
 	"momentum-core/config"
 	"momentum-core/models"
-	"strings"
 )
 
 type ValueService struct {
@@ -34,60 +33,15 @@ func (vs *ValueService) ValueById(repositoryName string, valueId string, traceId
 	return models.ToValueFromNode(value)
 }
 
+func (vs *ValueService) ValuesByRepository(repositoryName string, traceId string) ([]*models.ValueWrapper, error) {
+	return make([]*models.ValueWrapper, 0), nil
+}
+
 func (vs *ValueService) ValuesByApplication(repositoryName string, applicationId string, traceId string) ([]*models.ValueWrapper, error) {
-
-	application, err := vs.treeService.application(repositoryName, applicationId, traceId)
-	if err != nil {
-		return nil, err
-	}
-
-	wrappedValues := make([]*models.ValueWrapper, 0)
-	files := application.Files()
-	for _, f := range files {
-		if strings.EqualFold(f.NormalizedPath(), KUSTOMIZATION_FILE_NAME) {
-			wrappedKustomization, err := models.ToValueWrapperFromNode(f, models.APPLICATION)
-			if err != nil {
-				return nil, err
-			}
-			wrappedValues = append(wrappedValues, wrappedKustomization)
-		}
-		if strings.EqualFold(f.PathWithoutEnding(), "ns") {
-			wrappedNamespace, err := models.ToValueWrapperFromNode(f, models.APPLICATION)
-			if err != nil {
-				return nil, err
-			}
-			wrappedValues = append(wrappedValues, wrappedNamespace)
-		}
-		if strings.EqualFold(f.PathWithoutEnding(), "repository") {
-			wrappedRepository, err := models.ToValueWrapperFromNode(f, models.APPLICATION)
-			if err != nil {
-				return nil, err
-			}
-			wrappedValues = append(wrappedValues, wrappedRepository)
-		}
-	}
-
-	return wrappedValues, nil
+	return make([]*models.ValueWrapper, 0), nil
 }
 
 func (vs *ValueService) ValuesByStage(repositoryName string, stageId string, traceId string) ([]*models.ValueWrapper, error) {
-
-	stage, err := vs.treeService.stage(repositoryName, stageId, traceId)
-	if err != nil {
-		return nil, err
-	}
-
-	files := stage.Files()
-	for _, f := range files {
-		if strings.EqualFold(f.NormalizedPath(), KUSTOMIZATION_FILE_NAME) {
-			wrappedKustomization, err := models.ToValueWrapperFromNode(f, models.STAGE)
-			if err != nil {
-				return nil, err
-			}
-			return []*models.ValueWrapper{wrappedKustomization}, nil
-		}
-	}
-
 	return make([]*models.ValueWrapper, 0), nil
 }
 
@@ -115,4 +69,24 @@ func (vs *ValueService) ValuesByDeployment(repositoryName string, deploymentId s
 	}
 
 	return wrappers, nil
+}
+
+// This method removes all parents which shall not be read in certain types.
+// For example, when reading values of a stage, we do not want to read the
+// value of each deployment.
+func (vs *ValueService) cleanParents(parents []string, reading models.ValueType) []string {
+
+	switch reading {
+
+	case models.REPOSITORY:
+
+	case models.APPLICATION:
+
+	case models.STAGE:
+
+	case models.DEPLOYMENT:
+
+	}
+
+	return make([]string, 0)
 }
