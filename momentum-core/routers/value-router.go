@@ -31,6 +31,18 @@ func (vr *ValueRouter) RegisterValueRoutes(server *gin.Engine) {
 	server.GET(ROUTING_PATH_VALUE_BY_DEPLOYMENT, vr.valuesByDeployment)
 }
 
+// valueById godoc
+//
+//	@Summary		get a value of a repository by id
+//	@Tags			values
+//	@Produce		json
+//	@Param			repositoryName		path		string					true	"Repository Name"
+//	@Param			valueId				path		string					true	"Value ID"
+//	@Success		200		{object}	models.Value
+//	@Failure		400		{object}	models.ApiError
+//	@Failure		404		{object}	models.ApiError
+//	@Failure		500		{object}	models.ApiError
+//	@Router			/repository/{repositoryName}/value/{valueId} [get]
 func (vr *ValueRouter) valueById(c *gin.Context) {
 
 	traceId := config.LOGGER.TraceId()
@@ -48,6 +60,18 @@ func (vr *ValueRouter) valueById(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// valuesByApplication godoc
+//
+//	@Summary		get all values of an application by  the applications id
+//	@Tags			values
+//	@Produce		json
+//	@Param			repositoryName		path		string					true	"Repository Name"
+//	@Param			applicationId		path		string					true	"Application ID"
+//	@Success		200		{array}		models.ValueWrapper
+//	@Failure		400		{object}	models.ApiError
+//	@Failure		404		{object}	models.ApiError
+//	@Failure		500		{object}	models.ApiError
+//	@Router			/repository/{repositoryName}/application/values/{applicationId} [get]
 func (vr *ValueRouter) valuesByApplication(c *gin.Context) {
 
 	traceId := config.LOGGER.TraceId()
@@ -65,6 +89,18 @@ func (vr *ValueRouter) valuesByApplication(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// valuesByStage godoc
+//
+//	@Summary		get all values of an stage by  the stages id
+//	@Tags			values
+//	@Produce		json
+//	@Param			repositoryName		path		string					true	"Repository Name"
+//	@Param			stageId				path		string					true	"Stage ID"
+//	@Success		200		{array}		models.ValueWrapper
+//	@Failure		400		{object}	models.ApiError
+//	@Failure		404		{object}	models.ApiError
+//	@Failure		500		{object}	models.ApiError
+//	@Router			/repository/{repositoryName}/stage/values/{stageId} [get]
 func (vr *ValueRouter) valuesByStage(c *gin.Context) {
 
 	traceId := config.LOGGER.TraceId()
@@ -82,6 +118,18 @@ func (vr *ValueRouter) valuesByStage(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// valuesByDeployment godoc
+//
+//	@Summary		get all values of a deployment by the deployments id
+//	@Tags			values
+//	@Produce		json
+//	@Param			repositoryName		path		string					true	"Repository Name"
+//	@Param			deploymentId		path		string					true	"Deployment ID"
+//	@Success		200		{array}		models.ValueWrapper
+//	@Failure		400		{object}	models.ApiError
+//	@Failure		404		{object}	models.ApiError
+//	@Failure		500		{object}	models.ApiError
+//	@Router			/repository/{repositoryName}/deployment/values/{deploymentId} [get]
 func (vr *ValueRouter) valuesByDeployment(c *gin.Context) {
 
 	traceId := config.LOGGER.TraceId()

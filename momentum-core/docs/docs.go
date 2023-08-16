@@ -367,6 +367,62 @@ const docTemplate = `{
                 }
             }
         },
+        "/repository/{repositoryName}/application/values/{applicationId}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "values"
+                ],
+                "summary": "get all values of an application by  the applications id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Repository Name",
+                        "name": "repositoryName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Application ID",
+                        "name": "applicationId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.ValueWrapper"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiError"
+                        }
+                    }
+                }
+            }
+        },
         "/repository/{repositoryName}/applications": {
             "get": {
                 "consumes": [
@@ -395,6 +451,62 @@ const docTemplate = `{
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/models.Application"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/repository/{repositoryName}/deployment/values/{deploymentId}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "values"
+                ],
+                "summary": "get all values of a deployment by the deployments id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Repository Name",
+                        "name": "repositoryName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Deployment ID",
+                        "name": "deploymentId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.ValueWrapper"
                             }
                         }
                     },
@@ -468,6 +580,62 @@ const docTemplate = `{
                 }
             }
         },
+        "/repository/{repositoryName}/stage/values/{stageId}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "values"
+                ],
+                "summary": "get all values of an stage by  the stages id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Repository Name",
+                        "name": "repositoryName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Stage ID",
+                        "name": "stageId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.ValueWrapper"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiError"
+                        }
+                    }
+                }
+            }
+        },
         "/repository/{repositoryName}/stages": {
             "get": {
                 "produces": [
@@ -494,6 +662,59 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/models.Stage"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/repository/{repositoryName}/value/{valueId}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "values"
+                ],
+                "summary": "get a value of a repository by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Repository Name",
+                        "name": "repositoryName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Value ID",
+                        "name": "valueId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Value"
                         }
                     },
                     "400": {
@@ -774,6 +995,64 @@ const docTemplate = `{
                 },
                 "repositoryName": {
                     "type": "string"
+                }
+            }
+        },
+        "models.Value": {
+            "type": "object",
+            "properties": {
+                "displayName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "parentDeploymentId": {
+                    "type": "string"
+                },
+                "parentStageId": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ValueType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "REPOSITORY",
+                "APPLICATION",
+                "STAGE",
+                "DEPLOYMENT"
+            ]
+        },
+        "models.ValueWrapper": {
+            "type": "object",
+            "properties": {
+                "parentFileId": {
+                    "type": "string"
+                },
+                "parentFileName": {
+                    "type": "string"
+                },
+                "valueType": {
+                    "$ref": "#/definitions/models.ValueType"
+                },
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Value"
+                    }
                 }
             }
         }
