@@ -99,6 +99,10 @@ func (m *MomentumConfig) checkMandatoryTemplates() error {
 
 func (m *MomentumConfig) initializeGitAccessToken() error {
 
+	if TRANSACTION_MODE == gittransaction.DEBUG {
+		return nil
+	}
+
 	m.transactionToken = new(gittransaction.Token)
 
 	m.transactionToken.Username = os.Getenv(MOMENTUM_GIT_USER)
