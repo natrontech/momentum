@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"momentum-core/config"
 	"momentum-core/models"
 	"strings"
@@ -41,9 +42,12 @@ func (vs *ValueService) ValuesByApplication(repositoryName string, applicationId
 		return nil, err
 	}
 
+	fmt.Println(application)
+
 	wrappedValues := make([]*models.ValueWrapper, 0)
 	files := application.Files()
 	for _, f := range files {
+		fmt.Println("File:", f.NormalizedPath())
 		if strings.EqualFold(f.NormalizedPath(), KUSTOMIZATION_FILE_NAME) {
 			wrappedKustomization, err := models.ToValueWrapperFromNode(f, models.APPLICATION)
 			if err != nil {

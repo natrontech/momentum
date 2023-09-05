@@ -78,6 +78,10 @@ func ToValueWrapperFromNode(n *tree.Node, valType ValueType) (*ValueWrapper, err
 
 func ToValueFromNode(n *tree.Node) (*Value, error) {
 
+	if n == nil {
+		return nil, errors.New("expected a tree node but was nil")
+	}
+
 	keyValue := new(Value)
 
 	keyValue.Id = n.Id
@@ -85,7 +89,8 @@ func ToValueFromNode(n *tree.Node) (*Value, error) {
 	keyValue.Value = n.Value
 
 	parentStage := n
-	for !parentStage.IsStage() {
+
+	for !parentStage.IsStage() && parentStage.Parent != nil {
 		if parentStage.Kind == tree.File {
 			keyValue.ParentDeploymentId = parentStage.Id
 		}
