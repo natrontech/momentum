@@ -11,21 +11,16 @@ import (
 
 const ROUTING_PATH_VALUE_BY_ID = VERSION + "/repository/:repositoryName/value/:valueId"
 const ROUTING_PATH_VALUE = VERSION + "/value"
-const ROUTING_PATH_VALUE_BY_APPLICATION = VERSION + "/repository/:repositoryName/application/values/:applicationId"
-const ROUTING_PATH_VALUE_BY_STAGE = VERSION + "/repository/:repositoryName/stage/values/:stageId"
-const ROUTING_PATH_VALUE_BY_DEPLOYMENT = VERSION + "/repository/:repositoryName/deployment/values/:deploymentId"
+const ROUTING_PATH_VALUE_BY_APPLICATION = VERSION + "/:repositoryName/application/values/:applicationId"
+const ROUTING_PATH_VALUE_BY_STAGE = VERSION + "/:repositoryName/stage/values/:stageId"
+const ROUTING_PATH_VALUE_BY_DEPLOYMENT = VERSION + "/:repositoryName/deployment/values/:deploymentId"
 
 type ValueRouter struct {
 	valueService *services.ValueService
 }
 
 func NewValueRouter(valueService *services.ValueService) *ValueRouter {
-
-	vs := new(ValueRouter)
-
-	vs.valueService = valueService
-
-	return vs
+	return new(ValueRouter)
 }
 
 func (vr *ValueRouter) RegisterValueRoutes(server *gin.Engine) {
@@ -84,7 +79,7 @@ func (vr *ValueRouter) valuesByApplication(c *gin.Context) {
 	repoName := c.Param("repositoryName")
 	applicationId := c.Param("applicationId")
 
-	result, err := vr.valueService.ValuesByApplication(repoName, applicationId, traceId)
+	result, err := vr.valueService.ValueById(repoName, applicationId, traceId)
 	if err != nil {
 		c.JSON(http.StatusNotFound, models.NewApiError(err, http.StatusNotFound, c, traceId))
 		config.LOGGER.LogError(err.Error(), err, traceId)

@@ -21,10 +21,6 @@ func (n *Node) MomentumRoot() *Node {
 
 func (n *Node) Apps() []*Node {
 
-	if n == nil {
-		return make([]*Node, 0)
-	}
-
 	root := n.MomentumRoot()
 	apps := make([]*Node, 0)
 	for _, app := range root.Directories() {
