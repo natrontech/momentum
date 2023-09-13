@@ -80,6 +80,9 @@ func (n *Node) Remove() {
 		}
 	}
 	n.Parent.Children = newChilds
+
+	n.Parent.RemoveYamlChild(n.Path)
+
 	n.Parent = nil
 }
 

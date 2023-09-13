@@ -47,6 +47,7 @@ func NewDispatcher(config *config.MomentumConfig,
 	dispatcher.applicationRouter.RegisterApplicationRoutes(dispatcher.server)
 	dispatcher.stageRouter.RegisterStageRoutes(dispatcher.server)
 	dispatcher.deploymentRouter.RegisterDeploymentRoutes(dispatcher.server)
+	dispatcher.valueRouter.RegisterValueRoutes(dispatcher.server)
 
 	dispatcher.server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

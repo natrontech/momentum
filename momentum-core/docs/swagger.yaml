@@ -100,6 +100,46 @@ definitions:
       repositoryName:
         type: string
     type: object
+  models.Value:
+    properties:
+      displayName:
+        type: string
+      id:
+        type: string
+      key:
+        type: string
+      parentDeploymentId:
+        type: string
+      parentStageId:
+        type: string
+      value:
+        type: string
+    type: object
+  models.ValueType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - REPOSITORY
+    - APPLICATION
+    - STAGE
+    - DEPLOYMENT
+  models.ValueWrapper:
+    properties:
+      parentFileId:
+        type: string
+      parentFileName:
+        type: string
+      valueType:
+        $ref: '#/definitions/models.ValueType'
+      values:
+        items:
+          $ref: '#/definitions/models.Value'
+        type: array
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -372,6 +412,43 @@ paths:
       summary: get a deployment of a repository by id
       tags:
       - deployments
+  /repository/{repositoryName}/application/values/{applicationId}:
+    get:
+      parameters:
+      - description: Repository Name
+        in: path
+        name: repositoryName
+        required: true
+        type: string
+      - description: Application ID
+        in: path
+        name: applicationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ValueWrapper'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiError'
+      summary: get all values of an application by  the applications id
+      tags:
+      - values
   /repository/{repositoryName}/applications:
     get:
       consumes:
@@ -406,6 +483,43 @@ paths:
       summary: get all applications of a repository
       tags:
       - applications
+  /repository/{repositoryName}/deployment/values/{deploymentId}:
+    get:
+      parameters:
+      - description: Repository Name
+        in: path
+        name: repositoryName
+        required: true
+        type: string
+      - description: Deployment ID
+        in: path
+        name: deploymentId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ValueWrapper'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiError'
+      summary: get all values of a deployment by the deployments id
+      tags:
+      - values
   /repository/{repositoryName}/deployments:
     get:
       parameters:
@@ -438,6 +552,43 @@ paths:
       summary: get deployments
       tags:
       - deployments
+  /repository/{repositoryName}/stage/values/{stageId}:
+    get:
+      parameters:
+      - description: Repository Name
+        in: path
+        name: repositoryName
+        required: true
+        type: string
+      - description: Stage ID
+        in: path
+        name: stageId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ValueWrapper'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiError'
+      summary: get all values of an stage by  the stages id
+      tags:
+      - values
   /repository/{repositoryName}/stages:
     get:
       parameters:
@@ -470,6 +621,41 @@ paths:
       summary: get stages
       tags:
       - stages
+  /repository/{repositoryName}/value/{valueId}:
+    get:
+      parameters:
+      - description: Repository Name
+        in: path
+        name: repositoryName
+        required: true
+        type: string
+      - description: Value ID
+        in: path
+        name: valueId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Value'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ApiError'
+      summary: get a value of a repository by id
+      tags:
+      - values
   /stage:
     post:
       consumes:

@@ -38,10 +38,10 @@ func main() {
 	applicationService := services.NewApplicationService(config, treeService, templateService)
 	stageService := services.NewStageService(config, treeService, templateService)
 	deploymentService := services.NewDeploymentService(config, stageService, templateService, treeService)
-	// valueService := services.NewValueService()
+	valueService := services.NewValueService(treeService)
 
 	templateRouter := routers.NewTemplateRouter()
-	valueRouter := routers.NewValueRouter()
+	valueRouter := routers.NewValueRouter(valueService)
 	deploymentRouter := routers.NewDeploymentRouter(deploymentService, repositoryService, config)
 	stageRouter := routers.NewStageRouter(stageService, repositoryService, config)
 	applicationRouter := routers.NewApplicationRouter(applicationService, repositoryService, config)
