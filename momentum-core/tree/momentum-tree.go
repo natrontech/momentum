@@ -115,6 +115,41 @@ func (n *Node) DeploymentFolderFiles() []*Node {
 	return make([]*Node, 0)
 }
 
+func (n *Node) AllValues() []*Node {
+
+	depls := deployments(n)
+	stgs := n.stages()
+	apps := n.Apps()
+
+	deplFiles := make([]*Node, 0)
+	for _, dep := range depls {
+		deplFiles = append(deplFiles, dep.Files()...)
+		deplFiles = append(deplFiles, dep.DeploymentFolderFiles()...)
+	}
+
+	stgsFiles := make([]*Node, 0)
+	for _, stgFile := range stgs {
+		stgsFiles = append(stgsFiles, stgFile.Files()...)
+	}
+
+	appFiles := make([]*Node, 0)
+	for _, appFile := range apps {
+		appFiles = append(appFiles, appFile.Files()...)
+	}
+
+	files := make([]*Node, 0)
+	files = append(files, appFiles...)
+	files = append(files, stgsFiles...)
+	files = append(files, deplFiles...)
+
+	values := make([]*Node, 0)
+	for _, f := range files {
+		values = append(values, f.Values()...)
+	}
+
+	return values
+}
+
 func (n *Node) Values() []*Node {
 
 	if n == nil || n.Kind != File {

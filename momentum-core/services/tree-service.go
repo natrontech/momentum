@@ -86,9 +86,7 @@ func (ts *TreeService) value(repositoryName string, valueId string, traceId stri
 		return nil, err
 	}
 
-	// TODO -> AllValues / ValueById etc. on Momentum-Tree abstraction.
-
-	values := repo.AllDeployments()
+	values := repo.AllValues()
 	for _, value := range values {
 		if value.Id == valueId {
 			return value, nil
