@@ -121,15 +121,20 @@ func (n *Node) Values() []*Node {
 		return make([]*Node, 0)
 	}
 
-	return n.flat(make([]*Node, 0))
+	return n.flatPreorder(make([]*Node, 0))
 }
 
-func (n *Node) flat(result []*Node) []*Node {
+func (n *Node) flatPreorder(result []*Node) []*Node {
+
+	if n == nil {
+		return result
+	}
+
+	result = append(result, n)
 
 	if len(n.Children) > 0 {
-		result = append(result, n.Children...)
 		for _, child := range n.Children {
-			result = append(result, child.flat(result)...)
+			result = child.flatPreorder(result)
 		}
 	}
 

@@ -2,6 +2,7 @@ package tree
 
 import (
 	"errors"
+	"momentum-core/utils"
 	"momentum-core/yaml"
 )
 
@@ -18,6 +19,46 @@ const (
 	binaryTag    = "!!binary"
 	mergeTag     = "!!merge"
 )
+
+func (n *Node) RemoveYamlChildren() error {
+
+	errs := make([]error, 0)
+	for _, chld := range n.Children {
+		errs = append(errs, chld.RemoveYamlChild(chld.Path))
+	}
+
+	return errors.Join(errs...)
+}
+
+func (n *Node) RemoveYamlChild(path string) error {
+
+	updated := make([]*Node, 0)
+	for _, child := range n.Children {
+		if child.Path != path {
+			updated = append(updated, child)
+		}
+
+		updatedYaml := make([]*yaml.Node, 0)
+		if child.Path == path {
+			if child.Parent != nil && child.Parent.YamlNode != nil {
+				if child.Parent.YamlNode != nil {
+					for _, yamlChild := range child.Parent.YamlNode.Content {
+						if yamlChild.Value != utils.LastPartOfPath(path) {
+							updatedYaml = append(updatedYaml, yamlChild)
+						}
+					}
+					child.Parent.YamlNode.Content = updatedYaml
+				}
+			}
+		}
+
+		return nil
+	}
+
+	n.Children = updated
+
+	return nil
+}
 
 func (n *Node) AddYamlSequence(key string, values []string, style yaml.Style) error {
 
