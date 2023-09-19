@@ -1,3 +1,4 @@
 .vscode/*
 ./dev-setup.sh
 momentum-core
+__debug*

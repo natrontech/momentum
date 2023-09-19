@@ -47,7 +47,7 @@ func NewArtefact(path string, parent *Artefact) (*Artefact, error) {
 	}
 
 	artefact := new(Artefact)
-	artefact.Id, err = utils.GenerateId(idGenerationPath(path))
+	artefact.Id, err = utils.GenerateId(config.IdGenerationPath(path))
 	if err != nil {
 		return nil, err
 	}
@@ -150,6 +150,37 @@ func FileById(id string) (*Artefact, error) {
 	}
 
 	return nil, errors.New("no file with id " + id)
+}
+
+func DirectoryById(id string) (*Artefact, error) {
+
+	artefacts, err := LoadArtefactTree() // origin
+
+	if err != nil {
+		return nil, err
+	}
+
+	directories := Directories(artefacts)
+	for _, dir := range directories {
+		if dir.Id == id {
+			return dir, nil
+		}
+	}
+
+	return nil, errors.New("no file with id " + id)
+}
+
+func Directories(origin *Artefact) []*Artefact {
+
+	flattened := FlatPreorder(origin, make([]*Artefact, 0))
+	directories := make([]*Artefact, 0)
+	for _, artefact := range flattened {
+		if artefact.ArtefactType != FILE && artefact.ArtefactType != META {
+			directories = append(directories, artefact)
+		}
+	}
+
+	return directories
 }
 
 func Files(origin *Artefact) []*Artefact {
@@ -271,11 +302,6 @@ func loadArtefactTreeUntilDepth(path string, parent *Artefact, depth int) (*Arte
 	}
 
 	return artefact, nil
-}
-
-func idGenerationPath(path string) string {
-	relevantForId, _ := strings.CutPrefix(path, config.GLOBAL.RepoDir())
-	return relevantForId
 }
 
 func children(artefact *Artefact) ([]*Artefact, error) {

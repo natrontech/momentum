@@ -114,6 +114,14 @@ func dirCopyRecursive(rootOrigin string, rootDestination string, relativeToParen
 	return errors.Join(errs...)
 }
 
+func FileWrite(path string, content string) bool {
+
+	buf := make([]byte, 0)
+	buf = append(buf, bytes.NewBufferString(content).Bytes()...)
+
+	return write(path, int64(len(buf)), buf)
+}
+
 func FileWriteLines(path string, lines []string) bool {
 
 	buf := make([]byte, 0)

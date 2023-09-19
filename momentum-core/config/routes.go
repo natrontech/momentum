@@ -4,6 +4,7 @@ const API = "/api"
 const API_VERSION_BETA = API + "/beta"
 
 const API_FILE_BY_ID = API_VERSION_BETA + "/file/:id"
+const API_FILE_ADD = API_VERSION_BETA + "/file"
 const API_DIR_BY_ID = API_VERSION_BETA + "/dir/:id"
 const API_FILE_LINE_OVERWRITTENBY = API_VERSION_BETA + "/file/:id/line/:lineNumber/overwritten-by"
 const API_FILE_LINE_OVERWRITES = API_VERSION_BETA + "/file/:id/line/:lineNumber/overwrites"

@@ -21,23 +21,29 @@ type IOverwrite interface {
 }
 
 type File struct {
-	Id   string
-	Name string
-	Body string
+	Id   string `json:"id"`
+	Name string `json:"name"`
+	Body string `json:"body"`
+}
+
+type CreateFileRequest struct {
+	ParentId string `json:"parentId"`
+	Name     string `json:"name"`
+	Body     string `json:"body"`
 }
 
 type Dir struct {
-	Id      string
-	Name    string
-	SubDirs []*Dir
-	Files   []*File
+	Id      string  `json:"id"`
+	Name    string  `json:"name"`
+	SubDirs []*Dir  `json:"subDirs"`
+	Files   []*File `json:"files"`
 }
 
 type Overwrite struct {
-	OriginFileId      string
-	OriginFileLine    int
-	OverwriteFileId   string
-	OverwriteFileLine int
+	OriginFileId      string `json:"originFileId"`
+	OriginFileLine    int    `json:"originFileLine"`
+	OverwriteFileId   string `json:"overwriteFileId"`
+	OverwriteFileLine int    `json:"overwriteFileLine"`
 }
 
 func NewFile(id string, name string, encodedBody string) *File {

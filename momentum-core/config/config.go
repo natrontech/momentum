@@ -5,6 +5,7 @@ import (
 	"momentum-core/utils"
 	"os"
 	"path/filepath"
+	"strings"
 
 	git "gopkg.in/src-d/go-git.v4"
 
@@ -203,6 +204,11 @@ func createPathIfNotPresent(path string, parentDir string) {
 		}
 		utils.DirCreate(path)
 	}
+}
+
+func IdGenerationPath(path string) string {
+	relevantForId, _ := strings.CutPrefix(path, GLOBAL.RepoDir())
+	return relevantForId
 }
 
 func cloneRepoTo(url string, username string, password string, location string) error {
