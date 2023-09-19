@@ -1,8 +1,9 @@
 package main
 
 import (
+	"momentum-core/artefacts"
 	"momentum-core/config"
-	"momentum-core/routers"
+	"momentum-core/files"
 
 	"github.com/gin-gonic/gin"
 
@@ -13,41 +14,18 @@ import (
 )
 
 type Dispatcher struct {
-	server            *gin.Engine
-	config            *config.MomentumConfig
-	repositoryRouter  *routers.RepositoryRouter
-	applicationRouter *routers.ApplicationRouter
-	stageRouter       *routers.StageRouter
-	deploymentRouter  *routers.DeploymentRouter
-	valueRouter       *routers.ValueRouter
-	templateRouter    *routers.TemplateRouter
+	server *gin.Engine
+	config *config.MomentumConfig
 }
 
-func NewDispatcher(config *config.MomentumConfig,
-	repositoryRouter *routers.RepositoryRouter,
-	applicationRouter *routers.ApplicationRouter,
-	stageRouter *routers.StageRouter,
-	deploymentRouter *routers.DeploymentRouter,
-	valueRouter *routers.ValueRouter,
-	templateRouter *routers.TemplateRouter) *Dispatcher {
+func NewDispatcher(config *config.MomentumConfig) *Dispatcher {
 
 	dispatcher := new(Dispatcher)
-
+	dispatcher.config = config
 	dispatcher.server = gin.Default()
 
-	dispatcher.config = config
-
-	dispatcher.repositoryRouter = repositoryRouter
-	dispatcher.applicationRouter = applicationRouter
-	dispatcher.stageRouter = stageRouter
-	dispatcher.deploymentRouter = deploymentRouter
-	dispatcher.valueRouter = valueRouter
-
-	dispatcher.repositoryRouter.RegisterRepositoryRoutes(dispatcher.server)
-	dispatcher.applicationRouter.RegisterApplicationRoutes(dispatcher.server)
-	dispatcher.stageRouter.RegisterStageRoutes(dispatcher.server)
-	dispatcher.deploymentRouter.RegisterDeploymentRoutes(dispatcher.server)
-	dispatcher.valueRouter.RegisterValueRoutes(dispatcher.server)
+	files.RegisterFileRoutes(dispatcher.server)
+	artefacts.RegisterArtefactRoutes(dispatcher.server)
 
 	dispatcher.server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

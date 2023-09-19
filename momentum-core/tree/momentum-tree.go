@@ -5,6 +5,18 @@ import (
 	"strings"
 )
 
+func (n *Node) ChildById(id string, parent *Node) *Node {
+
+	flattened := parent.FlatPreorder(make([]*Node, 0))
+	for _, n := range flattened {
+		if n.Id == id {
+			return n
+		}
+	}
+
+	return nil
+}
+
 func (n *Node) Repo() *Node {
 
 	return n.Root()
@@ -156,10 +168,10 @@ func (n *Node) Values() []*Node {
 		return make([]*Node, 0)
 	}
 
-	return n.flatPreorder(make([]*Node, 0))
+	return n.FlatPreorder(make([]*Node, 0))
 }
 
-func (n *Node) flatPreorder(result []*Node) []*Node {
+func (n *Node) FlatPreorder(result []*Node) []*Node {
 
 	if n == nil {
 		return result
@@ -169,7 +181,7 @@ func (n *Node) flatPreorder(result []*Node) []*Node {
 
 	if len(n.Children) > 0 {
 		for _, child := range n.Children {
-			result = child.flatPreorder(result)
+			result = child.FlatPreorder(result)
 		}
 	}
 

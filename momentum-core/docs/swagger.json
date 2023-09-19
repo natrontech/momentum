@@ -1,7 +1,6 @@
 {
     "schemes": [
-        "http,",
-        "https"
+        "http"
     ],
     "swagger": "2.0",
     "info": {
@@ -17,6 +16,388 @@
     "host": "localhost:8080",
     "basePath": "/",
     "paths": {
+        "/api/beta/applications": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "artefacts"
+                ],
+                "summary": "gets a list of all applications",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/artefacts.Artefact"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/beta/artefact/{id}/": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "artefacts"
+                ],
+                "summary": "get an artefact by id (an artefact can be any of APPLICATION, STAGE or DEPLOYMENT)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "artefact id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/artefacts.Artefact"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/beta/deployments": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "artefacts"
+                ],
+                "summary": "get a list of deployments for a given stage by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "stage id",
+                        "name": "stageId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/artefacts.Artefact"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/beta/dir/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "gets the content of a file",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "file id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/files.Dir"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/beta/file/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "gets the content of a file",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "file id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/files.File"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/beta/file/{id}/line/{lineNumber}/overwrites": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "gets a list of child properties, which are overwritten by the given line.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "file id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "line number in file",
+                        "name": "lineNumber",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/files.Overwrite"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/beta/file/{id}/line/{lineNumber}/overwritten-by": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "gets a list of properties which overwrite the given line.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "file id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "line number in file",
+                        "name": "lineNumber",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/files.Overwrite"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/beta/stages": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "artefacts"
+                ],
+                "summary": "gets a list of all stages within an application or stage by id.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "application or stage id",
+                        "name": "parentId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/artefacts.Artefact"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    }
+                }
+            }
+        },
         "/application": {
             "post": {
                 "consumes": [
@@ -50,19 +431,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     }
                 }
@@ -101,19 +482,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     }
                 }
@@ -142,19 +523,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     }
                 }
@@ -194,19 +575,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     }
                 }
@@ -240,19 +621,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     }
                 }
@@ -293,19 +674,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     }
                 }
@@ -346,19 +727,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     }
                 }
@@ -402,19 +783,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     }
                 }
@@ -454,19 +835,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     }
                 }
@@ -510,19 +891,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     }
                 }
@@ -559,19 +940,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     }
                 }
@@ -615,19 +996,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     }
                 }
@@ -664,19 +1045,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     }
                 }
@@ -717,19 +1098,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     }
                 }
@@ -770,19 +1151,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     }
                 }
@@ -821,19 +1202,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ApiError"
+                            "$ref": "#/definitions/config.ApiError"
                         }
                     }
                 }
@@ -841,7 +1222,51 @@
         }
     },
     "definitions": {
-        "models.ApiError": {
+        "artefacts.Artefact": {
+            "type": "object",
+            "properties": {
+                "contentIds": {
+                    "description": "id's of children artefacts",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parentId": {
+                    "description": "id's of parent",
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/artefacts.ArtefactType"
+                }
+            }
+        },
+        "artefacts.ArtefactType": {
+            "type": "integer",
+            "enum": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32
+            ],
+            "x-enum-varnames": [
+                "ROOT",
+                "META",
+                "APPLICATION",
+                "STAGE",
+                "DEPLOYMENT",
+                "FILE"
+            ]
+        },
+        "config.ApiError": {
             "type": "object",
             "properties": {
                 "detail": {
@@ -858,6 +1283,72 @@
                     "type": "string"
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "files.Dir": {
+            "type": "object",
+            "properties": {
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/files.File"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "subDirs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/files.Dir"
+                    }
+                }
+            }
+        },
+        "files.File": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "files.Overwrite": {
+            "type": "object",
+            "properties": {
+                "originFileId": {
+                    "type": "string"
+                },
+                "originFileLine": {
+                    "type": "integer"
+                },
+                "originFilePath": {
+                    "type": "string"
+                },
+                "overwriteFileId": {
+                    "type": "string"
+                },
+                "overwriteFileLine": {
+                    "type": "integer"
+                },
+                "overwriteFilePath": {
                     "type": "string"
                 }
             }

@@ -1,2 +1,3 @@
+.vscode/*
 ./dev-setup.sh
 momentum-core

@@ -2,10 +2,7 @@ package main
 
 import (
 	"fmt"
-	"momentum-core/clients"
 	"momentum-core/config"
-	"momentum-core/routers"
-	"momentum-core/services"
 
 	_ "github.com/pdrum/swagger-automation/docs" // This line is necessary for go-swagger to find your docs!
 )
@@ -17,7 +14,7 @@ import (
 // @license.name	Apache 2.0
 // @license.url		http://www.apache.org/licenses/LICENSE-2.0.html
 //
-// @schemes 	http, https
+// @schemes 	http
 // @host		localhost:8080
 // @BasePath	/
 func main() {
@@ -29,25 +26,10 @@ func main() {
 		panic("failed initializing momentum. problem: " + err.Error())
 	}
 
-	gitClient := clients.NewGitClient(config)
-	kustomizeClient := clients.NewKustomizationValidationClient(config)
+	// gitClient := clients.NewGitClient(config)
+	// kustomizeClient := clients.NewKustomizationValidationClient(config)
 
-	templateService := services.NewTemplateService()
-	treeService := services.NewTreeService(config)
-	repositoryService := services.NewRepositoryService(config, treeService, gitClient, kustomizeClient)
-	applicationService := services.NewApplicationService(config, treeService, templateService)
-	stageService := services.NewStageService(config, treeService, templateService)
-	deploymentService := services.NewDeploymentService(config, stageService, templateService, treeService)
-	valueService := services.NewValueService(treeService)
-
-	templateRouter := routers.NewTemplateRouter()
-	valueRouter := routers.NewValueRouter(valueService)
-	deploymentRouter := routers.NewDeploymentRouter(deploymentService, repositoryService, config)
-	stageRouter := routers.NewStageRouter(stageService, repositoryService, config)
-	applicationRouter := routers.NewApplicationRouter(applicationService, repositoryService, config)
-	repositoryRouter := routers.NewRepositoryRouter(repositoryService, applicationService, stageService, deploymentService)
-
-	dispatcher := NewDispatcher(config, repositoryRouter, applicationRouter, stageRouter, deploymentRouter, valueRouter, templateRouter)
+	dispatcher := NewDispatcher(config)
 
 	dispatcher.Serve()
 }
