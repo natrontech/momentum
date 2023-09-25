@@ -135,6 +135,8 @@ func AddFile(c *gin.Context) {
 //	@Router			/api/beta/dir/{id} [get]
 func GetDir(c *gin.Context) {
 
+	// TODO is this needed?
+
 	_ = c.Param("id")
 
 	return

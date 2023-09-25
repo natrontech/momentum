@@ -1,7 +1,5 @@
 package artefacts
 
-import "momentum-core/tree"
-
 type ArtefactType int
 
 const (
@@ -21,21 +19,4 @@ type Artefact struct {
 	Content      []*Artefact  `json:"-"`
 	ParentId     string       `json:"parentId"` // id of parent artefacts
 	Parent       *Artefact    `json:"-"`
-}
-
-func toArtefact(n *tree.Node) *Artefact {
-
-	if n == nil {
-		return nil
-	}
-
-	artefact := new(Artefact)
-	artefact.Id = n.Id
-	artefact.Name = n.NormalizedPath()
-
-	if n.Kind == tree.File {
-		artefact.ArtefactType = FILE
-	}
-
-	return artefact
 }

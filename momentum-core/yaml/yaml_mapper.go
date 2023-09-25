@@ -1,22 +1,21 @@
-package tree
+package yaml
 
 import (
 	"errors"
 	"momentum-core/utils"
-	"momentum-core/yaml"
 	"strings"
 )
 
 const EMPTY_SCALAR = ""
 
-func MomentumTreeFromYaml(n *yaml.Node, filePath string) (*Node, error) {
+func MomentumTreeFromYaml(n *Node, filePath string) (*ViewNode, error) {
 
 	if n == nil {
 
-		return nil, errors.New("yaml node is nil")
+		return nil, errors.New("yaml ViewNode is nil")
 	}
 
-	if n.Kind != yaml.DocumentNode {
+	if n.Kind != DocumentNode {
 
 		return nil, errors.New("only yaml nodes of kind documentnode can be loaded into the tree")
 	}
@@ -35,16 +34,16 @@ func MomentumTreeFromYaml(n *yaml.Node, filePath string) (*Node, error) {
 	return fileNode, nil
 }
 
-func momentumFileTree(yamlNode *yaml.Node, parent *Node) (*Node, error) {
+func momentumFileTree(yamlNode *Node, parent *ViewNode) (*ViewNode, error) {
 
 	if yamlNode == nil {
 
-		return nil, errors.New("yaml node is nil")
+		return nil, errors.New("yaml ViewNode is nil")
 	}
 
 	if parent == nil {
 
-		return nil, errors.New("parent node is nil")
+		return nil, errors.New("parent ViewNode is nil")
 	}
 
 	mapped, parent, doAddChild, err := mapYamlNode(yamlNode, parent)
@@ -70,7 +69,7 @@ func momentumFileTree(yamlNode *yaml.Node, parent *Node) (*Node, error) {
 	return parent, nil
 }
 
-func mapYamlNode(n *yaml.Node, parent *Node) (*Node, *Node, bool, error) {
+func mapYamlNode(n *Node, parent *ViewNode) (*ViewNode, *ViewNode, bool, error) {
 
 	if n == nil {
 
@@ -84,7 +83,7 @@ func mapYamlNode(n *yaml.Node, parent *Node) (*Node, *Node, bool, error) {
 	}
 
 	doAddChild := true
-	var momentumNode *Node
+	var momentumNode *ViewNode
 
 	switch momentumKind {
 
@@ -120,7 +119,7 @@ func mapYamlNode(n *yaml.Node, parent *Node) (*Node, *Node, bool, error) {
 	return momentumNode, parent, doAddChild, nil
 }
 
-func YamlTree(n *Node) (*yaml.Node, error) {
+func YamlTree(n *ViewNode) (*Node, error) {
 
 	if n.Kind == Directory {
 
@@ -135,11 +134,11 @@ func YamlTree(n *Node) (*yaml.Node, error) {
 	return n.YamlNode, nil
 }
 
-func handleValueEntries(n *yaml.Node, parent *Node) (*Node, bool, error) {
+func handleValueEntries(n *Node, parent *ViewNode) (*ViewNode, bool, error) {
 
-	if n.Kind != yaml.ScalarNode {
+	if n.Kind != ScalarNode {
 
-		return nil, false, errors.New("expecting scalar node")
+		return nil, false, errors.New("expecting scalar ViewNode")
 	}
 
 	if parent.Kind == Sequence {
@@ -158,14 +157,14 @@ func handleValueEntries(n *yaml.Node, parent *Node) (*Node, bool, error) {
 		return parent.Children[lastChildIndex], false, nil
 	}
 
-	return nil, false, errors.New("unallowed combination of kind value and node parents kind (parent kind: " + ToHumanReadableKind(parent.Kind) + ")")
+	return nil, false, errors.New("unallowed combination of kind value and ViewNode parents kind (parent kind: " + ToHumanReadableKind(parent.Kind) + ")")
 }
 
-func handlePropertyEntries(n *yaml.Node, parent *Node) (*Node, bool, error) {
+func handlePropertyEntries(n *Node, parent *ViewNode) (*ViewNode, bool, error) {
 
-	if n.Kind != yaml.ScalarNode {
+	if n.Kind != ScalarNode {
 
-		return nil, false, errors.New("expecting scalar node")
+		return nil, false, errors.New("expecting scalar ViewNode")
 	}
 
 	return NewNode(Property, n.Value, EMPTY_SCALAR, nil, nil, nil), true, nil
@@ -175,11 +174,11 @@ func handlePropertyEntries(n *yaml.Node, parent *Node) (*Node, bool, error) {
 * Most of the Sequence and Mapping entries are relevant to the parser, but not to us.
 * This function handles edge cases for sequences.
  */
-func handleSequenceEntries(n *yaml.Node, parent *Node) (*Node, error) {
+func handleSequenceEntries(n *Node, parent *ViewNode) (*ViewNode, error) {
 
-	if n.Kind != yaml.SequenceNode {
+	if n.Kind != SequenceNode {
 
-		return nil, errors.New("expecting sequence node")
+		return nil, errors.New("expecting sequence ViewNode")
 	}
 
 	lastChildIndex := len(parent.Children) - 1
@@ -204,11 +203,11 @@ func handleSequenceEntries(n *yaml.Node, parent *Node) (*Node, error) {
 * Most of the Sequence and Mapping entries are relevant to the parser, but not to us.
 * This function handles edge cases for maps.
  */
-func handleMapEntries(n *yaml.Node, parent *Node) (*Node, bool, error) {
+func handleMapEntries(n *Node, parent *ViewNode) (*ViewNode, bool, error) {
 
-	if n.Kind != yaml.MappingNode {
+	if n.Kind != MappingNode {
 
-		return nil, false, errors.New("expecting mapping node")
+		return nil, false, errors.New("expecting mapping ViewNode")
 	}
 
 	lastChildIndex := len(parent.Children) - 1
@@ -241,7 +240,7 @@ func handleMapEntries(n *yaml.Node, parent *Node) (*Node, bool, error) {
 	return newNode, true, nil
 }
 
-func yamlNodeIsMapValue(parent *Node) bool {
+func yamlNodeIsMapValue(parent *ViewNode) bool {
 
 	if parent == nil || parent.Kind != Mapping {
 		return false
@@ -256,23 +255,23 @@ func yamlNodeIsMapValue(parent *Node) bool {
 	return parent.Children[lastChildIndex].Kind == Property && parent.Children[lastChildIndex].Value == EMPTY_SCALAR
 }
 
-func momentumKind(n *yaml.Node, parent *Node) (NodeKind, error) {
+func momentumKind(n *Node, parent *ViewNode) (NodeKind, error) {
 
 	switch n.Kind {
 
-	case yaml.DocumentNode:
+	case DocumentNode:
 
 		return File, nil
-	case yaml.MappingNode:
+	case MappingNode:
 
 		return Mapping, nil
-	case yaml.SequenceNode:
+	case SequenceNode:
 
 		return Sequence, nil
-	case yaml.AliasNode:
+	case AliasNode:
 
 		return -1, errors.New("kind alias currently not supported by momentum")
-	case yaml.ScalarNode:
+	case ScalarNode:
 
 		if yamlNodeIsMapValue(parent) {
 			return Value, nil
@@ -284,5 +283,25 @@ func momentumKind(n *yaml.Node, parent *Node) (NodeKind, error) {
 	default:
 
 		return -1, errors.New("unknown yaml kind")
+	}
+}
+
+func ToHumanReadableKind(k NodeKind) string {
+
+	switch k {
+	case Directory:
+		return "Directory"
+	case File:
+		return "File"
+	case Mapping:
+		return "Mapping"
+	case Sequence:
+		return "Sequence"
+	case Property:
+		return "Property"
+	case Value:
+		return "Value"
+	default:
+		return "UNKNOWN"
 	}
 }

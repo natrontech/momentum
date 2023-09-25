@@ -1,35 +1,15 @@
-package tree
+package yaml
 
 import (
 	"fmt"
 )
 
-func Print(n *Node) {
+func Print(n *ViewNode) {
 
 	print(n, 0)
 }
 
-func ToHumanReadableKind(k NodeKind) string {
-
-	switch k {
-	case Directory:
-		return "Directory"
-	case File:
-		return "File"
-	case Mapping:
-		return "Mapping"
-	case Sequence:
-		return "Sequence"
-	case Property:
-		return "Property"
-	case Value:
-		return "Value"
-	default:
-		return "UNKNOWN"
-	}
-}
-
-func print(n *Node, level int) {
+func print(n *ViewNode, level int) {
 
 	if n == nil {
 		return

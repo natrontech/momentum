@@ -2,10 +2,20 @@ package main
 
 import (
 	"fmt"
+	"momentum-core/artefacts"
 	"momentum-core/config"
+	"momentum-core/files"
 
-	_ "github.com/pdrum/swagger-automation/docs" // This line is necessary for go-swagger to find your docs!
+	"github.com/gin-gonic/gin"
+
+	// do not change order of the three following imports. It would break stuff.
+	_ "momentum-core/docs" // This line is necessary for swagger to find your docs!
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
+const momentumCoreAsciiArt = "███╗   ███╗ ██████╗ ███╗   ███╗███████╗███╗   ██╗████████╗██╗   ██╗███╗   ███╗     ██████╗ ██████╗ ██████╗ ███████╗\n████╗ ████║██╔═══██╗████╗ ████║██╔════╝████╗  ██║╚══██╔══╝██║   ██║████╗ ████║    ██╔════╝██╔═══██╗██╔══██╗██╔════╝\n██╔████╔██║██║   ██║██╔████╔██║█████╗  ██╔██╗ ██║   ██║   ██║   ██║██╔████╔██║    ██║     ██║   ██║██████╔╝█████╗  \n██║╚██╔╝██║██║   ██║██║╚██╔╝██║██╔══╝  ██║╚██╗██║   ██║   ██║   ██║██║╚██╔╝██║    ██║     ██║   ██║██╔══██╗██╔══╝  \n██║ ╚═╝ ██║╚██████╔╝██║ ╚═╝ ██║███████╗██║ ╚████║   ██║   ╚██████╔╝██║ ╚═╝ ██║    ╚██████╗╚██████╔╝██║  ██║███████╗\n╚═╝     ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝    ╚═════╝ ╚═╝     ╚═╝     ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝"
 
 // @title		Momentum Core API
 // @version		early-alpha
@@ -19,17 +29,22 @@ import (
 // @BasePath	/
 func main() {
 
-	fmt.Println("Starting momentum-core")
-
-	config, err := config.InitializeMomentumCore()
+	_, err := config.InitializeMomentumCore()
 	if err != nil {
 		panic("failed initializing momentum. problem: " + err.Error())
 	}
 
+	fmt.Println(momentumCoreAsciiArt)
+
 	// gitClient := clients.NewGitClient(config)
 	// kustomizeClient := clients.NewKustomizationValidationClient(config)
 
-	dispatcher := NewDispatcher(config)
+	server := gin.Default()
 
-	dispatcher.Serve()
+	files.RegisterFileRoutes(server)
+	artefacts.RegisterArtefactRoutes(server)
+
+	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	server.Run("localhost:8080")
 }

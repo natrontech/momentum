@@ -3,7 +3,6 @@ package clients
 import (
 	"fmt"
 	"momentum-core/config"
-	"momentum-core/tree"
 	"momentum-core/utils"
 
 	"sigs.k8s.io/kustomize/api/krusty"
@@ -36,13 +35,14 @@ func (kustomizationService *KustomizationValidationClient) Validate(repoName str
 		return err
 	}
 
-	repoTree, err := tree.Parse(path)
-	if err != nil {
-		fmt.Println("failed parsing validation directory")
-		return err
-	}
+	// TODO -> fix kustomization validator
+	// repoTree, err := yaml.Parse(path)
+	// if err != nil {
+	// 	fmt.Println("failed parsing validation directory")
+	// 	return err
+	// }
 
-	err = kustomizationService.check(repoTree.MomentumRoot().FullPath())
+	// err = kustomizationService.check(repoTree.MomentumRoot().FullPath())
 	if err != nil {
 		fmt.Println("error while validating kustomize structure (check):", err.Error())
 		kustomizationService.validationCleanup(path)
@@ -68,7 +68,6 @@ func (kustomizationService *KustomizationValidationClient) check(path string) er
 
 	fs := filesys.MakeFsOnDisk()
 
-	// TODO ->  OpenAI ApiSchemes for FluxCD -> Kubeconform
 	kustomizer := krusty.MakeKustomizer(krusty.MakeDefaultOptions())
 
 	_, err := kustomizer.Run(fs, path)
