@@ -35,4 +35,4 @@ dist/
 _temp/
 
 ./momentum-core/momentum-core
-./momentum-core/.vscode/*
+./momentum-core/.vscode/
