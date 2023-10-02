@@ -12,6 +12,12 @@ patches:
   - path: application.yaml
     target:
       kind: Application
+  - path: values.yaml
+    target:
+      kind: Application
+  - path: secrets.yaml
+    target:
+      kind: Application
   - target:
       kind: Application
       name: .*
