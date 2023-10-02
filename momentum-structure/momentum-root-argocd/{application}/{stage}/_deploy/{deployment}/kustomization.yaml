@@ -1,0 +1,42 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../../_base/ # applications _base
+labels:
+- includeSelectors: true
+  pairs:
+    # Patched on stage above // wont work if addtionall resources are added on this level
+    #gitops.natron.io/app: ""
+    gitops.natron.io/stage: "{{ .StageName }}"
+patches:
+  - path: application.yaml
+    target:
+      kind: Application
+  - path: values.yaml
+    target:
+      kind: Application
+  - path: secrets.yaml
+    target:
+      kind: Application
+  - target:
+      kind: Application
+      name: .*
+    patch: |-
+      - op: replace
+        path: /metadata/name
+    # {{ .ApplicationName }}-{{ .StageNames }}
+        value: {{ .MetadataName }}
+  - target:
+      group: image.toolkit.fluxcd.io
+      name: .*
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: {{ .MetadataName }}
+  - target:
+      group: notification.toolkit.fluxcd.io
+      name: .*
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: {{ .MetadataName }}

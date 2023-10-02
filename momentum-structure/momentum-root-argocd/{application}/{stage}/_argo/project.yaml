@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: {{ .ApplicationName }}-{{ .StageNames }}
+  namespace: argocd
+spec:
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  description: This is the Project for {{ .ApplicationName }}
+  destinations:
+    - name: in-cluster
+      namespace: {{ .ApplicationName }}-{{ .StageNames }}-*
+      server: https://kubernetes.default.svc
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  # sourceRepos:
+  orphanedResources:
+    warn: false
