@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 
+	gittransaction "github.com/Joel-Haeberli/git-transaction"
 	"github.com/gin-gonic/gin"
 )
 
@@ -52,7 +53,7 @@ func GetFile(c *gin.Context) {
 
 // AddFile godoc
 //
-//	@Summary		adds a new file to a given parent
+//	@Summary		adds a new file to a given parent (triggers transaction)
 //	@Tags			files
 //	@Accept			json
 //	@Produce		json
@@ -97,10 +98,33 @@ func AddFile(c *gin.Context) {
 		return
 	}
 
+	ctx, transaction, err := gittransaction.New(config.TRANSACTION_MODE, config.GLOBAL.RepoDir(), config.GLOBAL.TransactionToken())
+	if err != nil {
+		transaction.Rollback(ctx)
+		c.JSON(http.StatusInternalServerError, config.NewApiError(err, http.StatusInternalServerError, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
 	writeSuccess := utils.FileWrite(filePath, fileContentDecoded)
 	if !writeSuccess {
+		transaction.Rollback(ctx)
 		err = errors.New("writing file failed")
 		c.JSON(http.StatusBadRequest, config.NewApiError(err, http.StatusBadRequest, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	err = transaction.Write(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, config.NewApiError(err, http.StatusInternalServerError, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	err = transaction.Commit(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, config.NewApiError(err, http.StatusInternalServerError, c, traceId))
 		config.LOGGER.LogError(err.Error(), err, traceId)
 		return
 	}
@@ -108,12 +132,15 @@ func AddFile(c *gin.Context) {
 	encodedFile, err := fileToBase64(filePath)
 	newFileId, err := utils.GenerateId(config.IdGenerationPath(filePath))
 	if err != nil {
+		transaction.Rollback(ctx)
 		c.JSON(http.StatusInternalServerError, config.NewApiError(err, http.StatusInternalServerError, c, traceId))
 		config.LOGGER.LogError(err.Error(), err, traceId)
 		return
 	}
+
 	fileArtefact, err := artefacts.FileById(newFileId)
 	if err != nil {
+		transaction.Rollback(ctx)
 		c.JSON(http.StatusInternalServerError, config.NewApiError(err, http.StatusInternalServerError, c, traceId))
 		config.LOGGER.LogError(err.Error(), err, traceId)
 		return
@@ -122,6 +149,86 @@ func AddFile(c *gin.Context) {
 	file := NewFile(fileArtefact.Id, fileArtefact.Name, encodedFile)
 
 	c.JSON(http.StatusOK, file)
+}
+
+// UpdateFile godoc
+//
+//	@Summary		updates the given file (triggers transaction)
+//	@Tags			files
+//	@Accept			json
+//	@Produce		json
+//	@Body 			File
+//	@Success		200		{object}	File
+//	@Failure		400		{object}	config.ApiError
+//	@Failure		404		{object}	config.ApiError
+//	@Failure		500		{object}	config.ApiError
+//	@Router			/api/beta/file/{id} [put]
+func UpdateFile(c *gin.Context) {
+
+	traceId := config.LOGGER.TraceId()
+
+	requestedFile := new(File)
+	err := c.BindJSON(requestedFile)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, config.NewApiError(err, http.StatusBadRequest, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	decodedBody, err := fileToRaw(requestedFile.Body)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, config.NewApiError(err, http.StatusBadRequest, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	file, err := artefacts.FileById(requestedFile.Id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, config.NewApiError(err, http.StatusNotFound, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	filePath := artefacts.FullPath(file)
+	if !utils.FileExists(filePath) {
+		err = errors.New("file does not exist")
+		c.JSON(http.StatusNotFound, config.NewApiError(err, http.StatusNotFound, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	ctx, transaction, err := gittransaction.New(config.TRANSACTION_MODE, config.GLOBAL.RepoDir(), config.GLOBAL.TransactionToken())
+	if err != nil {
+		transaction.Rollback(ctx)
+		c.JSON(http.StatusInternalServerError, config.NewApiError(err, http.StatusInternalServerError, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	utils.FileDelete(filePath)
+	success := utils.FileWrite(filePath, decodedBody)
+	if !success {
+		err = errors.New("failed to write file")
+		c.JSON(http.StatusInternalServerError, config.NewApiError(err, http.StatusInternalServerError, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	err = transaction.Write(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, config.NewApiError(err, http.StatusInternalServerError, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	err = transaction.Commit(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, config.NewApiError(err, http.StatusInternalServerError, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	c.JSON(http.StatusOK, requestedFile)
 }
 
 // GetOverwrittenBy godoc
