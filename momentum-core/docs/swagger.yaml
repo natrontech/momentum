@@ -1,6 +1,39 @@
 basePath: /
 definitions:
-  models.ApiError:
+  artefacts.Artefact:
+    properties:
+      contentIds:
+        description: id's of children artefacts
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      name:
+        type: string
+      parentId:
+        description: id of parent artefacts
+        type: string
+      type:
+        $ref: '#/definitions/artefacts.ArtefactType'
+    type: object
+  artefacts.ArtefactType:
+    enum:
+    - 1
+    - 2
+    - 4
+    - 8
+    - 16
+    - 32
+    type: integer
+    x-enum-varnames:
+    - ROOT
+    - META
+    - APPLICATION
+    - STAGE
+    - DEPLOYMENT
+    - FILE
+  config.ApiError:
     properties:
       detail:
         type: string
@@ -14,131 +47,25 @@ definitions:
       type:
         type: string
     type: object
-  models.Application:
+  files.File:
     properties:
-      id:
+      body:
         type: string
-      name:
-        type: string
-      repositoryName:
-        type: string
-    type: object
-  models.ApplicationCreateRequest:
-    properties:
-      chartVersion:
-        type: string
-      name:
-        type: string
-      reconcileInterval:
-        type: string
-      repositoryName:
-        type: string
-    type: object
-  models.Deployment:
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-      parentStageId:
-        type: string
-      repositoryId:
-        type: string
-    type: object
-  models.DeploymentCreateRequest:
-    properties:
-      applicationName:
-        type: string
-      chartVersion:
-        type: string
-      name:
-        type: string
-      parentStageId:
-        type: string
-      reconcileInterval:
-        type: string
-      repositoryName:
-        type: string
-    type: object
-  models.Repository:
-    properties:
       id:
         type: string
       name:
         type: string
     type: object
-  models.RepositoryCreateRequest:
+  files.Overwrite:
     properties:
-      name:
+      originFileId:
         type: string
-      url:
+      originFileLine:
+        type: integer
+      overwriteFileId:
         type: string
-    type: object
-  models.Stage:
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-      parentApplicationId:
-        type: string
-      parentStageId:
-        type: string
-    type: object
-  models.StageCreateRequest:
-    properties:
-      chartVersion:
-        type: string
-      name:
-        type: string
-      parentApplicationId:
-        type: string
-      parentStageId:
-        type: string
-      reconcileInterval:
-        type: string
-      repositoryName:
-        type: string
-    type: object
-  models.Value:
-    properties:
-      displayName:
-        type: string
-      id:
-        type: string
-      key:
-        type: string
-      parentDeploymentId:
-        type: string
-      parentStageId:
-        type: string
-      value:
-        type: string
-    type: object
-  models.ValueType:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    type: integer
-    x-enum-varnames:
-    - REPOSITORY
-    - APPLICATION
-    - STAGE
-    - DEPLOYMENT
-  models.ValueWrapper:
-    properties:
-      parentFileId:
-        type: string
-      parentFileName:
-        type: string
-      valueType:
-        $ref: '#/definitions/models.ValueType'
-      values:
-        items:
-          $ref: '#/definitions/models.Value'
-        type: array
+      overwriteFileLine:
+        type: integer
     type: object
 host: localhost:8080
 info:
@@ -150,75 +77,8 @@ info:
   title: Momentum Core API
   version: early-alpha
 paths:
-  /application:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Create Application
-        in: body
-        name: applicationCreateRequest
-        required: true
-        schema:
-          $ref: '#/definitions/models.ApplicationCreateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Application'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ApiError'
-      summary: add an application
-      tags:
-      - applications
-  /deployment:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Create Deployment
-        in: body
-        name: deploymentCreateRequest
-        required: true
-        schema:
-          $ref: '#/definitions/models.DeploymentCreateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Deployment'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ApiError'
-      summary: get a deployment of a repository by id
-      tags:
-      - deployments
-  /repositories:
+  /api/beta/applications:
     get:
-      description: load all repositories managed by this instance
       produces:
       - application/json
       responses:
@@ -226,63 +86,29 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Repository'
+              $ref: '#/definitions/artefacts.Artefact'
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ApiError'
+            $ref: '#/definitions/config.ApiError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/models.ApiError'
+            $ref: '#/definitions/config.ApiError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ApiError'
-      summary: load repositories
+            $ref: '#/definitions/config.ApiError'
+      summary: gets a list of all applications
       tags:
-      - repositories
-  /repository:
-    post:
-      consumes:
-      - application/json
-      description: adds a new repository to the instance
-      parameters:
-      - description: Create Repository
-        in: body
-        name: repositoryCreateRequest
-        required: true
-        schema:
-          $ref: '#/definitions/models.RepositoryCreateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Repository'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ApiError'
-      summary: add a new repository
-      tags:
-      - repositories
-  /repository/{repositoryName}:
+      - artefacts
+  /api/beta/artefact/{id}/:
     get:
       parameters:
-      - description: Repository Name
+      - description: artefact id
         in: path
-        name: repositoryName
+        name: id
         required: true
         type: string
       produces:
@@ -291,67 +117,28 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Repository'
+            $ref: '#/definitions/artefacts.Artefact'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ApiError'
+            $ref: '#/definitions/config.ApiError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/models.ApiError'
+            $ref: '#/definitions/config.ApiError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ApiError'
-      summary: get a repository
+            $ref: '#/definitions/config.ApiError'
+      summary: get an artefact by id (an artefact can be any of APPLICATION, STAGE
+        or DEPLOYMENT)
       tags:
-      - repositories
-  /repository/{repositoryName}/{applicationId}:
+      - artefacts
+  /api/beta/deployments:
     get:
       parameters:
-      - description: Repository Name
-        in: path
-        name: repositoryName
-        required: true
-        type: string
-      - description: Application ID
-        in: path
-        name: applicationId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Application'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ApiError'
-      summary: get an application of a repository by id
-      tags:
-      - applications
-  /repository/{repositoryName}/app/stage/{stageId}:
-    get:
-      parameters:
-      - description: Repository Name
-        in: path
-        name: repositoryName
-        required: true
-        type: string
-      - description: Stage ID
-        in: path
+      - description: stage id
+        in: query
         name: stageId
         required: true
         type: string
@@ -361,335 +148,145 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Deployment'
+            $ref: '#/definitions/artefacts.Artefact'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ApiError'
+            $ref: '#/definitions/config.ApiError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/models.ApiError'
+            $ref: '#/definitions/config.ApiError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ApiError'
-      summary: get a stage of a repository by id
+            $ref: '#/definitions/config.ApiError'
+      summary: get a list of deployments for a given stage by id
       tags:
-      - stages
-  /repository/{repositoryName}/app/stage/deployment/{deploymentId}:
-    get:
-      parameters:
-      - description: Repository Name
-        in: path
-        name: repositoryName
-        required: true
-        type: string
-      - description: Deployment ID
-        in: path
-        name: deploymentId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Deployment'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ApiError'
-      summary: get a deployment of a repository by id
-      tags:
-      - deployments
-  /repository/{repositoryName}/application/values/{applicationId}:
-    get:
-      parameters:
-      - description: Repository Name
-        in: path
-        name: repositoryName
-        required: true
-        type: string
-      - description: Application ID
-        in: path
-        name: applicationId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.ValueWrapper'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ApiError'
-      summary: get all values of an application by  the applications id
-      tags:
-      - values
-  /repository/{repositoryName}/applications:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: Repository Name
-        in: path
-        name: repositoryName
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Application'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ApiError'
-      summary: get all applications of a repository
-      tags:
-      - applications
-  /repository/{repositoryName}/deployment/values/{deploymentId}:
-    get:
-      parameters:
-      - description: Repository Name
-        in: path
-        name: repositoryName
-        required: true
-        type: string
-      - description: Deployment ID
-        in: path
-        name: deploymentId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.ValueWrapper'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ApiError'
-      summary: get all values of a deployment by the deployments id
-      tags:
-      - values
-  /repository/{repositoryName}/deployments:
-    get:
-      parameters:
-      - description: Repository Name
-        in: path
-        name: repositoryName
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Deployment'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ApiError'
-      summary: get deployments
-      tags:
-      - deployments
-  /repository/{repositoryName}/stage/values/{stageId}:
-    get:
-      parameters:
-      - description: Repository Name
-        in: path
-        name: repositoryName
-        required: true
-        type: string
-      - description: Stage ID
-        in: path
-        name: stageId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.ValueWrapper'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ApiError'
-      summary: get all values of an stage by  the stages id
-      tags:
-      - values
-  /repository/{repositoryName}/stages:
-    get:
-      parameters:
-      - description: Repository Name
-        in: path
-        name: repositoryName
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Stage'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ApiError'
-      summary: get stages
-      tags:
-      - stages
-  /repository/{repositoryName}/value/{valueId}:
-    get:
-      parameters:
-      - description: Repository Name
-        in: path
-        name: repositoryName
-        required: true
-        type: string
-      - description: Value ID
-        in: path
-        name: valueId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Value'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ApiError'
-      summary: get a value of a repository by id
-      tags:
-      - values
-  /stage:
+      - artefacts
+  /api/beta/file:
     post:
       consumes:
       - application/json
-      parameters:
-      - description: Create Stage
-        in: body
-        name: stageCreateRequest
-        required: true
-        schema:
-          $ref: '#/definitions/models.StageCreateRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Stage'
+            $ref: '#/definitions/files.File'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ApiError'
+            $ref: '#/definitions/config.ApiError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/models.ApiError'
+            $ref: '#/definitions/config.ApiError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ApiError'
-      summary: add a new stage
+            $ref: '#/definitions/config.ApiError'
+      summary: adds a new file to a given parent
       tags:
-      - stages
+      - files
+  /api/beta/file/{id}:
+    get:
+      parameters:
+      - description: file id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/files.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/config.ApiError'
+      summary: gets the content of a file
+      tags:
+      - files
+  /api/beta/file/{id}/line/{lineNumber}/overwritten-by:
+    get:
+      parameters:
+      - description: file id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: line number in file
+        in: path
+        name: lineNumber
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/files.Overwrite'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/config.ApiError'
+      summary: gets a list of properties which overwrite the given line.
+      tags:
+      - files
+  /api/beta/stages:
+    get:
+      parameters:
+      - description: application or stage id
+        in: query
+        name: parentId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/artefacts.Artefact'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/config.ApiError'
+      summary: gets a list of all stages within an application or stage by id.
+      tags:
+      - artefacts
 schemes:
-- http,
-- https
+- http
 swagger: "2.0"

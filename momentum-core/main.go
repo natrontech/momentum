@@ -2,13 +2,20 @@ package main
 
 import (
 	"fmt"
-	"momentum-core/clients"
+	"momentum-core/artefacts"
 	"momentum-core/config"
-	"momentum-core/routers"
-	"momentum-core/services"
+	"momentum-core/files"
 
-	_ "github.com/pdrum/swagger-automation/docs" // This line is necessary for go-swagger to find your docs!
+	"github.com/gin-gonic/gin"
+
+	// do not change order of the three following imports. It would break stuff.
+	_ "momentum-core/docs" // This line is necessary for swagger to find your docs!
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
+const momentumCoreAsciiArt = "███╗   ███╗ ██████╗ ███╗   ███╗███████╗███╗   ██╗████████╗██╗   ██╗███╗   ███╗     ██████╗ ██████╗ ██████╗ ███████╗\n████╗ ████║██╔═══██╗████╗ ████║██╔════╝████╗  ██║╚══██╔══╝██║   ██║████╗ ████║    ██╔════╝██╔═══██╗██╔══██╗██╔════╝\n██╔████╔██║██║   ██║██╔████╔██║█████╗  ██╔██╗ ██║   ██║   ██║   ██║██╔████╔██║    ██║     ██║   ██║██████╔╝█████╗  \n██║╚██╔╝██║██║   ██║██║╚██╔╝██║██╔══╝  ██║╚██╗██║   ██║   ██║   ██║██║╚██╔╝██║    ██║     ██║   ██║██╔══██╗██╔══╝  \n██║ ╚═╝ ██║╚██████╔╝██║ ╚═╝ ██║███████╗██║ ╚████║   ██║   ╚██████╔╝██║ ╚═╝ ██║    ╚██████╗╚██████╔╝██║  ██║███████╗\n╚═╝     ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝    ╚═════╝ ╚═╝     ╚═╝     ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝"
 
 // @title		Momentum Core API
 // @version		early-alpha
@@ -17,37 +24,27 @@ import (
 // @license.name	Apache 2.0
 // @license.url		http://www.apache.org/licenses/LICENSE-2.0.html
 //
-// @schemes 	http, https
+// @schemes 	http
 // @host		localhost:8080
 // @BasePath	/
 func main() {
 
-	fmt.Println("Starting momentum-core")
-
-	config, err := config.InitializeMomentumCore()
+	_, err := config.InitializeMomentumCore()
 	if err != nil {
 		panic("failed initializing momentum. problem: " + err.Error())
 	}
 
-	gitClient := clients.NewGitClient(config)
-	kustomizeClient := clients.NewKustomizationValidationClient(config)
+	fmt.Println(momentumCoreAsciiArt)
 
-	templateService := services.NewTemplateService()
-	treeService := services.NewTreeService(config)
-	repositoryService := services.NewRepositoryService(config, treeService, gitClient, kustomizeClient)
-	applicationService := services.NewApplicationService(config, treeService, templateService)
-	stageService := services.NewStageService(config, treeService, templateService)
-	deploymentService := services.NewDeploymentService(config, stageService, templateService, treeService)
-	valueService := services.NewValueService(treeService)
+	// gitClient := clients.NewGitClient(config)
+	// kustomizeClient := clients.NewKustomizationValidationClient(config)
 
-	templateRouter := routers.NewTemplateRouter()
-	valueRouter := routers.NewValueRouter(valueService)
-	deploymentRouter := routers.NewDeploymentRouter(deploymentService, repositoryService, config)
-	stageRouter := routers.NewStageRouter(stageService, repositoryService, config)
-	applicationRouter := routers.NewApplicationRouter(applicationService, repositoryService, config)
-	repositoryRouter := routers.NewRepositoryRouter(repositoryService, applicationService, stageService, deploymentService)
+	server := gin.Default()
 
-	dispatcher := NewDispatcher(config, repositoryRouter, applicationRouter, stageRouter, deploymentRouter, valueRouter, templateRouter)
+	files.RegisterFileRoutes(server)
+	artefacts.RegisterArtefactRoutes(server)
 
-	dispatcher.Serve()
+	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	server.Run("localhost:8080")
 }

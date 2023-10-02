@@ -4,6 +4,10 @@ import (
 	"errors"
 	"momentum-core/utils"
 	"os"
+	"path/filepath"
+	"strings"
+
+	git "gopkg.in/src-d/go-git.v4"
 
 	gittransaction "github.com/Joel-Haeberli/git-transaction"
 )
@@ -12,9 +16,12 @@ const MOMENTUM_ROOT = "momentum-root"
 
 const TRANSACTION_MODE = gittransaction.DEBUG
 
-const MOMENTUM_GIT_USER = "MOMENTUM_GIT_USER"
-const MOMENTUM_GIT_EMAIL = "MOMENTUM_GIT_EMAIL"
-const MOMENTUM_GIT_TOKEN = "MOMENTUM_GIT_TOKEN"
+const MOMENTUM_GIT_USER = "MOMENTUM_GIT_USER"         // the git username associated with the repositories token
+const MOMENTUM_GIT_EMAIL = "MOMENTUM_GIT_EMAIL"       // the email belonging to the user associated with the repository token
+const MOMENTUM_GIT_TOKEN = "MOMENTUM_GIT_TOKEN"       // the access token associated with the repository token
+const MOMENTUM_GIT_REPO_URL = "MOMENTUM_GIT_REPO_URL" // the HTTP url to the git repository the instance is working on
+
+var GLOBAL *MomentumConfig = nil // set on initialization, otherwise crash
 
 type ILoggerClient interface {
 	LogTrace(msg string, traceId string)
@@ -42,6 +49,10 @@ type MomentumConfig struct {
 
 func (m *MomentumConfig) DataDir() string {
 	return m.dataDir
+}
+
+func (m *MomentumConfig) RepoDir() string {
+	return filepath.Join(m.dataDir, "repository")
 }
 
 func (m *MomentumConfig) ValidationTmpDir() string {
@@ -93,6 +104,24 @@ func (m *MomentumConfig) checkMandatoryTemplates() error {
 	if !utils.FileExists(m.DeploymentTemplateFilePath()) {
 		return errors.New("provide mandatory template for deployment files at " + m.DeploymentTemplateFilePath())
 	}
+
+	return nil
+}
+
+func (m *MomentumConfig) initializeRepository() error {
+
+	_, err := os.Stat(m.RepoDir())
+	if !os.IsNotExist(err) {
+		LOGGER.LogInfo("will not clone repository because one present", "STARTUP")
+		return nil
+	}
+
+	repoUrl := os.Getenv(MOMENTUM_GIT_REPO_URL)
+	if repoUrl == "" {
+		return errors.New("failed initializing momentum because " + MOMENTUM_GIT_REPO_URL + " was not set")
+	}
+
+	cloneRepoTo(repoUrl, "", "", m.RepoDir())
 
 	return nil
 }
@@ -162,6 +191,8 @@ func InitializeMomentumCore() (*MomentumConfig, error) {
 		panic("failed initializing logger: " + err.Error())
 	}
 
+	GLOBAL = config
+
 	return config, err
 }
 
@@ -173,4 +204,19 @@ func createPathIfNotPresent(path string, parentDir string) {
 		}
 		utils.DirCreate(path)
 	}
+}
+
+func IdGenerationPath(path string) string {
+	relevantForId, _ := strings.CutPrefix(path, GLOBAL.RepoDir())
+	return relevantForId
+}
+
+func cloneRepoTo(url string, username string, password string, location string) error {
+	_, err := git.PlainClone(location, false, &git.CloneOptions{
+		URL:      url,
+		Progress: os.Stdout,
+		// Auth: ..., TODO in case not public dir
+	})
+
+	return err
 }

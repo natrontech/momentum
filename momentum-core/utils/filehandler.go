@@ -18,7 +18,8 @@ func IsDirectory(path string) bool {
 
 	stat, err := os.Stat(path)
 	if err != nil {
-		panic("Failed opening stat of file " + path)
+		fmt.Println("Failed opening stat of file " + path)
+		return false
 	}
 	return stat.IsDir()
 }
@@ -112,6 +113,14 @@ func dirCopyRecursive(rootOrigin string, rootDestination string, relativeToParen
 	}
 
 	return errors.Join(errs...)
+}
+
+func FileWrite(path string, content string) bool {
+
+	buf := make([]byte, 0)
+	buf = append(buf, bytes.NewBufferString(content).Bytes()...)
+
+	return write(path, int64(len(buf)), buf)
 }
 
 func FileWriteLines(path string, lines []string) bool {
