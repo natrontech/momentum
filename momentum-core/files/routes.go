@@ -2,7 +2,6 @@ package files
 
 import (
 	"errors"
-	"fmt"
 	"momentum-core/artefacts"
 	"momentum-core/backtracking"
 	"momentum-core/config"
@@ -127,7 +126,7 @@ func AddFile(c *gin.Context) {
 
 // GetOverwrittenBy godoc
 //
-//	@Summary		gets a list of properties which overwrite the given line.
+//	@Summary		gets a list of overwrites which overwrite the given line.
 //	@Tags			files
 //	@Produce		json
 //	@Param			id				path		string	true	"file id"
@@ -171,11 +170,10 @@ func GetOverwrittenBy(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("Line of predicate:", lineNode)
-
-	overwritingFiles := artefacts.OverwritesByPriorityAsc(artefacts.FullPath(overwritable))
-
-	fmt.Println("files possibly overwriting current", overwritingFiles)
+	overwritingFiles := make([]*artefacts.Artefact, 0)
+	for _, advice := range artefacts.ActiveOverwriteAdvices {
+		overwritingFiles = append(overwritingFiles, advice(artefacts.FullPath(overwritable))...)
+	}
 
 	if len(overwritingFiles) > 0 {
 
@@ -184,8 +182,6 @@ func GetOverwrittenBy(c *gin.Context) {
 
 		overwrites := make([]*Overwrite, 0)
 		for _, overwriting := range overwritingFiles {
-
-			fmt.Println("loading overwrite:", overwriting)
 
 			backtracker := backtracking.NewPropertyBacktracker(predicate, artefacts.FullPath(overwriting), backtracking.NewYamlPropertyParser())
 			var result []*backtracking.Match[string, yaml.ViewNode] = backtracker.RunBacktrack()

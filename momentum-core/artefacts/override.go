@@ -4,8 +4,13 @@ import (
 	"strings"
 )
 
+type OverwriteAdvice func(string) []*Artefact
+
+// extend this list to add more overwriting rules
+var ActiveOverwriteAdvices []OverwriteAdvice = []OverwriteAdvice{overwritesByFilenamePriorityAsc}
+
 // gets all files which are higher up in the structure with the same name as the given file path.
-func OverwritesByPriorityAsc(path string) []*Artefact {
+func overwritesByFilenamePriorityAsc(path string) []*Artefact {
 
 	overwritable := FindArtefactByPath(path)
 	if overwritable != nil {

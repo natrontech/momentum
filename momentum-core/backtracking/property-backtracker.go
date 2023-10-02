@@ -1,7 +1,6 @@
 package backtracking
 
 import (
-	"fmt"
 	"momentum-core/yaml"
 	"strings"
 )
@@ -77,7 +76,7 @@ func (backtracker *PropertyBacktracker) Comparable(n *Node[string, yaml.ViewNode
 
 func (backtracker *PropertyBacktracker) IsMatch(predicate *string, argument *string) bool {
 
-	fmt.Println("trying to match:", *predicate, "=?", *argument)
+	// fmt.Println("trying to match:", *predicate, "=?", *argument)
 	return strings.EqualFold(*predicate, *argument)
 }
 
