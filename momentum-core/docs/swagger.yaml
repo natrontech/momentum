@@ -47,21 +47,6 @@ definitions:
       type:
         type: string
     type: object
-  files.Dir:
-    properties:
-      files:
-        items:
-          $ref: '#/definitions/files.File'
-        type: array
-      id:
-        type: string
-      name:
-        type: string
-      subDirs:
-        items:
-          $ref: '#/definitions/files.Dir'
-        type: array
-    type: object
   files.File:
     properties:
       body:
@@ -179,36 +164,6 @@ paths:
       summary: get a list of deployments for a given stage by id
       tags:
       - artefacts
-  /api/beta/dir/{id}:
-    get:
-      parameters:
-      - description: file id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/files.Dir'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/config.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/config.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/config.ApiError'
-      summary: gets the content of a file
-      tags:
-      - files
   /api/beta/file:
     post:
       consumes:
@@ -263,44 +218,6 @@ paths:
           schema:
             $ref: '#/definitions/config.ApiError'
       summary: gets the content of a file
-      tags:
-      - files
-  /api/beta/file/{id}/line/{lineNumber}/overwrites:
-    get:
-      parameters:
-      - description: file id
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: line number in file
-        in: path
-        name: lineNumber
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/files.Overwrite'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/config.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/config.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/config.ApiError'
-      summary: gets a list of child properties, which are overwritten by the given
-        line.
       tags:
       - files
   /api/beta/file/{id}/line/{lineNumber}/overwritten-by:

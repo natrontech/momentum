@@ -23,13 +23,14 @@ type Search[T any, P any] interface {
 	IsMatch(*T, *T) bool
 	// StopEarly shall return true if the algorithm must backtrack and reject the current branch.
 	// False if the algorithm shall process further even if no full match has been reached.
+	// Be aware that a slightly wrong implementation can lead to ommitted results.
 	StopEarly(*T, *T) bool
 }
 
 // Node is the structure used inside the backtrack algorithm and describes a tree structure.
 type Node[T any, P any] struct {
 	value    *T
-	pointer  *P // pointer to the actual element which belongs to the node
+	Pointer  *P // pointer to the actual element which belongs to the node
 	parent   *Node[T, P]
 	children []*Node[T, P]
 }
@@ -119,7 +120,7 @@ func walkUp[T any, P any](parent *Node[T, P], current *Node[T, P]) *Node[T, P] {
 	}
 
 	if found && parent.parent != nil {
-		// this indicates that the current node was the last of level, thus we need to walk up further
+		// this indicates that the current node was the last of this level, thus we need to walk up further
 		// if the parent is nil, this indicates we are at root and traversed the whole tree
 		if parent.parent == nil {
 			return nil

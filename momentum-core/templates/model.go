@@ -1,6 +1,16 @@
 package templates
 
+import "momentum-core/files"
+
 type TemplateStructureType int
+
+type TemplateKind int
+
+const (
+	APPLICATION TemplateKind = 1 << iota
+	STAGE
+	DEPLOYMENT
+)
 
 const (
 	DIR TemplateStructureType = 1 << iota
@@ -8,25 +18,25 @@ const (
 )
 
 type CreateTemplateRequest struct {
-	Name              string                             `json:"name"`
-	ParentId          string                             `json:"parentId"` // must be an artefact of type APPLICATION or STAGE
-	TemplateStructure []*CreateTemplateStructureArtefact `json:"templateStructure"`
-}
-
-type CreateTemplateStructureArtefact struct {
-	Name                  string                `json:"name"`
-	Path                  string                `json:"path"` // the path is to be given relative to the templates root
-	TemplateStructureType TemplateStructureType `json:"templateStructureType"`
-	ParentId              string                `json:"parentId"` // if not set, it will live inside the templates root
+	TemplateKind TemplateKind `json:"templateKind"`
+	Template     *files.Dir   `json:"template"`
 }
 
 type Template struct {
-	Id               string              `json:"id"`
-	Name             string              `json:"name"`
-	TemplateArtefact []*TemplateArtefact `json:"templateArtefacts"`
+	TemplateKind TemplateKind `json:"templateKind"`
+	Template     *files.Dir   `json:"template"`
 }
 
-type TemplateArtefact struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
+type TemplateStore struct {
+	Templates []*Template `json:"templates"`
+}
+
+// next steps:
+//  1. define templates
+//  2. define implement overwrite detection by file
+//  3. implement backtracking with detected files for line matching endpoints
+
+// this shall define which files overwrite each other.
+// shall support wildcards and filenames.
+type OverwriteConfiguration struct {
 }

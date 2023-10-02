@@ -2,11 +2,16 @@ package files
 
 import (
 	"errors"
+	"fmt"
 	"momentum-core/artefacts"
+	"momentum-core/backtracking"
 	"momentum-core/config"
 	"momentum-core/utils"
+	"momentum-core/yaml"
 	"net/http"
 	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,9 +19,7 @@ import (
 func RegisterFileRoutes(engine *gin.Engine) {
 	engine.GET(config.API_FILE_BY_ID, GetFile)
 	engine.POST(config.API_FILE_ADD, AddFile)
-	engine.GET(config.API_DIR_BY_ID, GetDir)
 	engine.GET(config.API_FILE_LINE_OVERWRITTENBY, GetOverwrittenBy)
-	engine.GET(config.API_FILE_LINE_OVERWRITES, GetOverwrites)
 }
 
 // GetFile godoc
@@ -122,26 +125,6 @@ func AddFile(c *gin.Context) {
 	c.JSON(http.StatusOK, file)
 }
 
-// GetDir godoc
-//
-//	@Summary		gets the content of a file
-//	@Tags			files
-//	@Produce		json
-//	@Param			id		path		string					true	"file id"
-//	@Success		200		{object}	Dir
-//	@Failure		400		{object}	config.ApiError
-//	@Failure		404		{object}	config.ApiError
-//	@Failure		500		{object}	config.ApiError
-//	@Router			/api/beta/dir/{id} [get]
-func GetDir(c *gin.Context) {
-
-	// TODO is this needed?
-
-	_ = c.Param("id")
-
-	return
-}
-
 // GetOverwrittenBy godoc
 //
 //	@Summary		gets a list of properties which overwrite the given line.
@@ -156,24 +139,72 @@ func GetDir(c *gin.Context) {
 //	@Router			/api/beta/file/{id}/line/{lineNumber}/overwritten-by [get]
 func GetOverwrittenBy(c *gin.Context) {
 
-	_ = c.Param("id")
-	_ = c.Param("lineNumber")
-}
+	traceId := config.LOGGER.TraceId()
 
-// GetOverwrites godoc
-//
-//	@Summary		gets a list of child properties, which are overwritten by the given line.
-//	@Tags			files
-//	@Produce		json
-//	@Param			id				path		string	true	"file id"
-//	@Param			lineNumber		path		int		true	"line number in file"
-//	@Success		200		{array}		Overwrite
-//	@Failure		400		{object}	config.ApiError
-//	@Failure		404		{object}	config.ApiError
-//	@Failure		500		{object}	config.ApiError
-//	@Router			/api/beta/file/{id}/line/{lineNumber}/overwrites [get]
-func GetOverwrites(c *gin.Context) {
+	overwritableId := c.Param("id")
+	overwritableLine, err := strconv.Atoi(c.Param("lineNumber"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, config.NewApiError(err, http.StatusBadRequest, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
 
-	_ = c.Param("id")
-	_ = c.Param("lineNumber")
+	overwritable, err := artefacts.FileById(overwritableId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, config.NewApiError(err, http.StatusNotFound, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	fileNode, err := yaml.ParseFile(artefacts.FullPath(overwritable))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, config.NewApiError(err, http.StatusInternalServerError, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	lineNode := yaml.FindNodeByLine(fileNode, overwritableLine)
+	if lineNode == nil {
+		err := errors.New("could not find line " + strconv.Itoa(overwritableLine) + " in file " + artefacts.FullPath(overwritable))
+		c.JSON(http.StatusNotFound, config.NewApiError(err, http.StatusNotFound, c, traceId))
+		config.LOGGER.LogError(err.Error(), err, traceId)
+		return
+	}
+
+	fmt.Println("Line of predicate:", lineNode)
+
+	overwritingFiles := artefacts.OverwritesByPriorityAsc(artefacts.FullPath(overwritable))
+
+	fmt.Println("files possibly overwriting current", overwritingFiles)
+
+	if len(overwritingFiles) > 0 {
+
+		predicate := yaml.ToMatchableSearchTerm(lineNode.FullPath())
+		predicate = strings.Join(strings.Split(predicate, ".")[1:], ".") // remove filename prefix
+
+		overwrites := make([]*Overwrite, 0)
+		for _, overwriting := range overwritingFiles {
+
+			fmt.Println("loading overwrite:", overwriting)
+
+			backtracker := backtracking.NewPropertyBacktracker(predicate, artefacts.FullPath(overwriting), backtracking.NewYamlPropertyParser())
+			var result []*backtracking.Match[string, yaml.ViewNode] = backtracker.RunBacktrack()
+
+			for _, match := range result {
+
+				overwrite := new(Overwrite)
+				overwrite.OriginFileId = overwritableId
+				overwrite.OriginFileLine = overwritableLine
+				overwrite.OverwriteFileLine = match.MatchNode.Pointer.YamlNode.Line
+				overwrite.OverwriteFileId = overwriting.Id
+
+				overwrites = append(overwrites, overwrite)
+			}
+		}
+
+		c.JSON(http.StatusOK, overwrites)
+		return
+	}
+
+	c.JSON(http.StatusOK, make([]*Overwrite, 0))
 }

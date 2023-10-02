@@ -18,7 +18,8 @@ func IsDirectory(path string) bool {
 
 	stat, err := os.Stat(path)
 	if err != nil {
-		panic("Failed opening stat of file " + path)
+		fmt.Println("Failed opening stat of file " + path)
+		return false
 	}
 	return stat.IsDir()
 }

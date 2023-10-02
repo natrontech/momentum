@@ -151,52 +151,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/beta/dir/{id}": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "files"
-                ],
-                "summary": "gets the content of a file",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "file id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/files.Dir"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/config.ApiError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/config.ApiError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/config.ApiError"
-                        }
-                    }
-                }
-            }
-        },
         "/api/beta/file": {
             "post": {
                 "consumes": [
@@ -260,62 +214,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/files.File"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/config.ApiError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/config.ApiError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/config.ApiError"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/beta/file/{id}/line/{lineNumber}/overwrites": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "files"
-                ],
-                "summary": "gets a list of child properties, which are overwritten by the given line.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "file id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "line number in file",
-                        "name": "lineNumber",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/files.Overwrite"
-                            }
                         }
                     },
                     "400": {
@@ -505,29 +403,6 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "string"
-                }
-            }
-        },
-        "files.Dir": {
-            "type": "object",
-            "properties": {
-                "files": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/files.File"
-                    }
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "subDirs": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/files.Dir"
-                    }
                 }
             }
         },

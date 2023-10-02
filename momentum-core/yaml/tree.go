@@ -65,7 +65,6 @@ func NewNode(kind NodeKind, path string, value string, parent *ViewNode, childre
 	return n
 }
 
-// fileNode == nil indicates empty file.
 func ParseFile(path string) (*ViewNode, error) {
 
 	if strings.HasSuffix(path, ".yml") || strings.HasSuffix(path, ".yaml") {
@@ -82,6 +81,27 @@ func ParseFile(path string) (*ViewNode, error) {
 	return nil, errors.New("unsupported file type")
 }
 
+func FindNodeByLine(n *ViewNode, line int) *ViewNode {
+
+	if n.Kind == Directory {
+		fmt.Println("cannot find node of type directory")
+		return nil
+	}
+
+	if n.YamlNode.Line == line {
+		return n
+	}
+
+	for _, child := range n.Children {
+		result := FindNodeByLine(child, line)
+		if result != nil {
+			return result
+		}
+	}
+
+	return nil
+}
+
 // Returns full path from root to this node.
 func (n *ViewNode) FullPath() string {
 	path := ""
@@ -95,6 +115,11 @@ func (n *ViewNode) FullPath() string {
 	}
 	path = utils.BuildPath(current.Path, path)
 	return strings.ReplaceAll(path, FILE_ENDING_SEPARATOR_REPLACEMENT, ".")
+}
+
+func ToMatchableSearchTerm(fullPath string) string {
+
+	return strings.ReplaceAll(strings.ReplaceAll(fullPath, ".", "::"), "/", ".")
 }
 
 func (n *ViewNode) Remove() {

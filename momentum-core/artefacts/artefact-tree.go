@@ -262,6 +262,66 @@ func hasAnyPredecessor(artefact *Artefact, predecessorId string) bool {
 	return false
 }
 
+// selects all predecessors of an artefact, which have the same name
+func predecessorsByName(artefact *Artefact) []*Artefact {
+
+	predecessors := make([]*Artefact, 0)
+	if artefact == nil || artefact.Parent == nil {
+		return predecessors
+	}
+
+	current := artefact.Parent
+	for current != nil {
+
+		if strings.EqualFold(current.Name, artefact.Name) {
+			predecessors = append(predecessors, current)
+		}
+
+		for _, currentChild := range current.Content {
+
+			if strings.EqualFold(currentChild.Name, artefact.Name) {
+				predecessors = append(predecessors, currentChild)
+			}
+		}
+
+		current = current.Parent
+	}
+
+	return predecessors
+}
+
+func FindArtefactByPath(path string) *Artefact {
+
+	artefactTree, err := LoadArtefactTree()
+	if err != nil {
+		config.LOGGER.LogError(err.Error(), err, "NO-TRACEID")
+		return nil
+	}
+
+	return findArtefactByPath(artefactTree, path)
+}
+
+func findArtefactByPath(artefact *Artefact, path string) *Artefact {
+
+	if artefact == nil {
+		return nil
+	}
+
+	if strings.EqualFold(FullPath(artefact), path) {
+		return artefact
+	}
+
+	for _, next := range artefact.Content {
+
+		match := findArtefactByPath(next, path)
+		if match != nil {
+			return match
+		}
+	}
+
+	return nil
+}
+
 func FullPath(artefact *Artefact) string {
 
 	current := artefact

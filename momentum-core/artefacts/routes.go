@@ -2,7 +2,6 @@ package artefacts
 
 import (
 	"errors"
-	"fmt"
 	"momentum-core/config"
 	"net/http"
 
@@ -44,12 +43,12 @@ func GetArtefact(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(WriteToString(t))
+	// fmt.Println(WriteToString(t))
 
 	flattened := FlatPreorder(t, make([]*Artefact, 0))
 	for _, artefact := range flattened {
 		if artefact.Id == artefactId {
-			fmt.Println(artefact, "artefactId:", artefact.ParentId)
+			// fmt.Println(artefact, "artefactId:", artefact.ParentId)
 			c.JSON(http.StatusOK, artefact)
 			return
 		}

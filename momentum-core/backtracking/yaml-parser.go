@@ -42,7 +42,7 @@ func viewNodeToNode(n *yaml.ViewNode, parent *Node[string, yaml.ViewNode]) *Node
 	r := new(Node[string, yaml.ViewNode])
 	r.parent = parent
 	r.value = &n.Path
-	r.pointer = n
+	r.Pointer = n
 
 	children := make([]*Node[string, yaml.ViewNode], 0)
 	for _, child := range n.Children {
