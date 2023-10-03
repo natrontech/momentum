@@ -78,7 +78,7 @@ func root[T any, P any](n *Node[T, P]) *Node[T, P] {
 
 func reject[T any, P any](search Search[T, P], n *Node[T, P]) bool {
 
-	// can be dangerous, because results are ommited possibly ommitted
+	// can be dangerous, because correct results are possibly ommitted
 	return search.StopEarly(search.Predicate(), search.Comparable(n))
 }
 

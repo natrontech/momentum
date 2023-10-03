@@ -1,292 +1,427 @@
-basePath: /
-definitions:
-  artefacts.Artefact:
-    properties:
-      contentIds:
-        description: id's of children artefacts
-        items:
+  basePath: /
+  definitions:
+    artefacts.Artefact:
+      properties:
+        contentIds:
+          description: id's of children artefacts
+          items:
+            type: string
+          type: array
+        id:
           type: string
-        type: array
-      id:
-        type: string
-      name:
-        type: string
-      parentId:
-        description: id of parent artefacts
-        type: string
-      type:
-        $ref: '#/definitions/artefacts.ArtefactType'
-    type: object
-  artefacts.ArtefactType:
-    enum:
-    - 1
-    - 2
-    - 4
-    - 8
-    - 16
-    - 32
-    type: integer
-    x-enum-varnames:
-    - ROOT
-    - META
-    - APPLICATION
-    - STAGE
-    - DEPLOYMENT
-    - FILE
-  config.ApiError:
-    properties:
-      detail:
-        type: string
-      error: {}
-      instance:
-        type: string
-      status:
-        type: integer
-      title:
-        type: string
-      type:
-        type: string
-    type: object
-  files.File:
-    properties:
-      body:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-    type: object
-  files.Overwrite:
-    properties:
-      originFileId:
-        type: string
-      originFileLine:
-        type: integer
-      overwriteFileId:
-        type: string
-      overwriteFileLine:
-        type: integer
-    type: object
-host: localhost:8080
-info:
-  contact: {}
-  description: The momentum core api manages the core structure of momentum
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  title: Momentum Core API
-  version: early-alpha
-paths:
-  /api/beta/applications:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
+        name:
+          type: string
+        parentId:
+          description: id of parent artefacts
+          type: string
+        type:
+          $ref: '#/definitions/artefacts.ArtefactType'
+      type: object
+    artefacts.ArtefactType:
+      enum:
+      - 1
+      - 2
+      - 4
+      - 8
+      - 16
+      - 32
+      type: integer
+      x-enum-varnames:
+      - ROOT
+      - META
+      - APPLICATION
+      - STAGE
+      - DEPLOYMENT
+      - FILE
+    config.ApiError:
+      properties:
+        detail:
+          type: string
+        error: {}
+        instance:
+          type: string
+        status:
+          type: integer
+        title:
+          type: string
+        type:
+          type: string
+      type: object
+    files.Dir:
+      properties:
+        files:
+          items:
+            $ref: '#/definitions/files.File'
+          type: array
+        id:
+          type: string
+        name:
+          type: string
+        subDirs:
+          items:
+            $ref: '#/definitions/files.Dir'
+          type: array
+      type: object
+    files.File:
+      properties:
+        body:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+      type: object
+    files.Overwrite:
+      properties:
+        originFileId:
+          type: string
+        originFileLine:
+          type: integer
+        overwriteFileId:
+          type: string
+        overwriteFileLine:
+          type: integer
+      type: object
+    templates.Template:
+      properties:
+        template:
+          $ref: '#/definitions/files.Dir'
+        templateKind:
+          $ref: '#/definitions/templates.TemplateKind'
+      type: object
+    templates.TemplateKind:
+      enum:
+      - 1
+      - 2
+      - 4
+      type: integer
+      x-enum-varnames:
+      - APPLICATION
+      - STAGE
+      - DEPLOYMENT
+  host: localhost:8080
+  info:
+    contact: {}
+    description: The momentum core api manages the core structure of momentum
+    license:
+      name: Apache 2.0
+      url: http://www.apache.org/licenses/LICENSE-2.0.html
+    title: Momentum Core API
+    version: early-alpha
+  paths:
+    /api/beta/applications:
+      get:
+        produces:
+        - application/json
+        responses:
+          "200":
+            description: OK
+            schema:
+              items:
+                $ref: '#/definitions/artefacts.Artefact'
+              type: array
+          "400":
+            description: Bad Request
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "404":
+            description: Not Found
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "500":
+            description: Internal Server Error
+            schema:
+              $ref: '#/definitions/config.ApiError'
+        summary: gets a list of all applications
+        tags:
+        - artefacts
+    /api/beta/artefact/{id}/:
+      get:
+        parameters:
+        - description: artefact id
+          in: path
+          name: id
+          required: true
+          type: string
+        produces:
+        - application/json
+        responses:
+          "200":
+            description: OK
+            schema:
               $ref: '#/definitions/artefacts.Artefact'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/config.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/config.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/config.ApiError'
-      summary: gets a list of all applications
-      tags:
-      - artefacts
-  /api/beta/artefact/{id}/:
-    get:
-      parameters:
-      - description: artefact id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/artefacts.Artefact'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/config.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/config.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/config.ApiError'
-      summary: get an artefact by id (an artefact can be any of APPLICATION, STAGE
-        or DEPLOYMENT)
-      tags:
-      - artefacts
-  /api/beta/deployments:
-    get:
-      parameters:
-      - description: stage id
-        in: query
-        name: stageId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/artefacts.Artefact'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/config.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/config.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/config.ApiError'
-      summary: get a list of deployments for a given stage by id
-      tags:
-      - artefacts
-  /api/beta/file:
-    post:
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/files.File'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/config.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/config.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/config.ApiError'
-      summary: adds a new file to a given parent
-      tags:
-      - files
-  /api/beta/file/{id}:
-    get:
-      parameters:
-      - description: file id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/files.File'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/config.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/config.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/config.ApiError'
-      summary: gets the content of a file
-      tags:
-      - files
-  /api/beta/file/{id}/line/{lineNumber}/overwritten-by:
-    get:
-      parameters:
-      - description: file id
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: line number in file
-        in: path
-        name: lineNumber
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/files.Overwrite'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/config.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/config.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/config.ApiError'
-      summary: gets a list of properties which overwrite the given line.
-      tags:
-      - files
-  /api/beta/stages:
-    get:
-      parameters:
-      - description: application or stage id
-        in: query
-        name: parentId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/artefacts.Artefact'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/config.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/config.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/config.ApiError'
-      summary: gets a list of all stages within an application or stage by id.
-      tags:
-      - artefacts
-schemes:
-- http
-swagger: "2.0"
+          "400":
+            description: Bad Request
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "404":
+            description: Not Found
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "500":
+            description: Internal Server Error
+            schema:
+              $ref: '#/definitions/config.ApiError'
+        summary: get an artefact by id (an artefact can be any of APPLICATION, STAGE
+          or DEPLOYMENT)
+        tags:
+        - artefacts
+    /api/beta/deployments:
+      get:
+        parameters:
+        - description: stage id
+          in: query
+          name: stageId
+          required: true
+          type: string
+        produces:
+        - application/json
+        responses:
+          "200":
+            description: OK
+            schema:
+              $ref: '#/definitions/artefacts.Artefact'
+          "400":
+            description: Bad Request
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "404":
+            description: Not Found
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "500":
+            description: Internal Server Error
+            schema:
+              $ref: '#/definitions/config.ApiError'
+        summary: get a list of deployments for a given stage by id
+        tags:
+        - artefacts
+    /api/beta/file:
+      post:
+        consumes:
+        - application/json
+        produces:
+        - application/json
+        responses:
+          "200":
+            description: OK
+            schema:
+              $ref: '#/definitions/files.File'
+          "400":
+            description: Bad Request
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "404":
+            description: Not Found
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "500":
+            description: Internal Server Error
+            schema:
+              $ref: '#/definitions/config.ApiError'
+        summary: adds a new file to a given parent (triggers transaction)
+        tags:
+        - files
+    /api/beta/file/{id}:
+      get:
+        parameters:
+        - description: file id
+          in: path
+          name: id
+          required: true
+          type: string
+        produces:
+        - application/json
+        responses:
+          "200":
+            description: OK
+            schema:
+              $ref: '#/definitions/files.File'
+          "400":
+            description: Bad Request
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "404":
+            description: Not Found
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "500":
+            description: Internal Server Error
+            schema:
+              $ref: '#/definitions/config.ApiError'
+        summary: gets the content of a file
+        tags:
+        - files
+      put:
+        consumes:
+        - application/json
+        produces:
+        - application/json
+        responses:
+          "200":
+            description: OK
+            schema:
+              $ref: '#/definitions/files.File'
+          "400":
+            description: Bad Request
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "404":
+            description: Not Found
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "500":
+            description: Internal Server Error
+            schema:
+              $ref: '#/definitions/config.ApiError'
+        summary: updates the given file (triggers transaction)
+        tags:
+        - files
+    /api/beta/file/{id}/line/{lineNumber}/overwritten-by:
+      get:
+        parameters:
+        - description: file id
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: line number in file
+          in: path
+          name: lineNumber
+          required: true
+          type: integer
+        produces:
+        - application/json
+        responses:
+          "200":
+            description: OK
+            schema:
+              items:
+                $ref: '#/definitions/files.Overwrite'
+              type: array
+          "400":
+            description: Bad Request
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "404":
+            description: Not Found
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "500":
+            description: Internal Server Error
+            schema:
+              $ref: '#/definitions/config.ApiError'
+        summary: gets a list of overwrites which overwrite the given line.
+        tags:
+        - files
+    /api/beta/stages:
+      get:
+        parameters:
+        - description: application or stage id
+          in: query
+          name: parentId
+          required: true
+          type: string
+        produces:
+        - application/json
+        responses:
+          "200":
+            description: OK
+            schema:
+              $ref: '#/definitions/artefacts.Artefact'
+          "400":
+            description: Bad Request
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "404":
+            description: Not Found
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "500":
+            description: Internal Server Error
+            schema:
+              $ref: '#/definitions/config.ApiError'
+        summary: gets a list of all stages within an application or stage by id.
+        tags:
+        - artefacts
+    /api/beta/templates/applications:
+      get:
+        produces:
+        - application/json
+        responses:
+          "200":
+            description: OK
+            schema:
+              items:
+                $ref: '#/definitions/templates.Template'
+              type: array
+          "400":
+            description: Bad Request
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "404":
+            description: Not Found
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "500":
+            description: Internal Server Error
+            schema:
+              $ref: '#/definitions/config.ApiError'
+        summary: gets all available application templates
+        tags:
+        - templates
+    /api/beta/templates/deployments:
+      get:
+        produces:
+        - application/json
+        responses:
+          "200":
+            description: OK
+            schema:
+              items:
+                $ref: '#/definitions/templates.Template'
+              type: array
+          "400":
+            description: Bad Request
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "404":
+            description: Not Found
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "500":
+            description: Internal Server Error
+            schema:
+              $ref: '#/definitions/config.ApiError'
+        summary: gets all available deployment templates
+        tags:
+        - templates
+    /api/beta/templates/stages:
+      get:
+        produces:
+        - application/json
+        responses:
+          "200":
+            description: OK
+            schema:
+              items:
+                $ref: '#/definitions/templates.Template'
+              type: array
+          "400":
+            description: Bad Request
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "404":
+            description: Not Found
+            schema:
+              $ref: '#/definitions/config.ApiError'
+          "500":
+            description: Internal Server Error
+            schema:
+              $ref: '#/definitions/config.ApiError'
+        summary: gets all available stage templates
+        tags:
+        - templates
+  schemes:
+  - http
+  swagger: "2.0"

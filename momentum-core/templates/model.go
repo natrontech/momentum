@@ -1,8 +1,9 @@
 package templates
 
-import "momentum-core/files"
-
-type TemplateStructureType int
+import (
+	"momentum-core/files"
+	"momentum-core/overwrites"
+)
 
 type TemplateKind int
 
@@ -12,31 +13,41 @@ const (
 	DEPLOYMENT
 )
 
-const (
-	DIR TemplateStructureType = 1 << iota
-	FILE
-)
+type TemplateDir struct {
+	Name        string          `json:"name"`
+	Directories []*TemplateDir  `json:"directories"`
+	Files       []*TemplateFile `json:"files"`
+}
+
+type TemplateFile struct {
+	Name         string `json:"name"`
+	TemplateBody string `json:"templateBody"` // base64 encoded
+}
 
 type CreateTemplateRequest struct {
 	TemplateKind TemplateKind `json:"templateKind"`
-	Template     *files.Dir   `json:"template"`
+	// the toplevel directories name is the name of the template
+	Template        *TemplateDir                `json:"template"`
+	Children        *Template                   `json:"children"`
+	OverwriteConfig *overwrites.OverwriteConfig `json:"overwriteConfig"`
 }
 
 type Template struct {
+	// be aware, that each template must have an unique name
+	// it doesn't matter if they are of different template kind
+	TemplateName string       `json:"templateName"`
 	TemplateKind TemplateKind `json:"templateKind"`
 	Template     *files.Dir   `json:"template"`
+	// The children are templates which are contained within the template.
+	Children []*Template `json:"children"`
 }
 
-type TemplateStore struct {
-	Templates []*Template `json:"templates"`
+type TemplateSpec struct {
+	ValueSpecs []*ValueSpec `json:"valueSpecs"`
 }
 
-// next steps:
-//  1. define templates
-//  2. define implement overwrite detection by file
-//  3. implement backtracking with detected files for line matching endpoints
-
-// this shall define which files overwrite each other.
-// shall support wildcards and filenames.
-type OverwriteConfiguration struct {
+type ValueSpec struct {
+	TemplateId string `json:"templateId"` // id of the template which the value belongs to
+	Name       string `json:"name"`       // name of the value (name displayed in frontend)
+	Value      string `json:"value"`      // the value assigned
 }

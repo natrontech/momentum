@@ -11,6 +11,7 @@ func fileToBase64(path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer f.Close()
 
 	fileAsString := utils.FileAsString(f)
 

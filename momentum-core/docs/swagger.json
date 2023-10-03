@@ -159,7 +159,7 @@
                 "tags": [
                     "files"
                 ],
-                "summary": "adds a new file to a given parent",
+                "summary": "adds a new file to a given parent (triggers transaction)",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -232,6 +232,44 @@
                         }
                     }
                 }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "updates the given file (triggers transaction)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/files.File"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    }
+                }
             }
         },
         "/api/beta/file/{id}/line/{lineNumber}/overwritten-by": {
@@ -242,7 +280,7 @@
                 "tags": [
                     "files"
                 ],
-                "summary": "gets a list of properties which overwrite the given line.",
+                "summary": "gets a list of overwrites which overwrite the given line.",
                 "parameters": [
                     {
                         "type": "string",
@@ -335,6 +373,126 @@
                     }
                 }
             }
+        },
+        "/api/beta/templates/applications": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "gets all available application templates",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/templates.Template"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/beta/templates/deployments": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "gets all available deployment templates",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/templates.Template"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/beta/templates/stages": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "gets all available stage templates",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/templates.Template"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -403,6 +561,29 @@
                 }
             }
         },
+        "files.Dir": {
+            "type": "object",
+            "properties": {
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/files.File"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "subDirs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/files.Dir"
+                    }
+                }
+            }
+        },
         "files.File": {
             "type": "object",
             "properties": {
@@ -433,6 +614,30 @@
                     "type": "integer"
                 }
             }
+        },
+        "templates.Template": {
+            "type": "object",
+            "properties": {
+                "template": {
+                    "$ref": "#/definitions/files.Dir"
+                },
+                "templateKind": {
+                    "$ref": "#/definitions/templates.TemplateKind"
+                }
+            }
+        },
+        "templates.TemplateKind": {
+            "type": "integer",
+            "enum": [
+                1,
+                2,
+                4
+            ],
+            "x-enum-varnames": [
+                "APPLICATION",
+                "STAGE",
+                "DEPLOYMENT"
+            ]
         }
     }
 }
