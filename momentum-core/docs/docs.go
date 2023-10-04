@@ -163,6 +163,17 @@ const docTemplate = `{
                     "files"
                 ],
                 "summary": "adds a new file to a given parent (triggers transaction)",
+                "parameters": [
+                    {
+                        "description": "the body shall contain a File instance",
+                        "name": "CreateFileRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/files.CreateFileRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -247,6 +258,24 @@ const docTemplate = `{
                     "files"
                 ],
                 "summary": "updates the given file (triggers transaction)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "file id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the body shall contain a File instance",
+                        "name": "File",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/files.File"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -306,7 +335,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/files.Overwrite"
+                                "$ref": "#/definitions/overwrites.Overwrite"
                             }
                         }
                     },
@@ -377,6 +406,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/beta/templates": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "adds a new template (triggers transaction)",
+                "parameters": [
+                    {
+                        "description": "the body shall contain a CreateTemplateRequest instance",
+                        "name": "CreateTemplateRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/templates.CreateTemplateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/templates.Template"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/beta/templates/applications": {
             "get": {
                 "produces": [
@@ -392,7 +472,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/templates.Template"
+                                "type": "string"
                             }
                         }
                     },
@@ -432,8 +512,112 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/templates.Template"
+                                "type": "string"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/beta/templates/spec/:templateName": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "gets the spec for a template, which contains values to be set when applying the template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the template (template names are unique)",
+                        "name": "templateName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/templates.Template"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/config.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/beta/templates/spec/apply/:anchorArtefactId": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "gets the spec for a template, which contains values to be set when applying the template (triggers transaction)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id of the artefact where the template shall be applied. Must be a directory.",
+                        "name": "anchorArtefactId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the body shall contain a CreateTemplateRequest instance",
+                        "name": "TemplateSpec",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/templates.TemplateSpec"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/templates.Template"
                         }
                     },
                     "400": {
@@ -472,7 +656,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/templates.Template"
+                                "type": "string"
                             }
                         }
                     },
@@ -564,6 +748,20 @@ const docTemplate = `{
                 }
             }
         },
+        "files.CreateFileRequest": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parentId": {
+                    "type": "string"
+                }
+            }
+        },
         "files.Dir": {
             "type": "object",
             "properties": {
@@ -601,7 +799,7 @@ const docTemplate = `{
                 }
             }
         },
-        "files.Overwrite": {
+        "overwrites.Overwrite": {
             "type": "object",
             "properties": {
                 "originFileId": {
@@ -618,14 +816,90 @@ const docTemplate = `{
                 }
             }
         },
-        "templates.Template": {
+        "templates.CreateTemplateRequest": {
             "type": "object",
             "properties": {
                 "template": {
-                    "$ref": "#/definitions/files.Dir"
+                    "description": "the toplevel directories name is the name of the template",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/templates.TemplateDir"
+                        }
+                    ]
+                },
+                "templateConfig": {
+                    "$ref": "#/definitions/templates.TemplateConfig"
                 },
                 "templateKind": {
                     "$ref": "#/definitions/templates.TemplateKind"
+                }
+            }
+        },
+        "templates.Template": {
+            "type": "object",
+            "properties": {
+                "children": {
+                    "description": "The children are templates which are contained within the template.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/templates.Template"
+                    }
+                },
+                "kind": {
+                    "$ref": "#/definitions/templates.TemplateKind"
+                },
+                "name": {
+                    "description": "be aware, that each template must have an unique name\nit doesn't matter if they are of different template kind",
+                    "type": "string"
+                },
+                "root": {
+                    "$ref": "#/definitions/files.Dir"
+                }
+            }
+        },
+        "templates.TemplateConfig": {
+            "type": "object",
+            "properties": {
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "kind": {
+                    "$ref": "#/definitions/templates.TemplateKind"
+                }
+            }
+        },
+        "templates.TemplateDir": {
+            "type": "object",
+            "properties": {
+                "directories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/templates.TemplateDir"
+                    }
+                },
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/templates.TemplateFile"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "templates.TemplateFile": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "templateBody": {
+                    "description": "base64 encoded",
+                    "type": "string"
                 }
             }
         },
@@ -641,6 +915,37 @@ const docTemplate = `{
                 "STAGE",
                 "DEPLOYMENT"
             ]
+        },
+        "templates.TemplateSpec": {
+            "type": "object",
+            "properties": {
+                "template": {
+                    "$ref": "#/definitions/templates.Template"
+                },
+                "valueSpecs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/templates.ValueSpec"
+                    }
+                }
+            }
+        },
+        "templates.ValueSpec": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "name of the value (name displayed in frontend)",
+                    "type": "string"
+                },
+                "templateName": {
+                    "description": "name of the template which the value belongs to",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "the value assigned",
+                    "type": "string"
+                }
+            }
         }
     }
 }`

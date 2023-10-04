@@ -18,7 +18,7 @@ func fileToBase64(path string) (string, error) {
 	return base64.RawStdEncoding.EncodeToString([]byte(fileAsString)), nil
 }
 
-func fileToRaw(base64Encoded string) (string, error) {
+func FileToRaw(base64Encoded string) (string, error) {
 
 	bytes, err := base64.RawStdEncoding.DecodeString(base64Encoded)
 	if err != nil {

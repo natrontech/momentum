@@ -3,6 +3,7 @@ package yaml
 import (
 	"errors"
 	"fmt"
+	"momentum-core/config"
 	"momentum-core/utils"
 	"strings"
 )
@@ -56,7 +57,7 @@ func NewNode(kind NodeKind, path string, value string, parent *ViewNode, childre
 		n.IsWrapping = true
 	}
 
-	id, err := utils.GenerateId(n.FullPath())
+	id, err := utils.GenerateId(config.IdGenerationPath(n.FullPath()))
 	if err != nil {
 		fmt.Println("generating id failed:", err.Error())
 	}

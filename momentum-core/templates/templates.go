@@ -1,20 +1,110 @@
 package templates
 
 import (
+	"errors"
 	"io/fs"
 	"momentum-core/config"
+	"momentum-core/files"
 	"momentum-core/utils"
 	"os"
+	"path/filepath"
 	"strings"
 )
+
+const TEMPLATE_CONFIG_FILENAME = "momentum-template-config.yaml"
 
 func LoadSpec(templateName string, templateKind TemplateKind) []*TemplateSpec {
 
 	return make([]*TemplateSpec, 0)
 }
 
-func CreateTemplate(templateRequest *CreateTemplateRequest) {
+func LoadTemplate(templateName string) (*Template, error) {
 
+	if !TemplateExists(templateName) {
+		return nil, errors.New("no template name '" + templateName + "'")
+	}
+
+	//files.
+
+	template := new(Template)
+	//template.Kind =
+
+	return template, nil
+}
+
+func CreateTemplate(templateRequest *CreateTemplateRequest) (*Template, error) {
+
+	templateAnchorPath := filepath.Join(templatePathForKind(templateRequest.TemplateKind))
+
+	err := createTemplateDir(templateAnchorPath, templateRequest.Template)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = templateConfigToFile(filepath.Join(templateAnchorPath, templateRequest.Template.Name, TEMPLATE_CONFIG_FILENAME), templateRequest.TemplateConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return LoadTemplate(templateRequest.Template.Name)
+}
+
+func createTemplateDir(anchorPath string, templateDir *TemplateDir) error {
+
+	templateAnchorPath := filepath.Join(anchorPath, templateDir.Name)
+	err := utils.DirCreate(templateAnchorPath)
+	if err != nil {
+		return err
+	}
+
+	for _, dir := range templateDir.Directories {
+		err := createTemplateDir(templateAnchorPath, dir)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, file := range templateDir.Files {
+		err := createTemplateFile(templateAnchorPath, file)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func createTemplateFile(anchorPath string, templateFile *TemplateFile) error {
+
+	if !strings.HasSuffix(templateFile.Name, ".yaml") && !strings.HasSuffix(templateFile.Name, ".yml") {
+		return errors.New("only yaml files supported at the moment (you sent " + templateFile.Name + ")")
+	}
+
+	path := filepath.Join(anchorPath, templateFile.Name)
+	body, err := files.FileToRaw(templateFile.TemplateBody)
+	if err != nil {
+		return err
+	}
+
+	success := utils.FileWrite(path, body)
+	if !success {
+		return errors.New("unable to write file '" + path + "'")
+	}
+	return nil
+}
+
+func templatePathForKind(kind TemplateKind) string {
+
+	switch kind {
+	case APPLICATION:
+		return config.ApplicationTemplatesPath(config.GLOBAL)
+	case STAGE:
+		return config.StageTemplatesPath(config.GLOBAL)
+	case DEPLOYMENT:
+		return config.DeploymentTemplatesPath(config.GLOBAL)
+	default:
+		return ""
+	}
 }
 
 func TemplateNames(path string) []string {
@@ -35,6 +125,23 @@ func TemplateNames(path string) []string {
 func TemplateExists(name string) bool {
 
 	return applicationExists(name) || stageExists(name) || deploymentExists(name)
+}
+
+// validates a given config. A config is valid if all contained children are present.
+func validTemplateConfig(templateConfig *TemplateConfig, templateKind TemplateKind) (bool, error) {
+
+	if templateKind != templateConfig.Kind {
+		return false, errors.New("template config must have same kind as request")
+	}
+
+	for _, temp := range templateConfig.Children {
+
+		if !TemplateExists(temp) {
+			return false, errors.New("template with name '" + temp + "' does not exist")
+		}
+	}
+
+	return true, nil
 }
 
 func applicationExists(name string) bool {

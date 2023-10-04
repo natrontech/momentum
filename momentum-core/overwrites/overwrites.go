@@ -15,6 +15,7 @@ type OverwriteProvider func(origin *artefacts.Artefact, originLineNumber int) ([
 var ActiveOverwriteProviders []OverwriteProvider = []OverwriteProvider{defaultOverwriteBehaviour, ruleEngineOverwriteBehaviour}
 
 func OverwriteConfigByArtefact(artefactId string) *OverwriteConfig {
+
 	return nil
 }
 

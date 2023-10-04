@@ -81,6 +81,14 @@ func checkMandatoryTemplates(config *MomentumConfig) error {
 
 	errs := make([]error, 0)
 
+	templatePath := TemplateDir(config)
+	if !utils.FileExists(templatePath) {
+		err := utils.DirCreate(templatePath)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
 	appTemplatePath := ApplicationTemplatesPath(config)
 	if !utils.FileExists(appTemplatePath) {
 		err := utils.DirCreate(appTemplatePath)
@@ -126,6 +134,10 @@ func initializeRepository(config *MomentumConfig) error {
 	}
 
 	cloneRepoTo(repoUrl, "", "", config.RepoDir())
+
+	if !utils.FileExists(filepath.Join(config.RepoDir(), MOMENTUM_ROOT)) {
+		return errors.New("invalid momentum repository")
+	}
 
 	return nil
 }

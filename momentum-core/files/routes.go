@@ -56,7 +56,8 @@ func GetFile(c *gin.Context) {
 //	@Tags			files
 //	@Accept			json
 //	@Produce		json
-//	@Body 			CreateFileRequest
+//	@Body			json
+//	@Param 			CreateFileRequest body CreateFileRequest true "the body shall contain a File instance"
 //	@Success		200		{object}	File
 //	@Failure		400		{object}	config.ApiError
 //	@Failure		404		{object}	config.ApiError
@@ -90,7 +91,7 @@ func AddFile(c *gin.Context) {
 		return
 	}
 
-	fileContentDecoded, err := fileToRaw(createFileReq.Body)
+	fileContentDecoded, err := FileToRaw(createFileReq.Body)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, config.NewApiError(err, http.StatusBadRequest, c, traceId))
 		config.LOGGER.LogError(err.Error(), err, traceId)
@@ -156,7 +157,9 @@ func AddFile(c *gin.Context) {
 //	@Tags			files
 //	@Accept			json
 //	@Produce		json
-//	@Body 			File
+//	@Body			json
+//	@Param			id		path		string					true	"file id"
+//	@Param 			File 	body 		File 					true	"the body shall contain a File instance"
 //	@Success		200		{object}	File
 //	@Failure		400		{object}	config.ApiError
 //	@Failure		404		{object}	config.ApiError
@@ -174,7 +177,7 @@ func UpdateFile(c *gin.Context) {
 		return
 	}
 
-	decodedBody, err := fileToRaw(requestedFile.Body)
+	decodedBody, err := FileToRaw(requestedFile.Body)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, config.NewApiError(err, http.StatusBadRequest, c, traceId))
 		config.LOGGER.LogError(err.Error(), err, traceId)

@@ -1,0 +1,36 @@
+{
+    "template": {
+      "directories": [
+          {
+              "directories": [],
+              "files": [
+                  {
+                      "name": "values.yaml",
+                      "templateBody": "aToKICBtOiBhIGR1bW15"
+                  },
+                  {
+                      "name": "secret.yaml",
+                      "templateBody": "aToKICBtOiBhIGR1bW15"
+                  }
+              ],
+              "name": "_base"
+          }
+      ],
+      "files": [
+        {
+          "name": "kustomization.yaml",
+          "templateBody": "aToKICBtOiBhIGR1bW15"
+        },
+        {
+          "name": "ns.yaml",
+          "templateBody": "aToKICBtOiBhIGR1bW15"
+        }
+      ],
+      "name": "test-app-template"
+    },
+    "templateConfig": {
+      "children": [],
+      "kind": 1 
+    },
+    "templateKind": 1
+  }
