@@ -5,6 +5,7 @@ import (
 	"momentum-core/artefacts"
 	"momentum-core/config"
 	"momentum-core/files"
+	"momentum-core/templates"
 
 	"github.com/gin-gonic/gin"
 
@@ -39,10 +40,13 @@ func main() {
 	// gitClient := clients.NewGitClient(config)
 	// kustomizeClient := clients.NewKustomizationValidationClient(config)
 
+	//gin.SetMode(gin.ReleaseMode)
+
 	server := gin.Default()
 
 	files.RegisterFileRoutes(server)
 	artefacts.RegisterArtefactRoutes(server)
+	templates.RegisterTemplateRoutes(server)
 
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

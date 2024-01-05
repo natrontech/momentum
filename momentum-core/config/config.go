@@ -36,15 +36,9 @@ var LOGGER ILoggerClient
 type MomentumConfig struct {
 	dataDir          string
 	validationTmpDir string
-	templatesDir     string
 	logDir           string
 
 	transactionToken *gittransaction.Token
-
-	applicationTemplateFolderPath string
-	stageTemplateFolderPath       string
-	deploymentTemplateFilePath    string
-	deploymentTemplateFolderPath  string
 }
 
 func (m *MomentumConfig) DataDir() string {
@@ -52,65 +46,83 @@ func (m *MomentumConfig) DataDir() string {
 }
 
 func (m *MomentumConfig) RepoDir() string {
-	return filepath.Join(m.dataDir, "repository")
+	return filepath.Join(m.DataDir(), "repository")
 }
 
 func (m *MomentumConfig) ValidationTmpDir() string {
 	return m.validationTmpDir
 }
 
-func (m *MomentumConfig) TemplateDir() string {
-	return m.templatesDir
-}
-
 func (m *MomentumConfig) LogDir() string {
 	return m.logDir
 }
 
-func (m *MomentumConfig) ApplicationTemplateFolderPath() string {
-	return m.applicationTemplateFolderPath
+func TemplateDir(config *MomentumConfig) string {
+	return filepath.Join(config.RepoDir(), "templates")
 }
 
-func (m *MomentumConfig) StageTemplateFolderPath() string {
-	return m.stageTemplateFolderPath
+func ApplicationTemplatesPath(config *MomentumConfig) string {
+	return filepath.Join(TemplateDir(config), "applications")
 }
 
-func (m *MomentumConfig) DeploymentTemplateFolderPath() string {
-	return m.deploymentTemplateFolderPath
+func StageTemplatesPath(config *MomentumConfig) string {
+	return filepath.Join(TemplateDir(config), "stages")
 }
 
-func (m *MomentumConfig) DeploymentTemplateFilePath() string {
-	return m.deploymentTemplateFilePath
+func DeploymentTemplatesPath(config *MomentumConfig) string {
+	return filepath.Join(TemplateDir(config), "deployments")
 }
 
 func (m *MomentumConfig) TransactionToken() *gittransaction.Token {
 	return m.transactionToken
 }
 
-func (m *MomentumConfig) checkMandatoryTemplates() error {
+func checkMandatoryTemplates(config *MomentumConfig) error {
 
-	if !utils.FileExists(m.ApplicationTemplateFolderPath()) {
-		return errors.New("provide mandatory template for application folder at " + m.TemplateDir())
+	errs := make([]error, 0)
+
+	templatePath := TemplateDir(config)
+	if !utils.FileExists(templatePath) {
+		err := utils.DirCreate(templatePath)
+		if err != nil {
+			errs = append(errs, err)
+		}
 	}
 
-	if !utils.FileExists(m.StageTemplateFolderPath()) {
-		return errors.New("provide mandatory template for stage folder at " + m.TemplateDir())
+	appTemplatePath := ApplicationTemplatesPath(config)
+	if !utils.FileExists(appTemplatePath) {
+		err := utils.DirCreate(appTemplatePath)
+		if err != nil {
+			errs = append(errs, err)
+		}
 	}
 
-	if !utils.FileExists(m.DeploymentTemplateFolderPath()) {
-		return errors.New("provide mandatory template for deployment folders at " + m.DeploymentTemplateFolderPath())
+	stageTemplatePath := StageTemplatesPath(config)
+	if !utils.FileExists(stageTemplatePath) {
+		err := utils.DirCreate(stageTemplatePath)
+		if err != nil {
+			errs = append(errs, err)
+		}
 	}
 
-	if !utils.FileExists(m.DeploymentTemplateFilePath()) {
-		return errors.New("provide mandatory template for deployment files at " + m.DeploymentTemplateFilePath())
+	deploymentTemplatePath := DeploymentTemplatesPath(config)
+	if !utils.FileExists(deploymentTemplatePath) {
+		err := utils.DirCreate(deploymentTemplatePath)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	if len(errs) > 0 {
+		return errors.Join(errs...)
 	}
 
 	return nil
 }
 
-func (m *MomentumConfig) initializeRepository() error {
+func initializeRepository(config *MomentumConfig) error {
 
-	_, err := os.Stat(m.RepoDir())
+	_, err := os.Stat(config.RepoDir())
 	if !os.IsNotExist(err) {
 		LOGGER.LogInfo("will not clone repository because one present", "STARTUP")
 		return nil
@@ -121,7 +133,11 @@ func (m *MomentumConfig) initializeRepository() error {
 		return errors.New("failed initializing momentum because " + MOMENTUM_GIT_REPO_URL + " was not set")
 	}
 
-	cloneRepoTo(repoUrl, "", "", m.RepoDir())
+	cloneRepoTo(repoUrl, "", "", config.RepoDir())
+
+	if !utils.FileExists(filepath.Join(config.RepoDir(), MOMENTUM_ROOT)) {
+		return errors.New("invalid momentum repository")
+	}
 
 	return nil
 }
@@ -159,7 +175,6 @@ func InitializeMomentumCore() (*MomentumConfig, error) {
 	momentumDir := utils.BuildPath(usrHome, ".momentum")
 	dataDir := utils.BuildPath(momentumDir, "data")
 	validationTmpDir := utils.BuildPath(momentumDir, "validation")
-	templatesDir := utils.BuildPath(momentumDir, "templates")
 	logDir := momentumDir
 
 	createPathIfNotPresent(dataDir, momentumDir)
@@ -170,25 +185,25 @@ func InitializeMomentumCore() (*MomentumConfig, error) {
 	config.logDir = logDir
 	config.dataDir = dataDir
 	config.validationTmpDir = validationTmpDir
-	config.templatesDir = templatesDir
-	config.applicationTemplateFolderPath = utils.BuildPath(templatesDir, "applications")
-	config.stageTemplateFolderPath = utils.BuildPath(templatesDir, "stages")
-	config.deploymentTemplateFolderPath = utils.BuildPath(templatesDir, "deployments", "deploymentName")
-	config.deploymentTemplateFilePath = utils.BuildPath(templatesDir, "deployments", "deploymentName.yaml")
+
+	LOGGER, err = NewLogger(config.LogDir())
+	if err != nil {
+		panic("failed initializing logger: " + err.Error())
+	}
 
 	err = config.initializeGitAccessToken()
 	if err != nil {
 		return nil, err
 	}
 
-	err = config.checkMandatoryTemplates()
+	err = initializeRepository(config)
 	if err != nil {
 		return nil, err
 	}
 
-	LOGGER, err = NewLogger(config.LogDir())
+	err = checkMandatoryTemplates(config)
 	if err != nil {
-		panic("failed initializing logger: " + err.Error())
+		return nil, err
 	}
 
 	GLOBAL = config

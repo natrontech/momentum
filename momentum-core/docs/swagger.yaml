@@ -47,6 +47,30 @@ definitions:
       type:
         type: string
     type: object
+  files.CreateFileRequest:
+    properties:
+      body:
+        type: string
+      name:
+        type: string
+      parentId:
+        type: string
+    type: object
+  files.Dir:
+    properties:
+      files:
+        items:
+          $ref: '#/definitions/files.File'
+        type: array
+      id:
+        type: string
+      name:
+        type: string
+      subDirs:
+        items:
+          $ref: '#/definitions/files.Dir'
+        type: array
+    type: object
   files.File:
     properties:
       body:
@@ -56,7 +80,7 @@ definitions:
       name:
         type: string
     type: object
-  files.Overwrite:
+  overwrites.Overwrite:
     properties:
       originFileId:
         type: string
@@ -66,6 +90,95 @@ definitions:
         type: string
       overwriteFileLine:
         type: integer
+    type: object
+  templates.CreateTemplateRequest:
+    properties:
+      template:
+        allOf:
+        - $ref: '#/definitions/templates.TemplateDir'
+        description: the toplevel directories name is the name of the template
+      templateConfig:
+        $ref: '#/definitions/templates.TemplateConfig'
+      templateKind:
+        $ref: '#/definitions/templates.TemplateKind'
+    type: object
+  templates.Template:
+    properties:
+      children:
+        description: The children are templates which are contained within the template.
+        items:
+          $ref: '#/definitions/templates.Template'
+        type: array
+      kind:
+        $ref: '#/definitions/templates.TemplateKind'
+      name:
+        description: |-
+          be aware, that each template must have an unique name
+          it doesn't matter if they are of different template kind
+        type: string
+      root:
+        $ref: '#/definitions/files.Dir'
+    type: object
+  templates.TemplateConfig:
+    properties:
+      children:
+        items:
+          type: string
+        type: array
+      kind:
+        $ref: '#/definitions/templates.TemplateKind'
+    type: object
+  templates.TemplateDir:
+    properties:
+      directories:
+        items:
+          $ref: '#/definitions/templates.TemplateDir'
+        type: array
+      files:
+        items:
+          $ref: '#/definitions/templates.TemplateFile'
+        type: array
+      name:
+        type: string
+    type: object
+  templates.TemplateFile:
+    properties:
+      name:
+        type: string
+      templateBody:
+        description: base64 encoded
+        type: string
+    type: object
+  templates.TemplateKind:
+    enum:
+    - 1
+    - 2
+    - 4
+    type: integer
+    x-enum-varnames:
+    - APPLICATION
+    - STAGE
+    - DEPLOYMENT
+  templates.TemplateSpec:
+    properties:
+      template:
+        $ref: '#/definitions/templates.Template'
+      valueSpecs:
+        items:
+          $ref: '#/definitions/templates.ValueSpec'
+        type: array
+    type: object
+  templates.ValueSpec:
+    properties:
+      name:
+        description: name of the value (name displayed in frontend)
+        type: string
+      templateName:
+        description: name of the template which the value belongs to
+        type: string
+      value:
+        description: the value assigned
+        type: string
     type: object
 host: localhost:8080
 info:
@@ -168,6 +281,13 @@ paths:
     post:
       consumes:
       - application/json
+      parameters:
+      - description: the body shall contain a File instance
+        in: body
+        name: CreateFileRequest
+        required: true
+        schema:
+          $ref: '#/definitions/files.CreateFileRequest'
       produces:
       - application/json
       responses:
@@ -187,7 +307,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/config.ApiError'
-      summary: adds a new file to a given parent
+      summary: adds a new file to a given parent (triggers transaction)
       tags:
       - files
   /api/beta/file/{id}:
@@ -220,6 +340,43 @@ paths:
       summary: gets the content of a file
       tags:
       - files
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: file id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: the body shall contain a File instance
+        in: body
+        name: File
+        required: true
+        schema:
+          $ref: '#/definitions/files.File'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/files.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/config.ApiError'
+      summary: updates the given file (triggers transaction)
+      tags:
+      - files
   /api/beta/file/{id}/line/{lineNumber}/overwritten-by:
     get:
       parameters:
@@ -240,7 +397,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/files.Overwrite'
+              $ref: '#/definitions/overwrites.Overwrite'
             type: array
         "400":
           description: Bad Request
@@ -254,7 +411,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/config.ApiError'
-      summary: gets a list of properties which overwrite the given line.
+      summary: gets a list of overwrites which overwrite the given line.
       tags:
       - files
   /api/beta/stages:
@@ -287,6 +444,188 @@ paths:
       summary: gets a list of all stages within an application or stage by id.
       tags:
       - artefacts
+  /api/beta/templates:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: the body shall contain a CreateTemplateRequest instance
+        in: body
+        name: CreateTemplateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/templates.CreateTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/templates.Template'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/config.ApiError'
+      summary: adds a new template (triggers transaction)
+      tags:
+      - templates
+  /api/beta/templates/applications:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/config.ApiError'
+      summary: gets all available application templates
+      tags:
+      - templates
+  /api/beta/templates/deployments:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/config.ApiError'
+      summary: gets all available deployment templates
+      tags:
+      - templates
+  /api/beta/templates/spec/:templateName:
+    get:
+      parameters:
+      - description: name of the template (template names are unique)
+        in: path
+        name: templateName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/templates.Template'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/config.ApiError'
+      summary: gets the spec for a template, which contains values to be set when
+        applying the template
+      tags:
+      - templates
+  /api/beta/templates/spec/apply/:anchorArtefactId:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: id of the artefact where the template shall be applied. Must
+          be a directory.
+        in: path
+        name: anchorArtefactId
+        required: true
+        type: string
+      - description: the body shall contain a CreateTemplateRequest instance
+        in: body
+        name: TemplateSpec
+        required: true
+        schema:
+          $ref: '#/definitions/templates.TemplateSpec'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/templates.Template'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/config.ApiError'
+      summary: gets the spec for a template, which contains values to be set when
+        applying the template (triggers transaction)
+      tags:
+      - templates
+  /api/beta/templates/stages:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/config.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/config.ApiError'
+      summary: gets all available stage templates
+      tags:
+      - templates
 schemes:
 - http
 swagger: "2.0"

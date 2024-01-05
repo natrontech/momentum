@@ -10,9 +10,9 @@ import (
 
 func RegisterArtefactRoutes(engine *gin.Engine) {
 	engine.GET(config.API_ARTEFACT_BY_ID, GetArtefact)
-	engine.GET(config.API_APPLICATIONS, GetApplications)
-	engine.GET(config.API_STAGES, GetStages)
-	engine.GET(config.API_DEPLOYMENTS, GetDeployments)
+	engine.GET(config.API_ARTEFACT_APPLICATIONS, GetApplications)
+	engine.GET(config.API_ARTEFACT_STAGES, GetStages)
+	engine.GET(config.API_ARTEFACT_DEPLOYMENTS, GetDeployments)
 }
 
 // GetArtefact godoc

@@ -347,6 +347,7 @@ func loadArtefactTreeUntilDepth(path string, parent *Artefact, depth int) (*Arte
 		if err != nil {
 			return nil, err
 		}
+		defer dir.Close()
 
 		dirEntries, err := dir.ReadDir(-1) // reads all entries
 		for _, entry := range dirEntries {
@@ -372,6 +373,7 @@ func children(artefact *Artefact) ([]*Artefact, error) {
 	if err != nil {
 		return make([]*Artefact, 0), err
 	}
+	defer dir.Close()
 
 	dirEntries, err := dir.ReadDir(-1) // reads all entries
 	for _, entry := range dirEntries {
