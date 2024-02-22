@@ -48,7 +48,7 @@
   "type": "module",
   "dependencies": {
     "@floating-ui/dom": "^1.2.8",
-    "@openapitools/openapi-generator-cli": "^2.7.0",
+    "@openapitools/openapi-generator-cli": "^2.9.0",
     "@picocss/pico": "^1.5.10",
     "@sveltejs/adapter-node": "^1.2.1",
     "@sveltejs/adapter-static": "^2.0.2",
